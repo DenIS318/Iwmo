@@ -1,37 +1,37 @@
 #include "mytextbox.h"
 using namespace myState;
 
-	myState::State statenow = myState::Enabled;
-	mytextbox::mytextbox(Vector2f size)
-	{
-		setSize(size);
-		setFillColor(Color::White);
-	}
-	mytextbox::mytextbox()
-	{
-		setFillColor(Color::White);
-	}
+myState::State statenow = myState::Enabled;
+mytextbox::mytextbox(Vector2f size)
+{
+	setSize(size);
+	setFillColor(Color::White);
+}
+mytextbox::mytextbox()
+{
+	setFillColor(Color::White);
+}
 
 
-	mytextbox::~mytextbox()
+mytextbox::~mytextbox()
+{
+}
+void mytextbox::setState(State state)
+{
+	statenow = state;
+	if (statenow == myState::Disabled)
 	{
+		setFillColor(Color::Transparent);
 	}
-	void mytextbox::setState(State state)
+	else
 	{
-		statenow = state;
-		if (statenow == myState::Disabled)
+		if (statenow == myState::Enabled)
 		{
-			setFillColor(Color::Transparent);
-		}
-		else
-		{
-			if (statenow == myState::Enabled)
-			{
-				setFillColor(Color::White);
-			}
+			setFillColor(Color::White);
 		}
 	}
-	myState::State mytextbox::getState()
-	{
-		return statenow;
-	}
+}
+myState::State mytextbox::getState()
+{
+	return statenow;
+}

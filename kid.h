@@ -2,27 +2,26 @@
 #include "Engine.h"
 #include "Animation.h"
 #include <iostream>
-#include "Listener.h"
+#include "MyListener.h"
 #include "iwmoEntity.h"
 
 
 
-	class kid : public iwmoEntity
-	{
-	public:
-		//kid();
+class kid : public iwmoEntity
+{
+public:
+	//kid();
 	//	~kid();
 
-		/*
-		Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
-		*/
-		void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine);
-		void SetHandler(GameHandler*);
-		//iwmoEntity* entity = iwmoEntity::GetBase();
+	/*
+	Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
+	*/
+	void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine);
+	//void SetHandler(GameHandler*);
+	//iwmoEntity* entity = iwmoEntity::GetBase();
 
-		//DerivedType * m_derivedType = dynamic_cast<DerivedType*>(&m_baseType);
-	private:
-		iwmoEntity* kidentity = iwmoEntity::MGetBase();
+	//DerivedType * m_derivedType = dynamic_cast<DerivedType*>(&m_baseType);
+private:
+	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 
-	};
-
+};

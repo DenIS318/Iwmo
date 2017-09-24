@@ -1,114 +1,113 @@
-
 #include "Game.h"
 #include <future>
 
 
 
-	GameHandler* eventhandler = new GameHandler;
-	Game* instanceEH = eventhandler;
-	void Game::EventHandling(CSource* sourc)
+GameHandler* eventhandler = new GameHandler;
+Game* instanceEH = eventhandler;
+void Game::EventHandling(CSource* sourc)
+{
+	m_ls = sourc;
+	instanceEH = dynamic_cast<Game*>(eventhandler);
+	instanceEH->m_hookEvent(m_ls);
+	__raise sourc->OnEvent(sf::Event());
+}
+void Game::m_hookEvent(CSource* pSource)
+{
+	cout << "Not hooked... Called from game" << endl;
+}
+void Game::m_unhookEvent(CSource* pSource)
+{
+
+}
+RenderWindow* Game::Getwindow()
+{
+	return window;
+}
+View* Game::GetCam()
+{
+	return &camera;
+}
+void Game::StartGame(Engine* engine)
+{
+
+	for (int i = 0; i < 5; i++)
 	{
-		m_ls = sourc;
-		instanceEH = dynamic_cast<Game*>(eventhandler);
-		instanceEH->m_hookEvent(m_ls);
-		__raise sourc->OnEvent(sf::Event());
+		engine->AddLayer(i);
 	}
-	void Game::m_hookEvent(CSource* pSource)
-	{
-		cout << "Not hooked... Called from game" << endl;
-	}
-	void Game::m_unhookEvent(CSource* pSource)
+
+	camera.setCenter(CAM_CENTER);
+	camera.setSize(CAM_SIZE);
+	window->setView(camera);
+	engine->SetCam(&camera);
+	cout << "Game started!" << endl;
+
+	if (debug)
 	{
 
 	}
-	RenderWindow* Game::Getwindow()
+}
+
+Game::Game()
+{
+
+}
+Game* Game::getGame()
+{
+	return (Game*)this;
+
+}
+Game::Game(Engine* engine, RenderWindow* wind)
+{
+	window = wind;
+	engine->RemoveAll();
+	if (debug)
 	{
-		return window;
+		//cout << "debug detected!" << endl;
+		tmx::setLogLevel(tmx::Logger::Error);
 	}
-	View* Game::GetCam()
+	else
 	{
-		return &camera;
+		//cout << "debug disabled..." << endl;
 	}
-	void Game::StartGame(Engine* engine)
+
+	if (kidSheet->loadFromFile("resources/kid.png"))
+	{
+		cout << "Kid spritesheet loaded" << endl;
+	}
+	static kid mykid;
+	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), engine);
+//	mykid.SettingHandler((GameHandler*)eventhandler);
+	engine->Addentity(&mykid, 0);
+	//
+	engine->LoadMap("map.tmx");
+	engine->GetMap()->getLayers()[2].visible = false;
+	const auto& layers = engine->GetMap()->getLayers();
+	for (const auto& layer : layers)
 	{
 
-		for (int i = 0; i < 5; i++)
+		if (layer.name == "objects")
 		{
-			engine->AddLayer(i);
-		}
-
-		camera.setCenter(CAM_CENTER);
-		camera.setSize(CAM_SIZE);
-		window->setView(camera);
-		engine->SetCam(&camera);
-		cout << "Game started!" << endl;
-		
-		if (debug)
-		{
-
-		}
-	}
-
-	Game::Game()
-	{
-
-	}
-	Game* Game::getGame()
-	{
-		return (Game*)this;
-
-	}
-	Game::Game(Engine* engine, RenderWindow* wind)
-	{
-		window = wind;
-		engine->RemoveAll();
-		if (debug)
-		{
-			//cout << "debug detected!" << endl;
-			tmx::setLogLevel(tmx::Logger::Error);
-		}
-		else
-		{
-			//cout << "debug disabled..." << endl;
-		}
-
-		if (kidSheet->loadFromFile("resources/kid.png"))
-		{
-			cout << "Kid spritesheet loaded" << endl;
-		}
-		static kid mykid;
-		mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), engine);
-		mykid.SettingHandler((GameHandler*)eventhandler);
-		engine->Addentity(&mykid, 0);
-		//
-		engine->LoadMap("map.tmx");
-		engine->GetMap()->getLayers()[2].visible = false;
-		const auto& layers = engine->GetMap()->getLayers();
-		for (const auto& layer : layers)
-		{
-
-			if (layer.name == "objects")
+			for (const auto& object : layer.objects)
 			{
-				for (const auto& object : layer.objects)
+
+				if (object.getName() == "spawn")
 				{
 
-					if (object.getName() == "spawn")
-					{
 
-
-						mykid.setPos(object.getPosition());
-					}
+					mykid.setPos(object.getPosition());
 				}
 			}
 		}
-		//
-
-		engine->gamestarted = true;
-		//
-		StartGame(engine);
 	}
+	//
+
+	engine->gamestarted = true;
+	//
+	StartGame(engine);
+}
 
 
-	Game::~Game()
-	{
-	}
+Game::~Game()
+{
+}

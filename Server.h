@@ -6,31 +6,31 @@
 #include <string>
 #include "Player.h"
 
-	class Server
-	{
-	public:
-		Server();
-		void run();
+class Server
+{
+public:
+	Server();
+	void run();
 
-	private:
+private:
 
-		void sendPacket(sf::Packet& packet, unsigned int skip = -1);
-		bool m_isRunning;
+	void sendPacket(sf::Packet& packet, unsigned int skip = -1);
+	bool m_isRunning;
 
-		sf::IpAddress m_ipAdress;
-		unsigned short m_port;
+	sf::IpAddress m_ipAdress;
+	unsigned short m_port;
 
-		sf::TcpListener m_listener;
-		sf::SocketSelector m_selector;
+	sf::TcpListener m_listener;
+	sf::SocketSelector m_selector;
 
-		int m_maxPlayerNumber;
-		int m_currentID;
-		int m_playerNumber;
+	int m_maxPlayerNumber;
+	int m_currentID;
+	int m_playerNumber;
 
-		std::vector<Player> m_playerList;
-		char m_tmp[1400];
+	std::vector<Player> m_playerList;
+	char m_tmp[1400];
 
-		sf::Clock m_clock;
+	sf::Clock m_clock;
 
 
-	};
+};

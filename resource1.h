@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Включаемый файл, созданный в Microsoft Visual C++.
-// Используется Iwmo.rc
+// ¬ключаемый файл, созданный в Microsoft Visual C++.
+// »спользуетс¤ Iwmo.rc
 //
 #define IDI_ICON1                       101
 

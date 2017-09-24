@@ -4,27 +4,26 @@
 //#include "Enemy.h"
 #include <iostream>
 #include <memory>
+class Network
+{
+public:
+	Network(sf::IpAddress& ip, unsigned short port);
+	void disconnect(Player* p);
 
-	class Network
-	{
-	public:
-		Network(sf::IpAddress& ip, unsigned short port);
-		void disconnect(Player* p);
+	void send(Player* p);
+	void sendPosition(Player* p);
+	void receive(Player* p); //Add more later
+	void sendMessage(Player* p, std::string& text);
+	void sendMyName(Player* p);
+	void getPlayerList(Player* p);
 
-		void send(Player* p);
-		void sendPosition(Player* p);
-		void receive(Player* p); //Add more later
-		void sendMessage(Player* p, std::string& text);
-		void sendMyName(Player* p);
-		void getPlayerList(Player* p);
+	std::string getMessage() { return m_textMessage; }
 
-		std::string getMessage() { return m_textMessage; }
+private:
+	sf::TcpSocket connection;
+	bool m_connected;
 
-	private:
-		sf::TcpSocket connection;
-		bool m_connected;
-
-		std::string m_textMessage;
-		int packetCounter = 0;
-		sf::Clock packetClock;
-	};
+	std::string m_textMessage;
+	int packetCounter = 0;
+	sf::Clock packetClock;
+};
