@@ -8,7 +8,6 @@
 	Game* instanceEH = eventhandler;
 	void Game::EventHandling(CSource* sourc)
 	{
-		bool debugg = debug;
 		m_ls = sourc;
 		instanceEH = dynamic_cast<Game*>(eventhandler);
 		instanceEH->m_hookEvent(m_ls);
@@ -43,6 +42,7 @@
 		window->setView(camera);
 		engine->SetCam(&camera);
 		cout << "Game started!" << endl;
+		
 		if (debug)
 		{
 
@@ -58,12 +58,10 @@
 		return (Game*)this;
 
 	}
-	Game::Game(Engine* engine, RenderWindow* wind, bool debugg)
+	Game::Game(Engine* engine, RenderWindow* wind)
 	{
 		window = wind;
 		engine->RemoveAll();
-		debug = debugg;
-
 		if (debug)
 		{
 			//cout << "debug detected!" << endl;

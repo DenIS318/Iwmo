@@ -1,4 +1,5 @@
 #pragma once
+#include "IwmoConfig.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Listener.h"
@@ -12,7 +13,7 @@
 	using namespace std;
 	using namespace sf;
 	using namespace tmx;
-
+	using namespace IV;
 		class Game
 		{
 
@@ -28,8 +29,8 @@
 			/*
 			Initalizates games with engine.
 			*/
-			Game(Engine*, RenderWindow*, bool);
-			virtual ~Game();
+			Game(Engine*, RenderWindow*);
+			 ~Game();
 			void StartGame(Engine* engine);
 			/*
 			Sending event source and handler to Game, yeap, perfect explanation
@@ -39,7 +40,6 @@
 
 			virtual void m_hookEvent(CSource* pSource);
 			virtual void m_unhookEvent(CSource* pSource);
-			bool debug;
 			View* GetCam();
 			Game* getGame();
 			const Vector2f CAM_SIZE = Vector2f(800, 600);

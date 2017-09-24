@@ -169,9 +169,9 @@
 		return &window;
 	}
 
-	void Engine::init(int Width, int Height, string title, short fm, bool db)
+	void Engine::init(int Width, int Height, string title, short fm)
 	{
-		debug = db;
+
 		window.create(VideoMode(Width, Height), title);
 		window.setFramerateLimit(fm);
 		//window.setVerticalSyncEnabled(true);

@@ -61,6 +61,7 @@
     <ClInclude Include="Network.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="IwmoConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Iwmo.rc" />

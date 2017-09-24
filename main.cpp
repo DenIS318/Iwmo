@@ -11,22 +11,13 @@
 #include "Server.h"
 #include "Network.h"
 #include "Game.h"
+#include "IwmoConfig.h"
 #include <stdio.h>
 using namespace std;
 using namespace myState;
-
-
-	//CONFIG
-	const int Width = 800;
-	const int Height = 600;
-	const string WindowName = "I wanna maker online";
-	const short framerate = 60;
-	const string res = "resources\\";
-	const string but = "button_";
-	const bool debug = true;
-	const sf::Time timeout = sf::Time::Zero;
-	const UINT16 port = 25565;
+using namespace IV;
 	CSource* source = new CSource;
+
 	/*const unsigned short maxPlayerNumber = 20;
 	unsigned short playerNumber = 0;*/
 	Texture kidbuttext, makerbuttext, startt, serverr;
@@ -72,9 +63,9 @@ using namespace myState;
 
 	}
 
-	void startgame(Engine* engine, RenderWindow* window, bool debug)
+	void startgame(Engine* engine, RenderWindow* window)
 	{
-		static Game game(engine, window, debug);
+		static Game game(engine, window);
 		game.EventHandling(source);
 
 	}
@@ -158,7 +149,7 @@ using namespace myState;
 							while (!ready) {             // wait until main() sets ready...
 								std::this_thread::yield();
 							}
-							startgame(engine, window, debug);
+							startgame(engine, window);
 
 						}
 						catch (exception e)
@@ -226,7 +217,7 @@ using namespace myState;
 
 		font.loadFromFile("resources/Arial.otf");
 		Engine engine;
-		engine.init(Width, Height, WindowName, framerate, debug);
+		engine.init(Width, Height, WindowName, framerate);
 		Texture text;
 		RenderWindow* window = engine.GetWindow();
 		engine.AddLayer(bglayer);

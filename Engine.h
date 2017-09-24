@@ -7,11 +7,10 @@
 #include <tmx\MapLoader.hpp>
 #include "Animation.h"
 #include "iwmoEntity.h"
- 
+#include "IwmoConfig.h"
 	using namespace sf;
 	using namespace std;
-
-	
+	using namespace IV;
 		//using namespace IwmoEngine;
 		class Engine
 		{
@@ -23,9 +22,9 @@
 
 			///PROTOTYPES
 			/*
-			Initializates engine and creating main window with given width, height, title, max framerate and debug mode.
+			Initializates engine and creating main window with given width, height, title, max framerate.
 			*/
-			void init(int, int, std::string, short, bool);
+			void init(int, int, std::string, short);
 			/*
 			Adding layer.
 			*/
@@ -89,7 +88,7 @@
 			const int maxlayersize = 1;
 			vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);
 			vector<vector<iwmoEntity*>> layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
-			bool debug;
+		
 			sf::Clock clock;
 			sf::Time time;
 			RenderWindow window;
