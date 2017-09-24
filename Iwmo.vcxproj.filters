@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="tinyxml\tinystr.cpp" />
+    <ClCompile Include="tinyxml\tinyxml.cpp" />
+    <ClCompile Include="tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\DebugShape.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\Log.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\MapLayer.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\MapLoaderPrivate.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\MapLoaderPublic.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\MapObject.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\miniz.c">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\QuadTreeNode.cpp">
+      <Filter>maplodaer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\1\tiledloader\src\pugixml\pugixml.cpp">
+      <Filter>maplodaer\pugixml</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="iwmoEntity.cpp" />
+    <ClCompile Include="kid.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyEntityEngine.cpp" />
+    <ClCompile Include="mytextbox.cpp" />
+    <ClCompile Include="Network.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Server.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="tinyxml\tinystr.h" />
+    <ClInclude Include="tinyxml\tinyxml.h" />
+    <ClInclude Include="..\..\..\..\Desktop\1\tiledloader\src\miniz.h">
+      <Filter>maplodaer</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="iwmoEntity.h" />
+    <ClInclude Include="kid.h" />
+    <ClInclude Include="Listener.h" />
+    <ClInclude Include="MyEntityEngine.h" />
+    <ClInclude Include="mytextbox.h" />
+    <ClInclude Include="Network.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Server.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Iwmo.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="maplodaer">
+      <UniqueIdentifier>{9eadaee1-8f18-4549-92dd-bfbcfb96fe82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="maplodaer\pugixml">
+      <UniqueIdentifier>{303a05f2-4116-43ca-80b4-29199cdf4c41}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

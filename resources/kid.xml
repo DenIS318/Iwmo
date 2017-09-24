@@ -1,0 +1,28 @@
+<!DOCTYPE SpriteDecomposer>
+<sprites image="kid.png" transparentColor="FFFFFF">
+ <animation title="idle" delay="50">
+  <cut w="22" x="3" y="3" h="21" row="1" col="1"/>
+  <cut w="23" x="29" y="3" h="21" row="1" col="1"/>
+  <cut w="24" x="56" y="3" h="21" row="1" col="1"/>
+  <cut w="23" x="84" y="4" h="20" row="1" col="1"/>
+ </animation>
+ <animation title="walk" delay="50">
+  <cut w="25" x="1" y="29" h="21" row="1" col="1"/>
+  <cut w="25" x="31" y="29" h="21" row="1" col="1"/>
+  <cut w="22" x="62" y="29" h="21" row="1" col="1"/>
+  <cut w="25" x="87" y="29" h="21" row="1" col="1"/>
+  <cut w="25" x="118" y="29" h="21" row="1" col="1"/>
+ </animation>
+ <animation title="jump" delay="50">
+  <cut w="17" x="6" y="70" h="23" row="1" col="1"/>
+  <cut w="18" x="29" y="70" h="23" row="1" col="1"/>
+ </animation>
+ <animation title="fall" delay="50">
+  <cut w="24" x="5" y="103" h="20" row="1" col="1"/>
+  <cut w="25" x="33" y="103" h="20" row="1" col="1"/>
+ </animation>
+ <animation title="slide" delay="50">
+  <cut w="21" x="14" y="134" h="20" row="1" col="1"/>
+  <cut w="22" x="53" y="135" h="20" row="1" col="1"/>
+ </animation>
+</sprites>
