@@ -5,6 +5,10 @@
 #include "Animation.h"
 //#include "MyEntityEngine.h"
 #include "tinyxml\tinyxml.h"
+#ifndef GAME_H
+
+//#include "Game.h"
+#endif // !GAME_H
 
 
 using namespace sf;
@@ -25,6 +29,7 @@ public:
 	inline void MGetEvent(Event);
 	AnimationManager* GetTextureAnimation();
 	iwmoEntity* MGetBase();
+	//TODO 2
 	//MyEntityEngine* eng = new MyEntityEngine;
 	//void SettingHandler(GameHandler* h);
 private:

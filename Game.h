@@ -1,4 +1,6 @@
 ﻿#pragma once
+#ifndef GAME_H
+#define GAME_H
 //#include "IwmoConfig.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -43,7 +45,7 @@ public:
 	View* GetCam();
 	Game* getGame();
 	const Vector2f CAM_SIZE = Vector2f(800, 600);
-	const Vector2f CAM_CENTER = Vector2f(300, 2900);
+	const Vector2f CAM_CENTER = Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
 	RenderWindow* window;
 	RenderWindow* Getwindow();
 
@@ -54,64 +56,4 @@ private:
 	TiXmlDocument LevelXML;
 	Texture* kidSheet = new Texture;
 };
-
-
-
-[event_receiver(native)]
-class GameHandler : public Game
-{
-
-public:
-
-	
-	Event event;
-	Game* gameinstance = Game::getGame();
-	RenderWindow* windinst = Game::Getwindow();
-	Event GameHandler::GetEvent()
-	{
-		return event;
-
-	}
-	void m_hookEvent(CSource* pSource) {
-		cout << "Hooked! Called from GameHandler!" << endl;
-
-		__hook(&CSource::OnEvent, pSource, &GameHandler::OnEvent, this);
-	}
-
-	void m_unhookEvent(CSource* pSource) {
-		__unhook(&CSource::OnEvent, pSource, &GameHandler::OnEvent);
-	}
-private:
-	View* camerapointer = gameinstance->GetCam();
-	void GameHandler::OnEvent(Event eventt)
-	{
-		event = eventt;
-
-		if (debug)
-		{
-		}
-		if (event.type == sf::Event::KeyPressed)
-		{
-			if (event.key.code == sf::Keyboard::X)
-			{
-
-				if (debug)
-				{
-					int x = 0;
-					int y = 0;
-					cout << "Enter x" << endl;
-					cin >> x;
-					cout << "Enter y" << endl;
-					cin >> y;
-					Vector2f vec(x, y);
-					cout << "Camera centered to " << x << ", " << y << endl;
-					gameinstance->camera.setCenter(vec);
-					//cout << "Camera pointer in derived is %p" << camerapointer << endl;
-					cout << "And now camera centered to " << camerapointer->getCenter().x << ", " << camerapointer->getCenter().y << endl;
-				}
-			}
-		}
-	}
-
-
-};
+#endif

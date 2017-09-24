@@ -2,7 +2,7 @@
 #include <future>
 
 
-
+class GameHandler : public Game {};
 GameHandler* eventhandler = new GameHandler;
 Game* instanceEH = eventhandler;
 void Game::EventHandling(CSource* sourc)

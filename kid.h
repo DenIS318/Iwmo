@@ -17,6 +17,7 @@ public:
 	Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
 	*/
 	void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine);
+	//TODO 5
 	//void SetHandler(GameHandler*);
 	//iwmoEntity* entity = iwmoEntity::GetBase();
 
