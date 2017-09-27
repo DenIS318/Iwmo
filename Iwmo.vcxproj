@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameHandler.cpp" />
     <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="IwmoEntity.cpp" />
     <ClCompile Include="kid.cpp" />
@@ -49,7 +48,6 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameHandler.h" />
     <ClInclude Include="IwmoConfig.h" />
     <ClInclude Include="IwmoEntity.h" />
     <ClInclude Include="kid.h" />

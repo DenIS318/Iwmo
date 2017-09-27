@@ -1,5 +1,5 @@
 #pragma once
-#include "GameHandler.h"
+#include "Game.h"
 class MyEntityEngine
 {
 public:

@@ -5,10 +5,10 @@
 #include "Animation.h"
 //#include "MyEntityEngine.h"
 #include "tinyxml\tinyxml.h"
-#ifndef GAME_H
+
 
 //#include "Game.h"
-#endif // !GAME_H
+ // !GAME_H
 
 
 using namespace sf;
