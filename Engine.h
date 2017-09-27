@@ -34,7 +34,7 @@ public:
 	*/
 	void RemoveLayer(unsigned short);
 	/*
-	Getting layer pointer.
+	Getting layers pointer.
 	*/
 	vector<vector<Drawable*>>& getLayers();
 	/*
@@ -82,6 +82,10 @@ public:
 	bool gamestarted = false;
 	tmx::MapLoader* GetMap();
 	void LoadMap(string);
+	/*
+	Returns all entities
+	*/
+	vector<vector<iwmoEntity*>>& GetEntities();
 
 private:
 

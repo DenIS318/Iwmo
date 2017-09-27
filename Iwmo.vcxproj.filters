@@ -42,7 +42,6 @@
     <ClCompile Include="tinyxml\tinyxml.cpp" />
     <ClCompile Include="tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="tinyxml\tinyxmlparser.cpp" />
-    <ClCompile Include="MyEntityEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />
@@ -62,7 +61,6 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="tinyxml\tinystr.h" />
     <ClInclude Include="tinyxml\tinyxml.h" />
-    <ClInclude Include="MyEntityEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="maploader">

@@ -49,10 +49,15 @@ public:
 		if (i < frames.size())
 		{
 			sprite.setTextureRect(frames[i]);
-			sprite.setOrigin(frames[currentFrame].width / 2, frames[currentFrame].height / 2);
+			if (!flip)
+			{
+				sprite.setOrigin(frames[currentFrame].width / 2, frames[currentFrame].height / 2);
+			}
 			if (flip) {
 				sprite.setTextureRect(frames_flip[i]);
-				sprite.setOrigin(frames_flip[currentFrame].width / 2, frames_flip[currentFrame].height / 2);
+				//FloatRect boundss = sprite.getGlobalBounds();
+				//fsprite.setOrigin(boundss);
+				//sprite.setOrigin(frames_flip[currentFrame].width / 2, frames_flip[currentFrame].height / 2);
 			}
 		}
 	}
@@ -102,7 +107,7 @@ public:
 
 		if (animFile.LoadFile())
 		{
-			cout << "Animation loaded" << endl;
+			//cout << "Animation loaded" << endl;
 		}
 
 		TiXmlElement *head;
@@ -110,7 +115,7 @@ public:
 
 		TiXmlElement *animElement;
 		animElement = head->FirstChildElement("animation");
-		std::stringstream ss;
+		/*std::stringstream ss;
 		ss << std::hex << (head->Attribute("transparentColor"));
 		Uint32 colorkey;
 		ss >> colorkey;
@@ -127,7 +132,7 @@ public:
 		img.createMaskFromColor(colorr);
 
 		t->loadFromImage(img);
-
+		*/
 		while (animElement)
 		{
 
@@ -150,7 +155,8 @@ public:
 				int h = atoi(cut->Attribute("h"));
 
 				anim.frames.push_back(IntRect(x, y, w, h));
-				anim.frames_flip.push_back(IntRect(x + w, y, -w, h));
+				
+				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
 				cut = cut->NextSiblingElement("cut");
 			}
 
@@ -188,9 +194,19 @@ public:
 
 	void play() { animList[currentAnim].isPlaying = true; }
 
-	void play(std::string name) { animList[name].isPlaying = true; }
+	void play(std::string name) { 
+		currentAnim = name;
+		animList[name].isPlaying = true; }
 
 	bool isPlaying() { return animList[currentAnim].isPlaying; }
+
+	bool isPlaying(string s) {
+		if (s == currentAnim)
+		{
+			return true;
+		}
+		return false;
+	}
 
 	float getH() { return animList[currentAnim].frames[0].height; }
 

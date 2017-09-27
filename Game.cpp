@@ -2,8 +2,8 @@
 #include <future>
 
 
-GameHandler* eventhandler = new GameHandler;
-Game* instanceEH = eventhandler;
+GameHandler* eventhandler;
+Game* instanceEH ;
 void Game::EventHandling(CSource* sourc)
 {
 	m_ls = sourc;
@@ -13,7 +13,10 @@ void Game::EventHandling(CSource* sourc)
 }
 void Game::m_hookEvent(CSource* pSource)
 {
-	cout << "Not hooked... Called from game" << endl;
+	if (debug)
+	{
+		cout << "Not hooked... Called from game" << endl;
+	}
 }
 void Game::m_unhookEvent(CSource* pSource)
 {
@@ -39,6 +42,8 @@ void Game::StartGame(Engine* engine)
 	camera.setSize(CAM_SIZE);
 	window->setView(camera);
 	engine->SetCam(&camera);
+	eventhandler = new GameHandler(this);
+	instanceEH = eventhandler;
 	cout << "Game started!" << endl;
 
 	if (debug)
@@ -58,8 +63,10 @@ Game* Game::getGame()
 }
 Game::Game(Engine* engine, RenderWindow* wind)
 {
+	
 	window = wind;
-	engine->RemoveAll();
+	m_engine = engine;
+	m_engine->RemoveAll();
 	if (debug)
 	{
 		//cout << "debug detected!" << endl;
@@ -75,13 +82,13 @@ Game::Game(Engine* engine, RenderWindow* wind)
 		cout << "Kid spritesheet loaded" << endl;
 	}
 	static kid mykid;
-	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), engine);
-//	mykid.SettingHandler((GameHandler*)eventhandler);
-	engine->Addentity(&mykid, 0);
+	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine);
+	//mykid.SettingHandler((GameHandler*)eventhandler);
+	m_engine->Addentity(&mykid, 0);
 	//
-	engine->LoadMap("map.tmx");
-	engine->GetMap()->getLayers()[2].visible = false;
-	const auto& layers = engine->GetMap()->getLayers();
+	m_engine->LoadMap("map.tmx");
+	m_engine->GetMap()->getLayers()[2].visible = false;
+	const auto& layers = m_engine->GetMap()->getLayers();
 	for (const auto& layer : layers)
 	{
 
@@ -101,9 +108,9 @@ Game::Game(Engine* engine, RenderWindow* wind)
 	}
 	//
 
-	engine->gamestarted = true;
+	m_engine->gamestarted = true;
 	//
-	StartGame(engine);
+	StartGame(m_engine);
 }
 
 
@@ -111,7 +118,18 @@ Game::~Game()
 {
 }
 
+GameHandler::GameHandler()
+{
 
+}
+GameHandler::GameHandler(const Game* geim)
+{
+	gameinstance = const_cast<Game*> (geim);
+}
+GameHandler::~GameHandler()
+{
+
+}
 
 void GameHandler::m_hookEvent(CSource* pSource) {
 	cout << "Hooked! Called from GameHandler!" << endl;
@@ -125,7 +143,25 @@ void GameHandler::m_unhookEvent(CSource* pSource) {
 void GameHandler::OnEvent(Event eventt)
 {
 	event = eventt;
+	//cout << "0 BIETCH" << endl;
+	try {
+		vector<vector<iwmoEntity*>> entities = gameinstance->m_engine->GetEntities();
+		for (unsigned int i = 0; i < entities.size(); i++)
+		{
+			for (unsigned int i1 = 0; i1 <  entities.at(i).size(); i1++)
+			{
+				{
 
+					entities.at(i).at(i1)->MGetEvent(eventt);
+				}
+
+			}
+		}
+	}
+	catch (exception e)
+	{
+		cout << e.what() << endl;
+	}
 	if (debug)
 	{
 	}

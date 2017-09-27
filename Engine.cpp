@@ -37,6 +37,10 @@ void Engine::RemoveLayer(unsigned short layernum)
 
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
 }
+vector<vector<iwmoEntity*>>& Engine::GetEntities()
+{
+	return Engine::layerrentity;
+}
 vector<vector<Drawable*>>& Engine::getLayers()
 {
 	return Engine::layerr;
@@ -151,6 +155,8 @@ void Engine::Render()
 			{
 				//cout << this_thread::get_id() << " THREAD ID IN RENDER" << endl;
 				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
+				Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
+				Engine::layerrentity.at(i).at(i1)->control();
 				//cout << Engine::layerrentity.at(i).at(i1)->anim.currentAnim.at(0) << endl;
 				Engine::layerrentity.at(i).at(i1)->draw(&window);
 			}

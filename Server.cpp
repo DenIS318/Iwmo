@@ -1,9 +1,10 @@
 #include "Server.h"
 
 using namespace std;
+#define server "[SERVER]: "
 Server::Server()
 {
-	m_maxPlayerNumber = 20;
+	m_maxPlayerNumber = 1000;
 	m_currentID = 0;
 	m_playerNumber = 0;
 
@@ -12,13 +13,7 @@ Server::Server()
 	m_selector.add(m_listener);
 	std::cout << "Server is started. Waiting for connections..." << std::endl;
 }
-string server()
-{
-	
-	string str = "@";
 
-	return str;
-}
 void Server::run()
 {
 	while (m_isRunning)

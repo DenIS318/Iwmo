@@ -5,11 +5,18 @@ iwmoEntity::iwmoEntity()
 {
 
 }
+void iwmoEntity::control()
+{
+	
+}
 void iwmoEntity::setPos(Vector2f pos)
 {
 
 	x = pos.x;
 	y = pos.y;
+}
+void iwmoEntity::updatetime(float t) {
+	time = t;
 }
 iwmoEntity* iwmoEntity::MGetBase()
 {
@@ -31,12 +38,15 @@ AnimationManager* iwmoEntity::GetTextureAnimation()
 }
 void iwmoEntity::MGetEvent(Event event)
 {
-
+	
+	//cout << "fukyou";
 }
 void iwmoEntity::m_move(int xm, int ym)
 {
-	x += xm;
-	y += ym;
+	//cout << time << endl;
+	x += (xm*30)/1000;
+	y += (ym*30)/1000;
+	this->setPos(Vector2f(x, y));
 }
 iwmoEntity::~iwmoEntity()
 {

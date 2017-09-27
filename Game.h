@@ -47,8 +47,8 @@ public:
 	const Vector2f CAM_CENTER = Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
 	RenderWindow* window;
 	RenderWindow* Getwindow();
-
-	sf::View camera;
+	Engine* m_engine;
+    sf::View camera;
 	CSource* m_ls;
 private:
 	TiXmlDocument kidXML;
@@ -61,9 +61,11 @@ class GameHandler : public Game
 
 public:
 
-
+	GameHandler();
+	GameHandler(const Game*);
+	~GameHandler();
 	Event event;
-	Game* gameinstance = Game::getGame();
+	Game* gameinstance;
 	RenderWindow* windinst = Game::Getwindow();
 	Event GameHandler::GetEvent()
 	{
@@ -76,6 +78,20 @@ public:
 private:
 	View* camerapointer = gameinstance->GetCam();
 	void GameHandler::OnEvent(Event eventt);
+
+
+};
+class MyEntityEngine
+{
+public:
+	MyEntityEngine();
+	~MyEntityEngine();
+	void initEntEng(GameHandler* handlerr, iwmoEntity* ent);
+	void MPassEvent(Event);
+	MyEntityEngine* GetThis();
+	GameHandler* m_handler;
+	iwmoEntity* m__entity;
+private:
 
 
 };

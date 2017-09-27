@@ -34,7 +34,6 @@
     <ClCompile Include="maploader\miniz.c" />
     <ClCompile Include="maploader\pugixml\pugixml.cpp" />
     <ClCompile Include="maploader\QuadTreeNode.cpp" />
-    <ClCompile Include="MyEntityEngine.cpp" />
     <ClCompile Include="mytextbox.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -52,7 +51,6 @@
     <ClInclude Include="IwmoEntity.h" />
     <ClInclude Include="kid.h" />
     <ClInclude Include="maploader\miniz.h" />
-    <ClInclude Include="MyEntityEngine.h" />
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />
     <ClInclude Include="Network.h" />

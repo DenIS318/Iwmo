@@ -9,7 +9,15 @@
 
 //#include "Game.h"
  // !GAME_H
-
+enum EntityState {
+	idle,
+	walk,
+	jump,
+	fall,
+	slide,
+	channel,
+	unknown
+};
 
 using namespace sf;
 using namespace std;
@@ -26,9 +34,15 @@ public:
 	int GetX();
 	int GetY();
 	AnimationManager anim;
-	inline void MGetEvent(Event);
+	virtual void MGetEvent(Event);
+	virtual void control();
 	AnimationManager* GetTextureAnimation();
 	iwmoEntity* MGetBase();
+	float SpeedX = 50.0;
+	float SpeedY = 50.0;
+	EntityState state = unknown;
+	void updatetime(float t);
+	float time=0.0;
 	//TODO 2
 	//MyEntityEngine* eng = new MyEntityEngine;
 	//void SettingHandler(GameHandler* h);
