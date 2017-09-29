@@ -13,6 +13,12 @@ using namespace sf;
 class Animation
 {
 public:
+	FloatRect
+		Col_up,
+		Col_down,
+		Col_right,
+		Col_left
+		;
 	std::vector<IntRect> frames;
 	std::vector<IntRect> frames_flip;
 	float currentFrame, speed;
@@ -60,6 +66,12 @@ public:
 				//sprite.setOrigin(frames_flip[currentFrame].width / 2, frames_flip[currentFrame].height / 2);
 			}
 		}
+		auto R = sprite.getGlobalBounds();
+		Col_left = FloatRect(R.left, R.left,1,1);
+		Col_up = FloatRect(R.top, R.top, 1, 1);
+		Col_right = FloatRect((R.left + R.width),( R.left + R.width), 1, 1);
+		Col_down = FloatRect((R.top + R.height), (R.top + R.height), 1, 1);
+		
 	}
 
 };
@@ -80,7 +92,10 @@ public:
 	{
 		animList.clear();
 	}
-
+	Sprite* getSprite()
+	{
+		return &(animList[currentAnim].sprite);
+	}
 	//ñîçäàíèå àíèìàöèé âðó÷íóþ
 	void create(std::string name, Texture &texture, int x, int y, int w, int h, int count, float speed, int step = 0, bool Loop = true)
 	{
@@ -183,6 +198,7 @@ public:
 		animList[currentAnim].sprite.setPosition(x, y);
 		//cout <<"x = "<< animList[currentAnim].sprite.getPosition().x << endl;
 		//cout << "y = " << animList[currentAnim].sprite.getPosition().y << endl;
+		
 		window->draw(animList[currentAnim].sprite);
 	}
 

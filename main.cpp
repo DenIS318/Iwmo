@@ -218,6 +218,7 @@ int main()
 	engine.init(Width, Height, WindowName, framerate);
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
+	engine.AddLayer(0);
 	engine.AddLayer(bglayer);
 	engine.AddLayer(textlayer);
 	text.loadFromFile("resources/bg.jpg");
@@ -260,6 +261,7 @@ int main()
 		ipbox.setState(myState::Disabled);
 	}
 	//adding
+	
 	engine.AddSprite(&bg, 0);
 	engine.AddSprite(&kidbut, 0);
 	engine.AddSprite(&makerbut, 0);

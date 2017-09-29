@@ -8,9 +8,13 @@
 #include "Animation.h"
 #include "IwmoConfig.h"
 #include "iwmoEntity.h"
+#include "tmx\MapLayer.hpp"
+#include "Block.h"
 using namespace sf;
 using namespace std;
 using namespace IV;
+using namespace tmx;
+using namespace Iwmo;
 //using namespace IwmoEngine;
 class Engine
 {
@@ -19,7 +23,8 @@ public:
 	//CONSTRUCT
 	Engine();
 	void SetCam(View*);
-
+	void AddBlock(Block b);
+	vector<Sprite*> maptiles;
 	///PROTOTYPES
 	/*
 	Initializates engine and creating main window with given width, height, title, max framerate.
@@ -86,7 +91,7 @@ public:
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
-
+	vector<Block> MapBlocks;
 private:
 
 	const int maxlayersize = 1;

@@ -1,9 +1,102 @@
 #include "Game.h"
 #include <future>
-
+const string m_res = "resources/blocks/";
 
 GameHandler* eventhandler;
 Game* instanceEH ;
+
+map<string,Texture*>* Game::GetBlockList()
+{
+	return &IwmoBlocks;
+}
+void Game::AddIwmoBlock(string name)
+{
+	Texture* texture = TextureManager::loadTexture(name, m_res+name);
+	IwmoBlocks.insert(std::pair<string, Texture*>(name, texture));
+}
+Block Game::CreateBlockByName(string name)
+{
+	for (auto it = IwmoBlocks.begin(); it != IwmoBlocks.end(); ++it)
+	{
+		if (it->first == name)
+		{
+			return Block(it->first);
+		}
+	}
+	cout << "Block '" << name << "'" << " not found!" << endl;
+	return Block(new Texture(), 0, 0);
+}
+Texture* Game::GetBlockTextureByName(string name)
+{
+	for (auto it = IwmoBlocks.begin(); it != IwmoBlocks.end(); ++it)
+	{
+		if (it->first == name)
+		{
+		return	TextureManager::getTexture(name);
+		}
+		//cout << it->first << endl;
+	}
+	cout << "Block texture '" << name << "'" << " not found!" << endl;
+	return new Texture;
+}
+vector<map<string, string>> get_file_list(const std::string& path)
+{
+	vector<map<string, string>> filevector = vector<map<string, string>>(0);
+	filevector.reserve(0);
+	if (!path.empty())
+	{
+		namespace fs = boost::filesystem;
+
+		fs::path apk_path(path);
+		fs::recursive_directory_iterator end;
+
+		for (fs::recursive_directory_iterator i(apk_path); i != end; ++i)
+		{
+			map<string, string> m_file;
+			const fs::path cp = (*i);
+			/*stringstream ss;
+			ss << cp.filename()/* << "." << cp.extension();*/
+			m_file.insert(std::pair<string, string>(cp.string(),cp.filename().string()));
+			filevector.push_back(m_file);
+		}
+	}
+	return filevector;
+}
+void Game::InitIwmoBlocks()
+{
+	path p("resources/blocks/");  // avoid repeated path construction below
+	std::vector<std::map<string, string>> filevector(0);
+	filevector.reserve(0);
+	if (exists(p))    // does path p actually exist?
+	{
+
+		filevector = get_file_list("resources/blocks/");
+	}
+	else
+	{
+		cout << "ERROR!!!! resources/blocks dont exists!!!" << endl;
+	}
+	map<string, string>::const_iterator map_iter;
+	for (unsigned int i = 0; i < filevector.size(); i++)
+	{
+	
+	for (map_iter = filevector[i].begin(); map_iter != filevector[i].end(); ++map_iter)
+	{
+		
+		string bname;
+		//auto btexture = TextureManager::loadTexture(bname, m_res);
+	/*	if (!btexture.loadFromFile(map_iter->first))
+		{
+			cout << map_iter->first << " not loaded!" << endl;
+		}*/
+		bname = map_iter->second;
+		AddIwmoBlock(bname);
+	}
+	}
+	
+
+}
+const Vector2f KidSpawn(50, 3100);
 void Game::EventHandling(CSource* sourc)
 {
 	m_ls = sourc;
@@ -63,6 +156,7 @@ Game* Game::getGame()
 }
 Game::Game(Engine* engine, RenderWindow* wind)
 {
+	InitIwmoBlocks();
 	
 	window = wind;
 	m_engine = engine;
@@ -85,8 +179,18 @@ Game::Game(Engine* engine, RenderWindow* wind)
 	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine);
 	//mykid.SettingHandler((GameHandler*)eventhandler);
 	m_engine->Addentity(&mykid, 0);
+	mykid.setPos(KidSpawn);
+	Texture* wall = GetBlockTextureByName("wall.png");
+	for (int i = 0; i < 10; i++)
+	{
+		Vector2f offset(wall->getSize().x*i, (-32));
+		
+		
+		m_engine->AddBlock(Block(wall, Vector2f(0,3200) + offset));
+	}
+	
 	//
-	m_engine->LoadMap("map.tmx");
+	/*m_engine->LoadMap("map.tmx");
 	m_engine->GetMap()->getLayers()[2].visible = false;
 	const auto& layers = m_engine->GetMap()->getLayers();
 	for (const auto& layer : layers)
@@ -105,7 +209,8 @@ Game::Game(Engine* engine, RenderWindow* wind)
 				}
 			}
 		}
-	}
+	}*/
+	
 	//
 
 	m_engine->gamestarted = true;

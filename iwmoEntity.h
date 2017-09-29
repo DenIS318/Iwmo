@@ -33,6 +33,7 @@ public:
 	void draw(RenderWindow*);
 	int GetX();
 	int GetY();
+	Vector2f GetPos();
 	AnimationManager anim;
 	virtual void MGetEvent(Event);
 	virtual void control();

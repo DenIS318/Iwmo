@@ -42,6 +42,10 @@
     <ClCompile Include="tinyxml\tinyxml.cpp" />
     <ClCompile Include="tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="IwmoMath.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />
@@ -61,6 +65,10 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="tinyxml\tinystr.h" />
     <ClInclude Include="tinyxml\tinyxml.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="IwmoMath.h" />
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="maploader">

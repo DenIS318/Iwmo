@@ -1,7 +1,7 @@
 ﻿#include "Engine.h"
 
 //using namespace IwmoEngine;
-tmx::MapLoader m_map("resources/");
+static tmx::MapLoader m_map("resources/");
 float fps;
 bool CameraSetted = false;
 View* CamPointer;
@@ -83,6 +83,10 @@ void Engine::Removeentity(iwmoEntity* man)
 
 	delete man;
 }
+void Engine::AddBlock(Block b)
+{
+	MapBlocks.push_back(b);
+}
 void Engine::LoadMap(string mapname)
 {
 
@@ -99,7 +103,18 @@ void Engine::LoadMap(string mapname)
 			cout << "m_map NOT LOADED!" << endl;
 		}
 	}
-
+	
+	auto l = m_map.getLayers();
+	cout << "SIZE IS " << l.at(0).tiles.size() << endl;
+	
+	for each (tmx::MapTile tile in l.at(0).tiles)
+	{
+		maptiles.push_back(&tile.sprite);
+	}
+	for each (tmx::MapTile tile in l.at(1).tiles)
+	{
+		maptiles.push_back(&tile.sprite);
+	}
 }
 tmx::MapLoader* Engine::GetMap()
 {
@@ -132,18 +147,26 @@ void Engine::Render()
 	}
 	if (gamestarted)
 	{
-		window.draw(m_map);
-	}
-	for (unsigned int i = 0; i < Engine::layerr.size(); i++)
-	{
-		for (unsigned int i1 = 0; i1 < Engine::layerr.at(i).size(); i1++)
-		{
-			//cout << Engine::layerr.at(i).size()<<endl; 
+		//window.draw(m_map);
 
-			window.draw(*(Engine::layerr.at(i).at(i1)));
+		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
+		{
+			window.draw((Engine::MapBlocks.at(i).sprite));
+			//cout << MapBlocks[i].sprite.getPosition().x << ", " << MapBlocks[i].sprite.getPosition().y << endl;
+		
 		}
 	}
+	
+		for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
+		{
+			for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
+			{
+				//cout << Engine::layerr.at(myi).size()<<endl; 
 
+				window.draw(*(Engine::layerr.at(myi).at(myi1)));
+			}
+		}
+	
 
 	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
 	{
@@ -151,7 +174,7 @@ void Engine::Render()
 		{
 			//cout << Engine::layerrentity.at(i).size()<<endl; 
 			//cout << 0;
-
+			
 			{
 				//cout << this_thread::get_id() << " THREAD ID IN RENDER" << endl;
 				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);

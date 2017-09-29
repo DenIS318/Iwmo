@@ -15,6 +15,10 @@ void iwmoEntity::setPos(Vector2f pos)
 	x = pos.x;
 	y = pos.y;
 }
+Vector2f iwmoEntity::GetPos()
+{
+	return Vector2f(x, y);
+}
 void iwmoEntity::updatetime(float t) {
 	time = t;
 }

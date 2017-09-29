@@ -8,13 +8,16 @@
 #include "Animation.h"
 #include "kid.h"
 #include "Engine.h"
+#include "Block.h"
+#include <boost/filesystem.hpp>
 //#include "Player.h"
 #include "tmx\Log.hpp"
-
+using namespace boost::filesystem;
 using namespace std;
 using namespace sf;
 using namespace tmx;
 using namespace IV;
+using namespace Iwmo;
 class Game
 {
 
@@ -50,10 +53,22 @@ public:
 	Engine* m_engine;
     sf::View camera;
 	CSource* m_ls;
+	/*
+	Creates block with given name in blocks folder without dot
+	*/
+	Block CreateBlockByName(string name);
+	/*
+	Get block texture* with given name in blocks folder with extension
+	*/
+	Texture* GetBlockTextureByName(string name);
+	map<string,Texture*>* GetBlockList();
+	void AddIwmoBlock(string name);
 private:
+	void InitIwmoBlocks();
 	TiXmlDocument kidXML;
 	TiXmlDocument LevelXML;
 	Texture* kidSheet = new Texture;
+	 map<string, Texture*> IwmoBlocks;
 };
 [event_receiver(native)]
 class GameHandler : public Game

@@ -315,6 +315,6 @@
 </data>
  </layer>
  <objectgroup name="objects">
-  <object id="1" name="spawn" type="defaultsave" x="56" y="3158" width="13" height="17"/>
+  <object id="1" name="spawn" type="defaultsave" x="56" y="3112" width="13" height="17"/>
  </objectgroup>
 </map>
