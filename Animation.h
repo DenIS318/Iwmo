@@ -5,11 +5,18 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <sstream>
-
+#define coutFloatRect m_c_f_r
 using namespace std;
 using namespace sf;
 
-
+#define cp ColPoint
+enum ColPoint
+{
+	left,
+	right,
+	up,
+	down
+};
 class Animation
 {
 public:
@@ -19,6 +26,8 @@ public:
 		Col_right,
 		Col_left
 		;
+	vector<vector<FloatRect>> ColRect;
+	vector<vector<FloatRect>> ColRectFlip;
 	std::vector<IntRect> frames;
 	std::vector<IntRect> frames_flip;
 	float currentFrame, speed;
@@ -36,8 +45,20 @@ public:
 		isPlaying = true;
 		flip = false;
 		loop = true;
+		
+		ColRect.reserve(0);
+		ColRect.resize(3);
+		ColRectFlip.reserve(0);
+		ColRectFlip.resize(3);
+		vector<FloatRect> tempvec;
+		tempvec.reserve(0);
+		ColRect.push_back(tempvec);
+		ColRectFlip.push_back(tempvec);
 	}
-
+	void coutFloatRect(FloatRect R)
+	{
+		cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
+	}
 	void tick(float time)
 	{
 		if (!isPlaying) return;
@@ -66,12 +87,7 @@ public:
 				//sprite.setOrigin(frames_flip[currentFrame].width / 2, frames_flip[currentFrame].height / 2);
 			}
 		}
-		auto R = sprite.getGlobalBounds();
-		Col_left = FloatRect(R.left, R.left,1,1);
-		Col_up = FloatRect(R.top, R.top, 1, 1);
-		Col_right = FloatRect((R.left + R.width),( R.left + R.width), 1, 1);
-		Col_down = FloatRect((R.top + R.height), (R.top + R.height), 1, 1);
-		
+
 	}
 
 };
@@ -162,6 +178,7 @@ public:
 			//anim.sprite.getColor().Transparent = colorr;
 			TiXmlElement *cut;
 			cut = animElement->FirstChildElement("cut");
+			int i = 0;
 			while (cut)
 			{
 				int x = atoi(cut->Attribute("x"));
@@ -170,8 +187,19 @@ public:
 				int h = atoi(cut->Attribute("h"));
 
 				anim.frames.push_back(IntRect(x, y, w, h));
-				
+				auto R = anim.frames[i];
+			
+				anim.ColRect[cp::left].push_back(FloatRect(0, 0, R.width / 2, R.height));
+				anim.ColRect[cp::up].push_back(FloatRect(0, 0, R.width, R.height / 2));
+				anim.ColRect[cp::right].push_back(FloatRect(R.width, 0, -(R.width / 2), R.height));
+				anim.ColRect[cp::down].push_back(FloatRect(0, R.height, R.width, -(R.width, R.height / 2)));
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
+				R = anim.frames_flip[i];
+				anim.ColRectFlip[cp::left].push_back(FloatRect(0, 0, R.width / 2, R.height));
+				anim.ColRectFlip[cp::up].push_back(FloatRect(0, 0, R.width, R.height / 2));
+				anim.ColRectFlip[cp::right].push_back(FloatRect(R.width, 0, -(R.width / 2), R.height));
+				anim.ColRectFlip[cp::down].push_back(FloatRect(0, R.height, R.width, -(R.width, R.height / 2)));
+				i++;
 				cut = cut->NextSiblingElement("cut");
 			}
 
@@ -180,6 +208,15 @@ public:
 			animList[currentAnim] = anim;
 
 			animElement = animElement->NextSiblingElement("animation");
+			
+			//cout << "Col_left: ";
+			/*coutFloatRect(anim.Col_left);
+			cout << "Col_up: ";
+			coutFloatRect(anim.Col_up);
+			cout << "Col_right: ";
+			coutFloatRect(anim.Col_right);
+			cout << "Col_down: ";
+			coutFloatRect(anim.Col_down);*/
 			//anim.sprite.setTexture(t);
 		}
 
@@ -209,7 +246,7 @@ public:
 	void pause() { animList[currentAnim].isPlaying = false; }
 
 	void play() { animList[currentAnim].isPlaying = true; }
-
+	
 	void play(std::string name) { 
 		currentAnim = name;
 		animList[name].isPlaying = true; }

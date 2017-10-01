@@ -8,7 +8,6 @@
 #include "tmx\MapLayer.hpp"
 #include "tmx\MapObject.hpp"
 #include "Collision.h"
-
 class kid : public iwmoEntity
 {
 public:
@@ -32,6 +31,7 @@ public:
 	//iwmoEntity* entity = iwmoEntity::GetBase();
 	//DerivedType * m_derivedType = dynamic_cast<DerivedType*>(&m_baseType);
 	iwmoEntity* GetEntity();
+
 private:
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 

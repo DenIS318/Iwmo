@@ -15,44 +15,65 @@ void kid::control()
 	colDOWN = false;
 	colLEFT = false;
 	colRIGHT = false;
-	for each (Sprite* spr in m_engine->maptiles)
+	for each (Block bl in m_engine->MapBlocks)
 	{
 		auto POS = GetPos();
-		auto B = spr->getGlobalBounds();
-		auto curAnim = anim.animList[anim.currentAnim];
-		if (B.intersects(curAnim.Col_up))
+		//auto B = bl.sprite.getLocalBounds();
+		auto curAnim = anim.animList[anim.currentAnim].ColRect[anim.animList[anim.currentAnim].currentFrame];
+		
+		//RectangleShape colupshape(Vector2f(curAnim.Col_up.width,curAnim.Col_up.height));
+		//colupshape.setPosition(curAnim.Col_up.left, curAnim.Col_up.top);
+	//	m_engine->AddSprite(&colupshape, 0);
+		Vector2f mtv;
+		bool b = m_engine->m_math.sat_test(bl.sprite, *kidentity->anim.getSprite(), &mtv);
+		//int;
+		if (b)
 		{
+			Vector2u siz = bl.sprite.getTexture()->getSize();
+			//cout << "intersect" << endl;
+			//cout << mtv.x <<", "<<mtv.y << endl;
+			
+		}
+		else
+		{
+		
+		}
+		if (curAnim[ColPoint::up].contains(mtv))
+		{
+			cout << "COLUP" << endl;
 			colUP = true;
 		}
-		if (B.intersects(curAnim.Col_left))
+		if (curAnim[ColPoint::left].contains(mtv))
 		{
+			cout << "COLLEFT" << endl;
 			colLEFT = true;
 			setPos(
 				Vector2f(
-					spr->getPosition().x 
+					bl.sprite.getPosition().x
 					+
 					kidentity->anim.getSprite()->getOrigin().x
 					, POS.y)
 			);
 		}
-		if (B.intersects(curAnim.Col_right))
+		if (curAnim[ColPoint::right].contains(mtv))
 		{
 			colRIGHT = true;
+			cout << "COLRIGHT" << endl;
 		}
 		
-		if (B.intersects(curAnim.Col_down))
+		if (curAnim[ColPoint::down].contains(mtv))
 		{
 			cout << "COL DOWN" << endl;
 			colDOWN = true;
 			setPos(
 				Vector2f(
 					POS.x
-					, spr->getPosition().y - anim.getSprite()->getOrigin().y)
+					, bl.sprite.getPosition().y - anim.getSprite()->getOrigin().y)
 			);
 		}
 
 	}
-
+	
 	if (colDOWN)
 	{
 		grounded = true;

@@ -10,6 +10,7 @@
 #include "iwmoEntity.h"
 #include "tmx\MapLayer.hpp"
 #include "Block.h"
+#include "IwmoMath.h"
 using namespace sf;
 using namespace std;
 using namespace IV;
@@ -92,6 +93,7 @@ public:
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
 	vector<Block> MapBlocks;
+	Math m_math;
 private:
 
 	const int maxlayersize = 1;
