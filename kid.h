@@ -22,7 +22,7 @@ public:
 	void MGetEvent(Event event);
 	void control();
 	Engine* m_engine;
-	bool grounded = false;
+	bool grounded = true;
 	bool colUP,
 		colDOWN,
 		colRIGHT,

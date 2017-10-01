@@ -55,6 +55,10 @@ public:
 		ColRect.push_back(tempvec);
 		ColRectFlip.push_back(tempvec);
 	}
+	bool isFlip()
+	{
+		return flip;
+	}
 	void coutFloatRect(FloatRect R)
 	{
 		cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
@@ -242,14 +246,19 @@ public:
 	void flip(bool b = 1) { animList[currentAnim].flip = b; }
 
 	void tick(float time) { animList[currentAnim].tick(time); }
-
+	bool isFlip()
+	{
+		return animList[currentAnim].isFlip();
+	}
 	void pause() { animList[currentAnim].isPlaying = false; }
 
 	void play() { animList[currentAnim].isPlaying = true; }
 	
 	void play(std::string name) { 
 		currentAnim = name;
-		animList[name].isPlaying = true; }
+		animList[name].isPlaying = true;
+		animList[name].currentFrame = 0;
+	}
 
 	bool isPlaying() { return animList[currentAnim].isPlaying; }
 
