@@ -1,11 +1,36 @@
 #include "kid.h"
 using namespace tmx;
+#define cp ColPoint
 /*kid::kid()
 {
 }*/
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
+}
+void coutMTV(Vector2f mtv)
+{
+	cout << "MTV = " << mtv.x << ", " << mtv.y << endl;
+}
+string checkbol(bool b)
+{
+	if (b)
+	{
+		return ("true");
+	}
+	else
+	{
+		return ("false");
+	}
+}
+void coutkidcol(bool colLEFT,bool colRIGHT,bool colDOWN, bool colUP)
+{
+	cout << "------------------------" << endl;
+	cout << "ColLEFT = " << checkbol(colLEFT) << endl;
+	cout << "ColRIGHT = " << checkbol(colRIGHT) << endl;
+	cout << "ColDOWN = " << checkbol(colDOWN) << endl;
+	cout << "ColUP = " << checkbol(colUP) << endl;
+	cout << "------------------------" << endl;
 }
 void kid::control()
 {
@@ -17,167 +42,164 @@ void kid::control()
 	{
 		kidentity->anim.flip(false);
 	}
-	//grounded = false;
+	/*grounded = false;
 	colUP = false;
 	colDOWN = false;
 	colLEFT = false;
-	colRIGHT = false;
-	for each (Block bl in m_engine->MapBlocks)
-	{
-		auto POS = GetPos();
-		//auto B = bl.sprite.getLocalBounds();
-		vector<FloatRect> curAnim;
-		if (!anim.isFlip())
-		{
-			int f = anim.animList[anim.currentAnim].currentFrame;
-			curAnim = anim.animList[anim.currentAnim].ColRect[f];
-		}
-		else
-		{
-			//cout << "FLIP" << endl;
-			int f = anim.animList[anim.currentAnim].currentFrame;
-			curAnim = anim.animList[anim.currentAnim].ColRectFlip[f];
-		}
-		//RectangleShape colupshape(Vector2f(curAnim.Col_up.width,curAnim.Col_up.height));
-		//colupshape.setPosition(curAnim.Col_up.left, curAnim.Col_up.top);
-	//	m_engine->AddSprite(&colupshape, 0);
-		Vector2f mtv;
-		m_engine->m_math.sat_test(bl.sprite, *kidentity->anim.getSprite(), &mtv);
-		
-		if (curAnim[ColPoint::up].contains(mtv))
-		{
-			//cout << "COLUP" << endl;
-			colUP = true;
-		}
-		if (curAnim[ColPoint::left].contains(mtv))
-		{
-			//cout << "COLLEFT" << endl;
-			colLEFT = true;
-			setPos(
-				Vector2f(
-					kidentity->GetX(),bl.sprite.getPosition().y-kidentity->anim.getSprite()->getOrigin().y
-			));
-		}
-		if (curAnim[ColPoint::right].contains(mtv))
-		{
-			colRIGHT = true;
-			//cout << "COLRIGHT" << endl;
-		}
-		
-		if (curAnim[ColPoint::down].contains(mtv))
-		{
-		//	cout << "COL DOWN" << endl;
-			colDOWN = true;
-			setPos(
-				Vector2f(
-					kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
-				));
-		}
+	colRIGHT = false;*/
+	static bool passed[4];
 
-	}
-	
-	if (colDOWN)
+	passed[ColPoint::left] = false;
+	passed[ColPoint::right] = false;
+	passed[ColPoint::up] = false;
+	passed[ColPoint::down] = false;
+	vector<FloatRect> curAnim;
+	if (!anim.isFlip())
 	{
-		grounded = true;
-		if (kidentity->state != walk)
-		{
-			kidentity->state = idle;
-		}
+		int f = anim.animList[anim.currentAnim].currentFrame;
+		curAnim = anim.animList[anim.currentAnim].ColRect[f];
 	}
 	else
 	{
-		grounded = false;
-		if (kidentity->state != fall && kidentity->state != jump)
-		{
-			kidentity->anim.play("fall");
-			kidentity->state = fall;
-		}
+		//cout << "FLIP" << endl;
+		int f = anim.animList[anim.currentAnim].currentFrame;
+		curAnim = anim.animList[anim.currentAnim].ColRectFlip[f];
 	}
-	
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		kidentity->m_move(-SpeedX, 0);
-		//kidentity->anim.flip(true);
-		if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump)
+	auto POS = GetPos();
+	try {
+		for each (Block bl in m_engine->MapBlocks)
 		{
-			kidentity->anim.play("walk");
-			kidentity->state = walk;
-		}
-		
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		kidentity->m_move(SpeedX, 0);
-		//kidentity->anim.flip(false);
-		if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump)
-		{
-			kidentity->anim.play("walk");
-			kidentity->state = walk;
-		}
-
-
-	}
-	if(grounded)
-	{ 
-		if (kidentity->state != jump && kidentity->state != fall)
-		{
-			if (
-				!sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
-				!sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
-				!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)
-				)
+			
+			//auto B = bl.sprite.getLocalBounds();
+			
+			//RectangleShape colupshape(Vector2f(curAnim.Col_up.width,curAnim.Col_up.height));
+			//colupshape.setPosition(curAnim.Col_up.left, curAnim.Col_up.top);
+		//	m_engine->AddSprite(&colupshape, 0);
+			Vector2f mtv;
+			if (m_engine->m_math.sat_test(bl.sprite, *kidentity->anim.getSprite(), &mtv))
 			{
-				//cout << 2 << endl;
-				if (kidentity->state != idle)
+				//coutMTV(mtv);
+				if (!passed[ColPoint::up])
 				{
-					kidentity->anim.play("idle");
-					kidentity->state = idle;
+
+					if (curAnim[ColPoint::up].contains(mtv))
+					{
+						setPos(
+							Vector2f(
+								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
+							));
+						colUP = true;
+						passed[ColPoint::up] = true;
+						
+					}
+				}
+				if (!passed[ColPoint::left])
+				{
+					if (curAnim[ColPoint::left].contains(mtv))
+					{
+						//cout << "COLLEFT" << endl;
+						colLEFT = true;
+						setPos(
+							Vector2f(
+								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
+							));
+						passed[ColPoint::left] = true;
+						
+					}
+				}
+				if (!passed[ColPoint::right])
+				{
+					if (curAnim[ColPoint::right].contains(mtv))
+					{
+						colRIGHT = true;
+						passed[ColPoint::right] = true;
+						//cout << "COLRIGHT" << endl;
+						
+					}
+				}
+				if (!passed[ColPoint::down])
+				{
+					if (curAnim[ColPoint::down].contains(mtv))
+					{
+						//	cout << "COL DOWN" << endl;
+						colDOWN = true;
+						setPos(
+							Vector2f(
+								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
+							));
+						passed[ColPoint::down] = true;
+						
+					}
 				}
 
 			}
 		}
-	}
-	if (!grounded)
-	{
-		kidentity->m_move(0, SpeedY);
-	}
-	/*
-	for each (Sprite* block in m_engine->maptiles)
-	{
-		if (block->getGlobalBounds().intersects((anim.getSprite()->getGlobalBounds())))
+		if (!passed[cp::left])
 		{
-			col = true;
+			colLEFT = false;
 		}
-		else
+		if (!passed[cp::right])
 		{
+			colRIGHT = false;
+		}
+		if (!passed[cp::up])
+		{
+			colUP = false;
+		}
+		if (!passed[cp::down])
+		{
+			colDOWN = false;
+			//cout << "not col down" << endl;
+		}
 
-		}
-		if (col)
+		if (colDOWN)
 		{
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+			grounded = true;
+			//	cout << "grounded" << endl;
+			if (kidentity->state != walk && kidentity->state != idle)
 			{
-				kidentity->m_move(-SpeedX, 0);
-				kidentity->anim.flip(true);
-				if (kidentity->state != walk)
-				{
-					kidentity->anim.play("walk");
-					kidentity->state = walk;
-				}
+				kidentity->state = idle;
+				kidentity->anim.play("idle");
 
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		}
+		if (!colDOWN)
+		{
+			grounded = false;
+			if (kidentity->state != fall && kidentity->state != jump)
 			{
-				kidentity->m_move(SpeedX, 0);
-				kidentity->anim.flip(false);
-				if (kidentity->state != walk)
-				{
-					kidentity->anim.play("walk");
-					kidentity->state = walk;
-				}
-
-
+				kidentity->anim.play("fall");
+				kidentity->state = fall;
+				//	cout << "fall" << endl;
 			}
-			//if (kidentity->state != jump && kidentity->state != fall)
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			kidentity->m_move(-SpeedX, 0);
+			//kidentity->anim.flip(true);
+			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump)
+			{
+				kidentity->anim.play("walk");
+				kidentity->state = walk;
+			}
+
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		{
+			kidentity->m_move(SpeedX, 0);
+			//kidentity->anim.flip(false);
+			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump)
+			{
+				kidentity->anim.play("walk");
+				kidentity->state = walk;
+			}
+
+
+		}
+		if (grounded)
+		{
+			if (kidentity->state != jump && kidentity->state != fall)
 			{
 				if (
 					!sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
@@ -195,28 +217,19 @@ void kid::control()
 				}
 			}
 		}
-	}
-	if (!col)
-	{
-		if (kidentity->state != fall && kidentity->state != jump)
+		if (!grounded)
 		{
-			kidentity->anim.play("fall");
-			kidentity->state = fall;
 			kidentity->m_move(0, SpeedY);
+			//cout << "fall move" << endl;
 		}
-		return;
-
 	}
-
-	*/
-
-
-		
-	
-	
-	
-				
-	//cout << kidentity->anim.currentAnim << endl;
+	 
+	 catch (const std::length_error& oor) {
+		 std::cerr << "Length error: " << oor.what() << '\n';
+	 }
+	 coutkidcol(colLEFT, colRIGHT, colDOWN, colUP);
+	 //delete [] passed;
+	 //passed = nullptr;
 }
 void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine)
 {
@@ -231,35 +244,14 @@ void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine
 	kidentity->anim.animList["slide"].loop = true;
 	kidentity->anim.animList["fall"].loop = true;
 	kidentity->anim.play("idle");
+	kidentity->state = idle;
 	kidentity->anim.currentAnim = "idle";
 	SpeedX = 70;
 	m_engine = engine;
 	
+	
+	
 }
 void kid::MGetEvent(Event event)
 {
-/*	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		kidentity->m_move(-SpeedX, 0);
-		kidentity->anim.flip(true);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		kidentity->m_move(SpeedX, 0);
-		kidentity->anim.flip(false);
-	}
-		*/
-	//cout << "lel" << endl;
 }
-//TODO 4
-/*void kid::SetHandler(GameHandler* h)
-{
-	kidentity->SettingHandler(h);
-}*/
-
-
-
-/*kid::~kid()
-{
-//	cout << "Kid destructor" << endl;
-}*/

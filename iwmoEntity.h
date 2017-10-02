@@ -40,7 +40,7 @@ public:
 	AnimationManager* GetTextureAnimation();
 	iwmoEntity* MGetBase();
 	float SpeedX = 50.0;
-	float SpeedY = 50.0;
+	float SpeedY = 70.0;
 	EntityState state = unknown;
 	void updatetime(float t);
 	float time=0.0;

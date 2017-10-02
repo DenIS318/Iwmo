@@ -8,8 +8,6 @@
 #define coutFloatRect m_c_f_r
 using namespace std;
 using namespace sf;
-
-#define cp ColPoint
 enum ColPoint
 {
 	left,
@@ -17,15 +15,19 @@ enum ColPoint
 	up,
 	down
 };
+#define cp ColPoint
+
 class Animation
 {
+
 public:
-	FloatRect
+
+	/*FloatRect
 		Col_up,
 		Col_down,
 		Col_right,
 		Col_left
-		;
+		;*/
 	vector<vector<FloatRect>> ColRect;
 	vector<vector<FloatRect>> ColRectFlip;
 	std::vector<IntRect> frames;
@@ -133,7 +135,13 @@ public:
 		animList[name] = a;
 		currentAnim = name;
 	}
-
+	void setPoints(IntRect R,FloatRect* leftRect,FloatRect* upRect,FloatRect* rightRect ,FloatRect* downRect)
+	{
+		*leftRect = FloatRect(0, 0, R.width / 2, R.height - 1);
+		*upRect = FloatRect(0, 0, R.width, R.height / 2);
+		*rightRect = FloatRect(R.width/2, 0, (R.width / 2), R.height - 1);
+		*downRect = FloatRect(0, R.height/2, R.width, R.height / 2);
+	}
 	//çàãðóçêà èç ôàéëà XML
 	void loadFromXML(std::string fileName, Texture* t)
 	{
@@ -189,20 +197,31 @@ public:
 				int y = atoi(cut->Attribute("y"));
 				int w = atoi(cut->Attribute("w"));
 				int h = atoi(cut->Attribute("h"));
-
+				//
 				anim.frames.push_back(IntRect(x, y, w, h));
 				auto R = anim.frames[i];
-			
-				anim.ColRect[cp::left].push_back(FloatRect(0, 0, R.width / 2, R.height));
-				anim.ColRect[cp::up].push_back(FloatRect(0, 0, R.width, R.height / 2));
-				anim.ColRect[cp::right].push_back(FloatRect(R.width, 0, -(R.width / 2), R.height));
-				anim.ColRect[cp::down].push_back(FloatRect(0, R.height, R.width, -(R.width, R.height / 2)));
+				//
+				FloatRect leftRect;
+				FloatRect upRect;
+				FloatRect rightRect;
+				FloatRect downRect;
+				//
+				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
+				//
+				anim.ColRect[cp::left].push_back(leftRect);
+				anim.ColRect[cp::up].push_back(upRect);
+				anim.ColRect[cp::right].push_back(rightRect);
+				anim.ColRect[cp::down].push_back(downRect);
+				//
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
 				R = anim.frames_flip[i];
-				anim.ColRectFlip[cp::left].push_back(FloatRect(0, 0, R.width / 2, R.height));
-				anim.ColRectFlip[cp::up].push_back(FloatRect(0, 0, R.width, R.height / 2));
-				anim.ColRectFlip[cp::right].push_back(FloatRect(R.width, 0, -(R.width / 2), R.height));
-				anim.ColRectFlip[cp::down].push_back(FloatRect(0, R.height, R.width, -(R.width, R.height / 2)));
+				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
+				//
+				anim.ColRectFlip[cp::left].push_back(leftRect);
+				anim.ColRectFlip[cp::up].push_back(upRect);
+				anim.ColRectFlip[cp::right].push_back(rightRect);
+				anim.ColRectFlip[cp::down].push_back(downRect);
+				//
 				i++;
 				cut = cut->NextSiblingElement("cut");
 			}
@@ -239,8 +258,16 @@ public:
 		animList[currentAnim].sprite.setPosition(x, y);
 		//cout <<"x = "<< animList[currentAnim].sprite.getPosition().x << endl;
 		//cout << "y = " << animList[currentAnim].sprite.getPosition().y << endl;
-		
+		//int i = animList[currentAnim].currentFrame;
+		//FloatRect fr = animList[currentAnim].ColRect[cp::up][i];
+		//static RectangleShape* r1 = new RectangleShape(Vector2f(fr.width, fr.height));
+		//r1->setPosition(fr.left, fr.top);
+		//r1->setFillColor(Color::Red);
+		//r1->setOrigin(Vector2f(fr.width / 2, fr.height / 2));
 		window->draw(animList[currentAnim].sprite);
+		//x = r1->getPosition().x;
+		//y = r1->getPosition().y;
+		//window->draw(*r1);
 	}
 
 	void flip(bool b = 1) { animList[currentAnim].flip = b; }
@@ -255,6 +282,7 @@ public:
 	void play() { animList[currentAnim].isPlaying = true; }
 	
 	void play(std::string name) { 
+		
 		currentAnim = name;
 		animList[name].isPlaying = true;
 		animList[name].currentFrame = 0;

@@ -10,6 +10,7 @@
 #include "Collision.h"
 class kid : public iwmoEntity
 {
+#define cp ÑolPoint
 public:
 	//kid();
 	//	~kid();
