@@ -34,6 +34,7 @@ public:
 	iwmoEntity* GetEntity();
 
 private:
+	 RectangleShape RectDown;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 
 };

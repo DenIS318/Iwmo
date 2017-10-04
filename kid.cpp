@@ -4,6 +4,7 @@ using namespace tmx;
 /*kid::kid()
 {
 }*/
+
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
@@ -23,14 +24,25 @@ string checkbol(bool b)
 		return ("false");
 	}
 }
-void coutkidcol(bool colLEFT,bool colRIGHT,bool colDOWN, bool colUP)
+void coutkidcol(bool colLEFT, bool colRIGHT, bool colDOWN, bool colUP)
 {
-	cout << "------------------------" << endl;
-	cout << "ColLEFT = " << checkbol(colLEFT) << endl;
-	cout << "ColRIGHT = " << checkbol(colRIGHT) << endl;
-	cout << "ColDOWN = " << checkbol(colDOWN) << endl;
-	cout << "ColUP = " << checkbol(colUP) << endl;
-	cout << "------------------------" << endl;
+	if (colLEFT || colRIGHT || colDOWN || colUP)
+	{
+		cout << "------------------------" << endl;
+		if (colLEFT)
+			cout << "ColLEFT = " << checkbol(colLEFT) << endl;
+		if (colRIGHT)
+			cout << "ColRIGHT = " << checkbol(colRIGHT) << endl;
+		if (colDOWN)
+			cout << "ColDOWN = " << checkbol(colDOWN) << endl;
+		if (colUP)
+			cout << "ColUP = " << checkbol(colUP) << endl;
+		cout << "------------------------" << endl;
+	}
+}
+void coutFloatRect2(FloatRect R)
+{
+	cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
 }
 void kid::control()
 {
@@ -53,19 +65,42 @@ void kid::control()
 	passed[ColPoint::right] = false;
 	passed[ColPoint::up] = false;
 	passed[ColPoint::down] = false;
-	vector<FloatRect> curAnim;
+	vector<FloatRect> curColRect[4];
+	curColRect[0].reserve(0);
+	curColRect[1].reserve(0);
+	curColRect[2].reserve(0);
+	curColRect[3].reserve(0);
+	int animnum = anim.GetAnimNum(anim.currentAnim);
+	//auto CurrentAnim = anim.animList[anim.currentAnim];
+	//cout << animnum;
+	int curf = anim.animList[anim.currentAnim].currentFrame;
 	if (!anim.isFlip())
 	{
-		int f = anim.animList[anim.currentAnim].currentFrame;
-		curAnim = anim.animList[anim.currentAnim].ColRect[f];
+		//int f = anim.animList[anim.currentAnim].currentFrame;
+		curColRect[0] = anim.animList[anim.currentAnim].ColRect[0];
+		curColRect[1] = anim.animList[anim.currentAnim].ColRect[1];
+		curColRect[2] = anim.animList[anim.currentAnim].ColRect[2];
+		curColRect[3] = anim.animList[anim.currentAnim].ColRect[3];
 	}
 	else
 	{
 		//cout << "FLIP" << endl;
-		int f = anim.animList[anim.currentAnim].currentFrame;
-		curAnim = anim.animList[anim.currentAnim].ColRectFlip[f];
+		//int f = anim.animList[anim.currentAnim].currentFrame;
+		curColRect[0] = anim.animList[anim.currentAnim].ColRectFlip[0];
+		curColRect[1] = anim.animList[anim.currentAnim].ColRectFlip[1];
+		curColRect[2] = anim.animList[anim.currentAnim].ColRectFlip[2];
+		curColRect[3] = anim.animList[anim.currentAnim].ColRectFlip[3];
 	}
-	auto POS = GetPos();
+	//static RectangleShape RectDown;
+	RectDown.setFillColor(Color::Red);
+	auto R = curColRect[ColPoint::down][curf];
+	//*downRect = FloatRect(0, R.height / 2, R.width, R.height / 2);
+	RectDown.setPosition(( kidentity->GetX() - kidentity->anim.animList[anim.currentAnim].frames[anim.animList[anim.currentAnim].currentFrame].width /2 ), kidentity->GetY() + R.height /2 );
+	RectDown.setSize(Vector2f(R.width,R.height));
+//	coutFloatRect2(R);
+	m_engine->AddSprite(&RectDown, 3);
+	Sprite kidspr = *kidentity->anim.getSprite();
+	//auto POS = GetPos();
 	try {
 		for each (Block bl in m_engine->MapBlocks)
 		{
@@ -76,18 +111,18 @@ void kid::control()
 			//colupshape.setPosition(curAnim.Col_up.left, curAnim.Col_up.top);
 		//	m_engine->AddSprite(&colupshape, 0);
 			Vector2f mtv;
-			if (m_engine->m_math.sat_test(bl.sprite, *kidentity->anim.getSprite(), &mtv))
+			if (m_engine->m_math.sat_test(bl.sprite, kidspr, &mtv))
 			{
 				//coutMTV(mtv);
 				if (!passed[ColPoint::up])
 				{
 
-					if (curAnim[ColPoint::up].contains(mtv))
+					if (curColRect[ColPoint::up].at(curf).contains(mtv))
 					{
-						setPos(
+						/*setPos(
 							Vector2f(
 								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
-							));
+							));*/
 						colUP = true;
 						passed[ColPoint::up] = true;
 						
@@ -95,21 +130,21 @@ void kid::control()
 				}
 				if (!passed[ColPoint::left])
 				{
-					if (curAnim[ColPoint::left].contains(mtv))
+					if (curColRect[ColPoint::left].at(curf).contains(mtv))
 					{
 						//cout << "COLLEFT" << endl;
 						colLEFT = true;
-						setPos(
+						/*setPos(
 							Vector2f(
 								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
-							));
+							));*/
 						passed[ColPoint::left] = true;
 						
 					}
 				}
 				if (!passed[ColPoint::right])
 				{
-					if (curAnim[ColPoint::right].contains(mtv))
+					if (curColRect[ColPoint::right].at(curf).contains(mtv))
 					{
 						colRIGHT = true;
 						passed[ColPoint::right] = true;
@@ -119,7 +154,7 @@ void kid::control()
 				}
 				if (!passed[ColPoint::down])
 				{
-					if (curAnim[ColPoint::down].contains(mtv))
+					if (curColRect[ColPoint::down].at(curf).contains(mtv))
 					{
 						//	cout << "COL DOWN" << endl;
 						colDOWN = true;
@@ -247,6 +282,7 @@ void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine
 	kidentity->state = idle;
 	kidentity->anim.currentAnim = "idle";
 	SpeedX = 70;
+	SpeedY = 35;
 	m_engine = engine;
 	
 	

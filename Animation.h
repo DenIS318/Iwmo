@@ -5,16 +5,18 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <sstream>
+#include <boost\math_fwd.hpp>
 #define coutFloatRect m_c_f_r
 using namespace std;
 using namespace sf;
 enum ColPoint
 {
 	left,
-	right,
 	up,
+	right,
 	down
 };
+const float ColPointDivide = 10;
 #define cp ColPoint
 
 class Animation
@@ -28,8 +30,13 @@ public:
 		Col_right,
 		Col_left
 		;*/
-	vector<vector<FloatRect>> ColRect;
-	vector<vector<FloatRect>> ColRectFlip;
+	/*
+	ПОИНТ
+	АНИМАЦИЯ
+	ФРЕЙМЫ
+	*/
+	vector<FloatRect> ColRect[4];
+	vector<FloatRect> ColRectFlip[4];
 	std::vector<IntRect> frames;
 	std::vector<IntRect> frames_flip;
 	float currentFrame, speed;
@@ -48,14 +55,32 @@ public:
 		flip = false;
 		loop = true;
 		
-		ColRect.reserve(0);
-		ColRect.resize(3);
-		ColRectFlip.reserve(0);
-		ColRectFlip.resize(3);
-		vector<FloatRect> tempvec;
+		ColRect[0].reserve(0);
+		ColRect[1].reserve(0);
+		ColRect[2].reserve(0);
+		ColRect[3].reserve(0);
+		ColRectFlip[0].reserve(0);
+		ColRectFlip[1].reserve(0);
+		ColRectFlip[2].reserve(0);
+		ColRectFlip[3].reserve(0);
+		
+	
+
+		
+		/*
+		АНИМАЦИЯ
+		ФРЕЙМЫ
+		*/
+		/*vector<vector<FloatRect>> tempvec;
 		tempvec.reserve(0);
-		ColRect.push_back(tempvec);
-		ColRectFlip.push_back(tempvec);
+		ColRect[0].push_back(tempvec);
+		ColRect[1].push_back(tempvec);
+		ColRect[2].push_back(tempvec);
+		ColRect[3].push_back(tempvec);
+		ColRectFlip[0].push_back(tempvec);
+		ColRectFlip[1].push_back(tempvec);
+		ColRectFlip[2].push_back(tempvec);
+		ColRectFlip[3].push_back(tempvec);*/
 	}
 	bool isFlip()
 	{
@@ -114,6 +139,19 @@ public:
 	{
 		animList.clear();
 	}
+	int GetAnimNum(string m_anim)
+	{
+		int i = 0;
+		map<string,Animation>::iterator it;
+		for (it = animList.begin(); it != animList.end(); it++)
+		{
+			if (it->first == m_anim)
+			{
+				return i;
+			}
+			i++;
+		}
+	}
 	Sprite* getSprite()
 	{
 		return &(animList[currentAnim].sprite);
@@ -137,10 +175,12 @@ public:
 	}
 	void setPoints(IntRect R,FloatRect* leftRect,FloatRect* upRect,FloatRect* rightRect ,FloatRect* downRect)
 	{
-		*leftRect = FloatRect(0, 0, R.width / 2, R.height - 1);
-		*upRect = FloatRect(0, 0, R.width, R.height / 2);
-		*rightRect = FloatRect(R.width/2, 0, (R.width / 2), R.height - 1);
-		*downRect = FloatRect(0, R.height/2, R.width, R.height / 2);
+		
+		*leftRect = FloatRect(IntRect(0,int( R.height/ColPointDivide),int( R.width / 2), int((R.height - R.height / ColPointDivide))));
+		*upRect = FloatRect(IntRect(int(R.width / ColPointDivide), 0, int(R.width- R.width / ColPointDivide), int(R.height / 2)));
+		*rightRect = FloatRect(IntRect(int(R.width/2), int(R.height / ColPointDivide), int((R.width / 2)), int(R.height - R.height / ColPointDivide)));
+		*downRect = FloatRect(IntRect(int(R.width / ColPointDivide), int((R.height/2)), int(R.width- R.width / ColPointDivide), int(R.height / 2)));
+		
 	}
 	//çàãðóçêà èç ôàéëà XML
 	void loadFromXML(std::string fileName, Texture* t)
@@ -176,10 +216,13 @@ public:
 
 		t->loadFromImage(img);
 		*/
+
+		
+
 		while (animElement)
 		{
 
-
+			
 			Animation anim;
 			//anim.sprite.setTexture(t);
 			currentAnim = animElement->Attribute("title");
@@ -191,6 +234,12 @@ public:
 			TiXmlElement *cut;
 			cut = animElement->FirstChildElement("cut");
 			int i = 0;
+			int curf = anim.currentFrame;
+			vector<FloatRect> tmpvc[4];
+			vector<FloatRect> tmpvcf[4];
+			tmpvc->reserve(0);
+			tmpvcf->reserve(0);
+			
 			while (cut)
 			{
 				int x = atoi(cut->Attribute("x"));
@@ -208,6 +257,10 @@ public:
 				//
 				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
 				//
+				/*anim.ColRect[cp::left].push_back(leftRect);
+				anim.ColRect[cp::up].push_back(upRect);
+				anim.ColRect[cp::right].push_back(rightRect);
+				anim.ColRect[cp::down].push_back(downRect);*/
 				anim.ColRect[cp::left].push_back(leftRect);
 				anim.ColRect[cp::up].push_back(upRect);
 				anim.ColRect[cp::right].push_back(rightRect);
@@ -217,11 +270,24 @@ public:
 				R = anim.frames_flip[i];
 				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
 				//
+				/*anim.ColRectFlip[cp::left].push_back(leftRect);
+				anim.ColRectFlip[cp::up].push_back(upRect);
+				anim.ColRectFlip[cp::right].push_back(rightRect);
+				anim.ColRectFlip[cp::down].push_back(downRect);*/
+				//
 				anim.ColRectFlip[cp::left].push_back(leftRect);
 				anim.ColRectFlip[cp::up].push_back(upRect);
 				anim.ColRectFlip[cp::right].push_back(rightRect);
-				anim.ColRectFlip[cp::down].push_back(downRect);
-				//
+				anim.ColRectFlip[cp::down].push_back(downRect); // массив фреймов
+			/*	tmpvcframes[0].push_back(tmpvc[0]); // массив
+				tmpvcframes[1].push_back(tmpvc[1]);
+				tmpvcframes[2].push_back(tmpvc[2]);
+				tmpvcframes[3].push_back(tmpvc[3]);
+				tmpvcframesf[0].push_back(tmpvcf[0]);
+				tmpvcframesf[1].push_back(tmpvcf[1]);
+				tmpvcframesf[2].push_back(tmpvcf[2]);
+				tmpvcframesf[3].push_back(tmpvcf[3]);*/
+				
 				i++;
 				cut = cut->NextSiblingElement("cut");
 			}
@@ -229,7 +295,22 @@ public:
 			anim.sprite.setOrigin(0, anim.frames[0].height);
 			//anim.sprite.setTexture(t);
 			animList[currentAnim] = anim;
+			
+			/*anim.ColRect[cp::left].push_back((tmpvc[cp::left]));
+			anim.ColRect[cp::up].push_back((tmpvc[cp::up]));
+			anim.ColRect[cp::right].push_back((tmpvc[cp::right]));
+			anim.ColRect[cp::down].push_back((tmpvc[cp::down]));
+			anim.ColRectFlip[cp::left].push_back((tmpvcf[cp::left]));
+			anim.ColRectFlip[cp::up].push_back((tmpvcf[cp::up]));
+			anim.ColRectFlip[cp::right].push_back((tmpvcf[cp::right]));
+			anim.ColRectFlip[cp::down].push_back((tmpvcf[cp::down]));*/
 
+			/*anim.ColRectFlip[cp::left][i][curf].push_back(tmpvcf[cp::left][curf]);
+			anim.ColRectFlip[cp::up][i][curf].push_back(tmpvcf[cp::left][curf]);
+			anim.ColRectFlip[cp::right][i][curf].push_back(tmpvcf[cp::left][curf]);
+			anim.ColRectFlip[cp::down][i][curf].push_back(tmpvcf[cp::left][curf]);*/
+			animList[currentAnim] = anim;
+			animList[currentAnim] = anim;
 			animElement = animElement->NextSiblingElement("animation");
 			
 			//cout << "Col_left: ";
@@ -241,9 +322,9 @@ public:
 			cout << "Col_down: ";
 			coutFloatRect(anim.Col_down);*/
 			//anim.sprite.setTexture(t);
+
 		}
-
-
+		
 	}
 
 	void set(std::string name)
