@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 #include <boost\math_fwd.hpp>
-#define coutFloatRect m_c_f_r
 using namespace std;
 using namespace sf;
 enum ColPoint
@@ -176,10 +175,15 @@ public:
 	void setPoints(IntRect R,FloatRect* leftRect,FloatRect* upRect,FloatRect* rightRect ,FloatRect* downRect)
 	{
 		
-		*leftRect = FloatRect(IntRect(0,int( R.height/ColPointDivide),int( R.width / 2), int((R.height - R.height / ColPointDivide))));
+		/**leftRect = FloatRect(IntRect(0,int( R.height/ColPointDivide),int( R.width / 2), int((R.height - R.height / ColPointDivide))));
 		*upRect = FloatRect(IntRect(int(R.width / ColPointDivide), 0, int(R.width- R.width / ColPointDivide), int(R.height / 2)));
 		*rightRect = FloatRect(IntRect(int(R.width/2), int(R.height / ColPointDivide), int((R.width / 2)), int(R.height - R.height / ColPointDivide)));
 		*downRect = FloatRect(IntRect(int(R.width / ColPointDivide), int((R.height/2)), int(R.width- R.width / ColPointDivide), int(R.height / 2)));
+		//*downRect = FloatRect(R.width / ColPointDivide, R.height, R.width -( R.width / ColPointDivide), -(R.height / 2));*/
+		*leftRect = FloatRect(0,R.height / ColPointDivide, R.width / 2, R.height - R.height / ColPointDivide);
+		*upRect = FloatRect(R.width / ColPointDivide, 0, R.width - R.width / ColPointDivide, R.height / 2);
+		*rightRect = FloatRect(R.width / 2, R.height / ColPointDivide, R.width / 2, R.height - R.height / ColPointDivide);
+		*downRect = FloatRect(R.width / ColPointDivide, R.height / 2, R.width - R.width / ColPointDivide, R.height / 2);
 		
 	}
 	//çàãðóçêà èç ôàéëà XML
@@ -235,10 +239,7 @@ public:
 			cut = animElement->FirstChildElement("cut");
 			int i = 0;
 			int curf = anim.currentFrame;
-			vector<FloatRect> tmpvc[4];
-			vector<FloatRect> tmpvcf[4];
-			tmpvc->reserve(0);
-			tmpvcf->reserve(0);
+			
 			
 			while (cut)
 			{
@@ -250,10 +251,10 @@ public:
 				anim.frames.push_back(IntRect(x, y, w, h));
 				auto R = anim.frames[i];
 				//
-				FloatRect leftRect;
-				FloatRect upRect;
-				FloatRect rightRect;
-				FloatRect downRect;
+				FloatRect leftRect,leftRectf;
+				FloatRect upRect,upRectf;
+				FloatRect rightRect,rightRectf;
+				FloatRect downRect, downRectf;
 				//
 				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
 				//
@@ -268,17 +269,18 @@ public:
 				//
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
 				R = anim.frames_flip[i];
-				setPoints(R, &leftRect, &upRect, &rightRect, &downRect);
+				setPoints(R, &leftRectf, &upRectf, &rightRectf, &downRectf);
 				//
 				/*anim.ColRectFlip[cp::left].push_back(leftRect);
 				anim.ColRectFlip[cp::up].push_back(upRect);
 				anim.ColRectFlip[cp::right].push_back(rightRect);
 				anim.ColRectFlip[cp::down].push_back(downRect);*/
 				//
-				anim.ColRectFlip[cp::left].push_back(leftRect);
-				anim.ColRectFlip[cp::up].push_back(upRect);
-				anim.ColRectFlip[cp::right].push_back(rightRect);
-				anim.ColRectFlip[cp::down].push_back(downRect); // массив фреймов
+				anim.ColRectFlip[cp::left].push_back(leftRectf);
+				anim.ColRectFlip[cp::up].push_back(upRectf);
+				anim.ColRectFlip[cp::right].push_back(rightRectf);
+				anim.ColRectFlip[cp::down].push_back(downRectf);// массив фреймов
+				//anim.coutFloatRect(downRect);
 			/*	tmpvcframes[0].push_back(tmpvc[0]); // массив
 				tmpvcframes[1].push_back(tmpvc[1]);
 				tmpvcframes[2].push_back(tmpvc[2]);

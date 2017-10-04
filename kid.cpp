@@ -65,6 +65,10 @@ void kid::control()
 	passed[ColPoint::right] = false;
 	passed[ColPoint::up] = false;
 	passed[ColPoint::down] = false;
+	colDOWN = false;
+	colLEFT = false;
+	colUP = false;
+	colRIGHT = false;
 	vector<FloatRect> curColRect[4];
 	curColRect[0].reserve(0);
 	curColRect[1].reserve(0);
@@ -93,9 +97,9 @@ void kid::control()
 	}
 	//static RectangleShape RectDown;
 	RectDown.setFillColor(Color::Red);
-	auto R = curColRect[ColPoint::down][curf];
+	auto R = curColRect[ColPoint::left][curf];
 	//*downRect = FloatRect(0, R.height / 2, R.width, R.height / 2);
-	RectDown.setPosition(( kidentity->GetX() - kidentity->anim.animList[anim.currentAnim].frames[anim.animList[anim.currentAnim].currentFrame].width /2 ), kidentity->GetY() + R.height /2 );
+	RectDown.setPosition(kidentity->GetX() - R.width / 2, kidentity->GetY() + kidentity->anim.animList[anim.currentAnim].frames[anim.animList[anim.currentAnim].currentFrame].height / 2);
 	RectDown.setSize(Vector2f(R.width,R.height));
 //	coutFloatRect2(R);
 	m_engine->AddSprite(&RectDown, 3);
@@ -104,7 +108,7 @@ void kid::control()
 	try {
 		for each (Block bl in m_engine->MapBlocks)
 		{
-			
+			FloatRect blrect = bl.sprite.getLocalBounds();
 			//auto B = bl.sprite.getLocalBounds();
 			
 			//RectangleShape colupshape(Vector2f(curAnim.Col_up.width,curAnim.Col_up.height));
@@ -113,11 +117,11 @@ void kid::control()
 			Vector2f mtv;
 			if (m_engine->m_math.sat_test(bl.sprite, kidspr, &mtv))
 			{
-				//coutMTV(mtv);
+		//		coutMTV(mtv);
 				if (!passed[ColPoint::up])
 				{
 
-					if (curColRect[ColPoint::up].at(curf).contains(mtv))
+					if (curColRect[ColPoint::up].at(curf).intersects(blrect))
 					{
 						/*setPos(
 							Vector2f(
@@ -130,7 +134,7 @@ void kid::control()
 				}
 				if (!passed[ColPoint::left])
 				{
-					if (curColRect[ColPoint::left].at(curf).contains(mtv))
+					if (curColRect[ColPoint::left].at(curf).intersects(blrect))
 					{
 						//cout << "COLLEFT" << endl;
 						colLEFT = true;
@@ -144,7 +148,7 @@ void kid::control()
 				}
 				if (!passed[ColPoint::right])
 				{
-					if (curColRect[ColPoint::right].at(curf).contains(mtv))
+					if (curColRect[ColPoint::right].at(curf).intersects(blrect))
 					{
 						colRIGHT = true;
 						passed[ColPoint::right] = true;
@@ -154,7 +158,7 @@ void kid::control()
 				}
 				if (!passed[ColPoint::down])
 				{
-					if (curColRect[ColPoint::down].at(curf).contains(mtv))
+					if (curColRect[ColPoint::down].at(curf).intersects(blrect))
 					{
 						//	cout << "COL DOWN" << endl;
 						colDOWN = true;
