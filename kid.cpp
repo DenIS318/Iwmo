@@ -95,17 +95,9 @@ void kid::control()
 		curColRect[2] = anim.animList[anim.currentAnim].ColRectFlip[2];
 		curColRect[3] = anim.animList[anim.currentAnim].ColRectFlip[3];
 	}
-	//static RectangleShape RectDown;
-	RectDown.setFillColor(Color::Red);
-	auto R = curColRect[ColPoint::left][curf];
-	//*downRect = FloatRect(0, R.height / 2, R.width, R.height / 2);
-	RectDown.setPosition(kidentity->GetX() - R.width / 2, kidentity->GetY() + kidentity->anim.animList[anim.currentAnim].frames[anim.animList[anim.currentAnim].currentFrame].height / 2);
-	RectDown.setSize(Vector2f(R.width,R.height));
-//	coutFloatRect2(R);
-	m_engine->AddSprite(&RectDown, 3);
+
 	Sprite kidspr = *kidentity->anim.getSprite();
-	//auto POS = GetPos();
-	try {
+	
 		for each (Block bl in m_engine->MapBlocks)
 		{
 			FloatRect blrect = bl.sprite.getLocalBounds();
@@ -117,16 +109,17 @@ void kid::control()
 			Vector2f mtv;
 			if (m_engine->m_math.sat_test(bl.sprite, kidspr, &mtv))
 			{
+				FloatRect mtvrect(mtv.x, mtv.y, blrect.width-mtv.x, blrect.height-mtv.y);
 		//		coutMTV(mtv);
 				if (!passed[ColPoint::up])
 				{
 
-					if (curColRect[ColPoint::up].at(curf).intersects(blrect))
+					if (mtvrect.intersects(curColRect[ColPoint::up].at(curf)))
 					{
-						/*setPos(
+						setPos(
 							Vector2f(
 								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
-							));*/
+							));
 						colUP = true;
 						passed[ColPoint::up] = true;
 						
@@ -134,23 +127,30 @@ void kid::control()
 				}
 				if (!passed[ColPoint::left])
 				{
-					if (curColRect[ColPoint::left].at(curf).intersects(blrect))
+					if (mtvrect.intersects(curColRect[ColPoint::left].at(curf)))
 					{
 						//cout << "COLLEFT" << endl;
 						colLEFT = true;
-						/*setPos(
+						setPos(
 							Vector2f(
-								kidentity->GetX(), bl.sprite.getPosition().y - kidentity->anim.getSprite()->getOrigin().y
-							));*/
+								bl.sprite.getPosition().x - kidentity->anim.getSprite()->getOrigin().x, kidentity->GetY()
+							));
 						passed[ColPoint::left] = true;
-						
+						/*cout << "MTVRECT = ";
+						anim.animList[anim.currentAnim].coutFloatRect(mtvrect);
+						cout << "CurColRect = ";
+						anim.animList[anim.currentAnim].coutFloatRect(curColRect[cp::left].at(curf));*/
 					}
 				}
 				if (!passed[ColPoint::right])
 				{
-					if (curColRect[ColPoint::right].at(curf).intersects(blrect))
+					if (mtvrect.intersects(curColRect[ColPoint::right].at(curf)))
 					{
 						colRIGHT = true;
+						setPos(
+							Vector2f(
+								bl.sprite.getPosition().x - kidentity->anim.getSprite()->getOrigin().x, kidentity->GetY()
+							));
 						passed[ColPoint::right] = true;
 						//cout << "COLRIGHT" << endl;
 						
@@ -158,7 +158,7 @@ void kid::control()
 				}
 				if (!passed[ColPoint::down])
 				{
-					if (curColRect[ColPoint::down].at(curf).intersects(blrect))
+					if (mtvrect.intersects(curColRect[ColPoint::down].at(curf)))
 					{
 						//	cout << "COL DOWN" << endl;
 						colDOWN = true;
@@ -261,12 +261,7 @@ void kid::control()
 			kidentity->m_move(0, SpeedY);
 			//cout << "fall move" << endl;
 		}
-	}
-	 
-	 catch (const std::length_error& oor) {
-		 std::cerr << "Length error: " << oor.what() << '\n';
-	 }
-	 coutkidcol(colLEFT, colRIGHT, colDOWN, colUP);
+	
 	 //delete [] passed;
 	 //passed = nullptr;
 }

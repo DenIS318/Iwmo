@@ -175,13 +175,17 @@ public:
 	void setPoints(IntRect R,FloatRect* leftRect,FloatRect* upRect,FloatRect* rightRect ,FloatRect* downRect)
 	{
 		
-		/**leftRect = FloatRect(IntRect(0,int( R.height/ColPointDivide),int( R.width / 2), int((R.height - R.height / ColPointDivide))));
-		*upRect = FloatRect(IntRect(int(R.width / ColPointDivide), 0, int(R.width- R.width / ColPointDivide), int(R.height / 2)));
-		*rightRect = FloatRect(IntRect(int(R.width/2), int(R.height / ColPointDivide), int((R.width / 2)), int(R.height - R.height / ColPointDivide)));
-		*downRect = FloatRect(IntRect(int(R.width / ColPointDivide), int((R.height/2)), int(R.width- R.width / ColPointDivide), int(R.height / 2)));
-		//*downRect = FloatRect(R.width / ColPointDivide, R.height, R.width -( R.width / ColPointDivide), -(R.height / 2));*/
-		*leftRect = FloatRect(0,R.height / ColPointDivide, R.width / 2, R.height - R.height / ColPointDivide);
-		*upRect = FloatRect(R.width / ColPointDivide, 0, R.width - R.width / ColPointDivide, R.height / 2);
+		
+		*leftRect = FloatRect(
+			0,
+			R.height / ColPointDivide,
+			R.width / 2,
+			R.height - R.height / ColPointDivide
+		);
+		*upRect = FloatRect(R.width / ColPointDivide,
+			0,
+			R.width - R.width / ColPointDivide,
+			R.height / 2);
 		*rightRect = FloatRect(R.width / 2, R.height / ColPointDivide, R.width / 2, R.height - R.height / ColPointDivide);
 		*downRect = FloatRect(R.width / ColPointDivide, R.height / 2, R.width - R.width / ColPointDivide, R.height / 2);
 		
