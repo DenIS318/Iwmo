@@ -10,28 +10,27 @@
 #include "Collision.h"
 class kid : public iwmoEntity
 {
-#define cp ÑolPoint
 public:
-	//kid();
-	//	~kid();
-
+	kid();
 	/*
 	Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
 	*/
 	void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine);
-	//TODO 5
-	void MGetEvent(Event event);
 	void control();
 	Engine* m_engine;
 	bool grounded = false;
-	//void SetHandler(GameHandler*);
-	//iwmoEntity* entity = iwmoEntity::GetBase();
-	//DerivedType * m_derivedType = dynamic_cast<DerivedType*>(&m_baseType);
 	iwmoEntity* GetEntity();
-
+	int jumpcount = 0;
+	Sound jumps;
+	Sound doublejumps;
+	Sound deaths;
+	Sound fires;
+	void MGetEvent(Event event);
+	Vector2f vel;
+	const float MAXVEL_Y = 140;
 private:
 	void Col();
-	 RectangleShape RectDown;
+	
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 
 };

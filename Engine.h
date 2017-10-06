@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <thread>  
 #include <iostream>
 #include <vector> 
@@ -94,8 +95,13 @@ public:
 	vector<vector<iwmoEntity*>>& GetEntities();
 	vector<Block> MapBlocks;
 	Math m_math;
+	bool LoadSound(string name,string buffername);
+	void AddSoundBuffer(string name);
+	map<string, sf::SoundBuffer>* buflist();
+	
+	
 private:
-
+	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;
 	const int maxlayersize = 1;
 	vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);
 	vector<vector<iwmoEntity*>> layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);

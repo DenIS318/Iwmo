@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 //#include "Player.h"
 #include "tmx\Log.hpp"
+
 using namespace boost::filesystem;
 using namespace std;
 using namespace sf;
@@ -64,6 +65,7 @@ public:
 	map<string,Texture*>* GetBlockList();
 	void AddIwmoBlock(string name);
 private:
+	void LS();
 	void InitIwmoBlocks();
 	TiXmlDocument kidXML;
 	TiXmlDocument LevelXML;

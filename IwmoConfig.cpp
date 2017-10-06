@@ -8,5 +8,6 @@ namespace IV {
 	std::string but = "button_";
 	bool debug = true;
 	unsigned short port = 25565;
+	int GRAVITY = 1;
 }
 

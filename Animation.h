@@ -8,69 +8,23 @@
 #include <boost\math_fwd.hpp>
 using namespace std;
 using namespace sf;
-enum ColPoint
-{
-	left,
-	up,
-	right,
-	down
-};
-const float ColPointDivide = 10;
-#define cp ColPoint
-
 class Animation
 {
 
 public:
-
-	/*FloatRect
-		Col_up,
-		Col_down,
-		Col_right,
-		Col_left
-		;*/
-	/*
-	ПОИНТ
-	АНИМАЦИЯ
-	ФРЕЙМЫ
-	*/
 	std::vector<IntRect> frames;
 	std::vector<IntRect> frames_flip;
 	float currentFrame, speed;
-	bool loop, flip, isPlaying;   // loop ïîêàçâàåò çàöèêëåíà ëè àíèìàöèÿ. Íàïðèìåð àíèìàöèÿ âçðûâà äîëæíà ïðîèãðàòüñÿ îäèí ðàç è îñòàíîâèòüñÿ, loop=false
+	bool loop, flip, isPlaying;  
 	Sprite sprite;
 
 	Animation()
 	{
-		/*frames.clear();
-		frames_flip.clear();
-		frames.reserve(0);
-		frames_flip.reserve(0);*/
 
 		currentFrame = 0;
 		isPlaying = true;
 		flip = false;
 		loop = true;
-		
-
-		
-	
-
-		
-		/*
-		АНИМАЦИЯ
-		ФРЕЙМЫ
-		*/
-		/*vector<vector<FloatRect>> tempvec;
-		tempvec.reserve(0);
-		ColRect[0].push_back(tempvec);
-		ColRect[1].push_back(tempvec);
-		ColRect[2].push_back(tempvec);
-		ColRect[3].push_back(tempvec);
-		ColRectFlip[0].push_back(tempvec);
-		ColRectFlip[1].push_back(tempvec);
-		ColRectFlip[2].push_back(tempvec);
-		ColRectFlip[3].push_back(tempvec);*/
 	}
 	bool isFlip()
 	{
@@ -92,8 +46,6 @@ public:
 		}
 
 		int i = currentFrame;
-		//cout << "i = " << i << endl;
-		//cout << "left = " << frames[i].left << endl;
 		if (i < frames.size())
 		{
 			sprite.setTextureRect(frames[i]);
@@ -103,9 +55,6 @@ public:
 			}
 			if (flip) {
 				sprite.setTextureRect(frames_flip[i]);
-				//FloatRect boundss = sprite.getGlobalBounds();
-				//fsprite.setOrigin(boundss);
-				//sprite.setOrigin(frames_flip[currentFrame].width / 2, frames_flip[currentFrame].height / 2);
 			}
 		}
 
@@ -146,7 +95,7 @@ public:
 	{
 		return &(animList[currentAnim].sprite);
 	}
-	//ñîçäàíèå àíèìàöèé âðó÷íóþ
+	//создание вручную
 	void create(std::string name, Texture &texture, int x, int y, int w, int h, int count, float speed, int step = 0, bool Loop = true)
 	{
 		Animation a;
@@ -164,7 +113,7 @@ public:
 		currentAnim = name;
 	}
 
-	//çàãðóçêà èç ôàéëà XML
+	//загрузка из XML (рекомендованно)
 	void loadFromXML(std::string fileName, Texture* t)
 	{
 
@@ -180,60 +129,25 @@ public:
 
 		TiXmlElement *animElement;
 		animElement = head->FirstChildElement("animation");
-		/*std::stringstream ss;
-		ss << std::hex << (head->Attribute("transparentColor"));
-		Uint32 colorkey;
-		ss >> colorkey;
-		Uint8 result[3];
-
-		result[0] = (colorkey & 0x000000ff);
-		result[1] = (colorkey & 0x0000ff00) >> 8;
-		result[2] = (colorkey & 0x00ff0000) >> 16;
-
-		sf::Color colorr(result[0], result[1], result[2], 255);
-		//cout << colorkey << endl;
-		Image img = t->copyToImage();
-
-		img.createMaskFromColor(colorr);
-
-		t->loadFromImage(img);
-		*/
-
-		
-
 		while (animElement)
 		{
-
-			
 			Animation anim;
-			//anim.sprite.setTexture(t);
 			currentAnim = animElement->Attribute("title");
 			int delay = atoi(animElement->Attribute("delay"));
 			anim.speed = (1.0 / delay)*0.25;
 			anim.sprite.setTexture(*t);
-			//cout << anim.sprite.getColor().toInteger() << endl;
-			//anim.sprite.getColor().Transparent = colorr;
 			TiXmlElement *cut;
 			cut = animElement->FirstChildElement("cut");
-			int i = 0;
-			int curf = anim.currentFrame;
-			
-			
 			while (cut)
 			{
 				int x = atoi(cut->Attribute("x"));
 				int y = atoi(cut->Attribute("y"));
 				int w = atoi(cut->Attribute("w"));
 				int h = atoi(cut->Attribute("h"));
-				//
 				anim.frames.push_back(IntRect(x, y, w, h));
-				//
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
-				
-				i++;
 				cut = cut->NextSiblingElement("cut");
 			}
-
 			anim.sprite.setOrigin(0, anim.frames[0].height);
 			animList[currentAnim] = anim;
 			animElement = animElement->NextSiblingElement("animation");

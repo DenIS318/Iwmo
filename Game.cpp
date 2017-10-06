@@ -14,6 +14,7 @@ void Game::AddIwmoBlock(string name)
 	Texture* texture = TextureManager::loadTexture(name, m_res+name);
 	IwmoBlocks.insert(std::pair<string, Texture*>(name, texture));
 }
+
 Block Game::CreateBlockByName(string name)
 {
 	for (auto it = IwmoBlocks.begin(); it != IwmoBlocks.end(); ++it)
@@ -123,6 +124,17 @@ View* Game::GetCam()
 {
 	return &camera;
 }
+void Game::LS()
+{
+	m_engine->AddSoundBuffer("kidjump");
+	m_engine->LoadSound("jump1.ogg", "kidjump");
+	m_engine->AddSoundBuffer("kiddoublejump");
+	m_engine->LoadSound("jump2.ogg", "kiddoublejump");
+	m_engine->AddSoundBuffer("kiddeath");
+	m_engine->LoadSound("death.wav", "kiddeath");
+	m_engine->AddSoundBuffer("kidfire");
+	m_engine->LoadSound("fire.wav", "kidfire");
+}
 void Game::StartGame(Engine* engine)
 {
 
@@ -137,6 +149,8 @@ void Game::StartGame(Engine* engine)
 	engine->SetCam(&camera);
 	eventhandler = new GameHandler(this);
 	instanceEH = eventhandler;
+	
+	
 	cout << "Game started!" << endl;
 
 	if (debug)
@@ -175,6 +189,7 @@ Game::Game(Engine* engine, RenderWindow* wind)
 	{
 		cout << "Kid spritesheet loaded" << endl;
 	}
+	LS();
 	static kid mykid;
 	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine);
 	//mykid.SettingHandler((GameHandler*)eventhandler);
@@ -188,31 +203,6 @@ Game::Game(Engine* engine, RenderWindow* wind)
 		
 		m_engine->AddBlock(Block(wall, Vector2f(0,3200) + offset));
 	}
-	
-	//
-	/*m_engine->LoadMap("map.tmx");
-	m_engine->GetMap()->getLayers()[2].visible = false;
-	const auto& layers = m_engine->GetMap()->getLayers();
-	for (const auto& layer : layers)
-	{
-
-		if (layer.name == "objects")
-		{
-			for (const auto& object : layer.objects)
-			{
-
-				if (object.getName() == "spawn")
-				{
-
-
-					mykid.setPos(object.getPosition());
-				}
-			}
-		}
-	}*/
-	
-	//
-
 	m_engine->gamestarted = true;
 	//
 	StartGame(m_engine);

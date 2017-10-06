@@ -1,32 +1,12 @@
 #include "kid.h"
 using namespace tmx;
-#define cp ColPoint
-/*kid::kid()
-{
-}*/
-
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
 }
-void coutMTV(Vector2f mtv)
+kid::kid()
 {
-	cout << "MTV = " << mtv.x << ", " << mtv.y << endl;
-}
-string checkbol(bool b)
-{
-	if (b)
-	{
-		return ("true");
-	}
-	else
-	{
-		return ("false");
-	}
-}
-void coutFloatRect2(FloatRect R)
-{
-	cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
+	
 }
 void kid::Col()
 {
@@ -65,7 +45,11 @@ void kid::Col()
 
 			//	cout << "fall" << endl;
 		}
-		kidentity->m_move(0, SpeedY);
+		if (kidentity->state != jump)
+		{
+			kidentity->m_move(0, SpeedY);
+			
+		}
 	}
 }
 void kid::control()
@@ -91,10 +75,7 @@ void kid::control()
 	
 		for each (Block bl in m_engine->MapBlocks)
 		{
-			FloatRect blrect = bl.sprite.getGlobalBounds();
-			FloatRect kidrect = kidentity->anim.getSprite()->getGlobalBounds();
 			Vector2f mtv;
-			
 			if (m_engine->m_math.sat_test(bl.sprite, *kidspr, &mtv))
 			{
 				kidspr->move(mtv);
@@ -103,9 +84,8 @@ void kid::control()
 					grounded = true;
 					//cout << "grounded" << endl;
 					m_p = true;
+					jumpcount = 0;
 				}
-				
-
 			}
 			else
 			{
@@ -138,22 +118,70 @@ void kid::control()
 				kidentity->anim.play("walk");
 				kidentity->state = walk;
 			}
-
-
 		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+		{
+			if (kidentity->state == jump)
+			{
 
-	
-	 //delete [] passed;
-	 //passed = nullptr;
+				if (vel.y < MAXVEL_Y)
+				{
+					vel.y = vel.y + GRAVITY;
+				}
+				else
+				{
+					vel.y = 0;
+					kidentity->state = fall;
+					kidentity->anim.play("fall");
+				}
+				cout << vel.y << endl;
+				kidentity->m_move(0, -SpeedY + vel.y);
+			}
+			else
+			{
+				vel.y = 0;
+			}
+		}
+		
+		
+}
+void kid::MGetEvent(Event event)
+{
+	if (event.type == Event::KeyPressed)
+	{
+		if (event.key.code == Keyboard::LShift)
+		{
+			if (jumpcount <= 1)
+			{
+
+				if (jumpcount == 0)
+				{
+					jumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+					jumps.play();
+
+				}
+				else if (jumpcount == 1)
+				{
+					doublejumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+					doublejumps.play();
+
+				}
+				jumpcount++;
+				grounded = false;
+				if (kidentity->state != jump)
+				{
+					kidentity->anim.play("jump");
+					kidentity->state = jump;
+
+				}
+			}
+		}
+	}
 }
 void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine)
 {
-	//kidentity = iwmoEntity();
 	kidentity->initEntit(filen, kidTexture);
-
 	kidentity->setPos(position);
-	//TODO 3
-	//kidentity->eng = new MyKidEngine();
 	kidentity->anim.animList["idle"].loop = true;
 	kidentity->anim.animList["walk"].loop = true;
 	kidentity->anim.animList["slide"].loop = true;
@@ -164,10 +192,9 @@ void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine
 	SpeedX = 70;
 	SpeedY = 70;
 	m_engine = engine;
-	
-	
-	
-}
-void kid::MGetEvent(Event event)
-{
+	map<string, SoundBuffer>* buflist = m_engine->buflist();
+	jumps.setBuffer(buflist->at("kidjump"));
+	doublejumps.setBuffer(buflist->at("kiddoublejump"));
+	deaths.setBuffer(buflist->at("kiddeath"));
+	fires.setBuffer(buflist->at("kidfire"));
 }

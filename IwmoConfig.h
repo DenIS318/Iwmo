@@ -10,5 +10,6 @@ namespace IV {
 	extern std::string but;
 	extern bool debug;
 	extern unsigned short port;
+	extern int GRAVITY;
 }
 

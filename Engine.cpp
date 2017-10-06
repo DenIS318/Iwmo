@@ -1,17 +1,34 @@
 ﻿#include "Engine.h"
-
-//using namespace IwmoEngine;
 static tmx::MapLoader m_map("resources/");
+const string m_spath = "resources/sounds/";
 float fps;
 bool CameraSetted = false;
 View* CamPointer;
+void Engine::AddSoundBuffer(string name)
+{
+	bufferlist->insert(pair<string,SoundBuffer>(name,SoundBuffer()));
+}
+map<string, sf::SoundBuffer>* Engine::buflist()
+{
+	return bufferlist;
+}
+bool Engine::LoadSound(string name,string buffername)
+{
+	
+	if (bufferlist->find(name) == bufferlist->end()) {
+		return false;
+	}
+	else {
+		if (!bufferlist->at(buffername).loadFromFile(m_spath + name))
+		{
+			cout << "'" << name << "'" << " not loaded!!!" << endl;
+			return false;
+		}
+	}
+	return true;
+}
 void Engine::RemoveAll()
 {
-	/*for (unsigned int i = 0; i < Engine::layerr.size(); i++)
-	{
-	Engine::layerr[i].clear();
-	}*/
-
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
 }
