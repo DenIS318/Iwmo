@@ -23,17 +23,14 @@ public:
 	void MGetEvent(Event event);
 	void control();
 	Engine* m_engine;
-	bool grounded = true;
-	bool colUP,
-		colDOWN,
-		colRIGHT,
-		colLEFT;
+	bool grounded = false;
 	//void SetHandler(GameHandler*);
 	//iwmoEntity* entity = iwmoEntity::GetBase();
 	//DerivedType * m_derivedType = dynamic_cast<DerivedType*>(&m_baseType);
 	iwmoEntity* GetEntity();
 
 private:
+	void Col();
 	 RectangleShape RectDown;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 
