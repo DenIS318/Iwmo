@@ -27,12 +27,12 @@ class iwmoEntity
 public:
 	iwmoEntity();
 	void setPos(Vector2f);
-	void m_move(int, int);
+	void m_move(float, float);
 	void initEntit(std::string fileName, Texture* t);
 	~iwmoEntity();
 	void draw(RenderWindow*);
-	int GetX();
-	int GetY();
+	float GetX();
+	float GetY();
 	Vector2f GetPos();
 	AnimationManager anim;
 	virtual void MGetEvent(Event);
@@ -44,12 +44,9 @@ public:
 	EntityState state = unknown;
 	void updatetime(float t);
 	float time=0.0;
-	//TODO 2
-	//MyEntityEngine* eng = new MyEntityEngine;
-	//void SettingHandler(GameHandler* h);
 private:
-	int x = 0;
-	int y = 0;
+	float x = 0;
+	float y = 0;
 
 };
 

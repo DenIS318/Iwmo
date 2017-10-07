@@ -13,7 +13,6 @@
 #include "Game.h"
 using namespace std;
 using namespace myState;
-using namespace IV;
 CSource* source = new CSource;
 
 /*const unsigned short maxPlayerNumber = 20;

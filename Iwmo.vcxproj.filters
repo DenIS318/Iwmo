@@ -37,7 +37,6 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="kid.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="tinyxml\tinystr.cpp" />
     <ClCompile Include="tinyxml\tinyxml.cpp" />
     <ClCompile Include="tinyxml\tinyxmlerror.cpp" />
@@ -46,6 +45,7 @@
     <ClCompile Include="IwmoMath.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="IwmoConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />

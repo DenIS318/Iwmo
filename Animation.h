@@ -42,20 +42,26 @@ public:
 
 		if (currentFrame > frames.size()) {
 			currentFrame -= frames.size();
-			if (!loop) { isPlaying = false; return; }
+			if (!loop) { 
+				isPlaying = false;
+				return;
+			}
 		}
 
 		int i = currentFrame;
 		if (i < frames.size())
 		{
-			sprite.setTextureRect(frames[i]);
+			
 			if (!flip)
 			{
-				sprite.setOrigin(frames[currentFrame].width / 2, frames[currentFrame].height / 2);
+				sprite.setTextureRect(frames[i]);
+				
 			}
 			if (flip) {
 				sprite.setTextureRect(frames_flip[i]);
+				
 			}
+			sprite.setOrigin(frames[i].width / 2, frames[i].height / 2);
 		}
 
 	}
@@ -129,6 +135,7 @@ public:
 
 		TiXmlElement *animElement;
 		animElement = head->FirstChildElement("animation");
+		
 		while (animElement)
 		{
 			Animation anim;
@@ -147,9 +154,11 @@ public:
 				anim.frames.push_back(IntRect(x, y, w, h));
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
 				cut = cut->NextSiblingElement("cut");
+				
+				
 			}
-			anim.sprite.setOrigin(0, anim.frames[0].height);
 			animList[currentAnim] = anim;
+			
 			animElement = animElement->NextSiblingElement("animation");
 		}
 		
@@ -158,16 +167,22 @@ public:
 	void set(std::string name)
 	{
 		currentAnim = name;
-		animList[currentAnim].flip = 0;
+		
 	}
 
-	void draw(RenderWindow *window, int x, int y)
+	void draw(RenderWindow *window, float x, float y)
 	{
 		animList[currentAnim].sprite.setPosition(x, y);
 		window->draw(animList[currentAnim].sprite);
 	}
 
-	void flip(bool b = 1) { animList[currentAnim].flip = b; }
+	void flip(bool b) { 
+		typedef std::map<std::string, Animation>::iterator it_type;
+		for (it_type iterator = animList.begin(); iterator != animList.end(); iterator++) {
+			iterator->second.flip = b;
+		}
+		
+	}
 
 	void tick(float time) { animList[currentAnim].tick(time); }
 	bool isFlip()

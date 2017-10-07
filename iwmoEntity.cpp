@@ -45,7 +45,7 @@ void iwmoEntity::MGetEvent(Event event)
 	
 	//cout << "fukyou";
 }
-void iwmoEntity::m_move(int xm, int ym)
+void iwmoEntity::m_move(float xm, float ym)
 {
 	//cout << time << endl;
 	x += (xm*30)/1000;
@@ -56,11 +56,11 @@ iwmoEntity::~iwmoEntity()
 {
 	//cout << "entity destructor" << endl;
 }
-int iwmoEntity::GetX()
+float iwmoEntity::GetX()
 {
 	return x;
 }
-int iwmoEntity::GetY()
+float iwmoEntity::GetY()
 {
 	return y;
 }

@@ -17,7 +17,6 @@ using namespace boost::filesystem;
 using namespace std;
 using namespace sf;
 using namespace tmx;
-using namespace IV;
 using namespace Iwmo;
 class Game
 {

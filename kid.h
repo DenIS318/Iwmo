@@ -27,10 +27,10 @@ public:
 	Sound fires;
 	void MGetEvent(Event event);
 	Vector2f vel;
-	const float MAXVEL_Y = 140;
+	int JumpPower = -230;
 private:
 	void Col();
-	
+	bool m_p = false;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 
 };

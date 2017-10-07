@@ -15,7 +15,7 @@ map<string, sf::SoundBuffer>* Engine::buflist()
 bool Engine::LoadSound(string name,string buffername)
 {
 	
-	if (bufferlist->find(name) == bufferlist->end()) {
+	if (bufferlist->find(buffername) == bufferlist->end()) {
 		return false;
 	}
 	else {

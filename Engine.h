@@ -14,7 +14,6 @@
 #include "IwmoMath.h"
 using namespace sf;
 using namespace std;
-using namespace IV;
 using namespace tmx;
 using namespace Iwmo;
 //using namespace IwmoEngine;

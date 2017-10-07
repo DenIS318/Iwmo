@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 //CONFIG
-namespace IV {
+namespace Iwmo {
 	extern int Width;
 	extern int Height;
 	extern std::string WindowName;
@@ -12,4 +12,3 @@ namespace IV {
 	extern unsigned short port;
 	extern int GRAVITY;
 }
-

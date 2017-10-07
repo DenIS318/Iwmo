@@ -1,5 +1,5 @@
 #include <iostream>
-namespace IV {
+namespace Iwmo {
 	int Width = 800;
 	int Height = 600;
 	std::string WindowName = "I wanna maker online";
@@ -8,6 +8,5 @@ namespace IV {
 	std::string but = "button_";
 	bool debug = true;
 	unsigned short port = 25565;
-	int GRAVITY = 1;
+	int GRAVITY = 10;
 }
-

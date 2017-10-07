@@ -149,7 +149,7 @@ void Game::StartGame(Engine* engine)
 	engine->SetCam(&camera);
 	eventhandler = new GameHandler(this);
 	instanceEH = eventhandler;
-	
+	engine->GetWindow()->setKeyRepeatEnabled(false);
 	
 	cout << "Game started!" << endl;
 
