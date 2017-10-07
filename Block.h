@@ -8,6 +8,12 @@ namespace Iwmo {
 	class Block
 	{
 	public:
+		enum BlockType
+		{
+			solid,
+			decoration,
+			killing
+		};
 		Block(string str);
 		Block(Texture* texture,int x,int y);
 		Block(Texture* texture, Vector2<int>  position);
@@ -15,6 +21,7 @@ namespace Iwmo {
 		void SetPos(Vector2f pos);
 		~Block();
 		Sprite sprite;
+		BlockType blocktype = solid;
 	private:
 		void AddToManager(string texturename);
 	};

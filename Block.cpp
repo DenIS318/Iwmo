@@ -14,6 +14,8 @@ namespace Iwmo {
 	{
 		AddToManager(str);
 		sprite.setTexture(*TextureManager::getTexture(str));
+		auto size = TextureManager::getTexture(str)->getSize();
+		sprite.setOrigin(size.x / 2, size.y / 2);
 	}
 	Block::Block( Texture* texture,int x,int y)
 	{

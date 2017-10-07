@@ -28,6 +28,8 @@ public:
 	void MGetEvent(Event event);
 	Vector2f vel;
 	int JumpPower = -230;
+	bool Alive = true;
+	void death();
 private:
 	void Col();
 	bool m_p = false;

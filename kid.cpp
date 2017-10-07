@@ -59,39 +59,58 @@ void kid::Col()
 		}
 	}
 }
+void kid::death()
+{
+	Alive = false;
+}
 void kid::control()
 {
-	
-	m_p = false;
-	Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
-	Vector2f mtv;
-	
-		for (vector<Block>::iterator bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)	
+	if (Alive)
+	{
+		m_p = false;
+		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
+		Vector2f mtv;
+		/*auto an = anim.getSprite();
+		auto ann = an->getLocalBounds();
+		int f = anim.animList[anim.currentAnim].currentFrame;
+		cout << "origin ";
+		cout << an->getOrigin().x << ", " << an->getOrigin().y << endl;
+		cout << "bounds ";
+		cout << ann.width << ", " <<ann.height << endl;*/
+		for (vector<Block>::iterator bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)
 		{
-			
+
 			if (!m_p)
 			{
 				if (m_engine->m_math.sat_test(*kidspr, bl->sprite, &mtv))
 				{
-					kidentity->setPos(kidentity->GetPos() + mtv);
-					//kidspr->setPosition(kidentity->GetPos());
-					//cout << mtv.x << endl;
-					if (mtv.y <= bl->sprite.getTexture()->getSize().y / 2 && mtv.x < 1)
+					if (bl->blocktype == Block::BlockType::solid)
 					{
-						grounded = true;
-						m_p = true;
-						vel.y = 0;
-						jumpcount = 0;
-					
+						kidentity->setPos(kidentity->GetPos() + mtv);
+						//cout << kidentity->anim.currentAnim << ", " << kidentity->anim.animList[kidentity->anim.currentAnim].currentFrame << endl;
+
+						//kidspr->setPosition(kidentity->GetPos());
+						//cout << mtv.x << endl;
+						if (mtv.y <= bl->sprite.getTexture()->getSize().y / (-2) && mtv.x < 1)
+						{
+							cout << "collided up " << kidentity->GetX() << ", " << kidentity->GetY() << endl;
+							cout << "mtv is " << mtv.x << ", " << mtv.y << endl;
+							grounded = true;
+							m_p = true;
+							vel.y = 0;
+							jumpcount = 0;
+							mtv = Vector2f(0, 0);
+						}
 					}
 				}
 			}
 		}
 		if (!m_p)
 		{
+			cout << "isnt ground " << kidentity->GetX() << ", " << kidentity->GetY() << endl;
 			grounded = false;
 		}
-	
+
 		if (kidentity->state == jump && !grounded)
 		{
 			if (vel.y < 0)
@@ -99,7 +118,7 @@ void kid::control()
 				vel.y += GRAVITY;
 				kidentity->m_move(0, vel.y);
 			}
-			
+
 			else
 			{
 				//мизерное замедление
@@ -122,17 +141,17 @@ void kid::control()
 					}
 				}
 			}
-			
-			
+
+
 
 		}
 		Col();
-		
+
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		{
 			kidentity->m_move(-SpeedX, 0);
 
-			
+
 			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
 			{
 				kidentity->anim.play("walk");
@@ -143,7 +162,7 @@ void kid::control()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 		{
 			kidentity->m_move(SpeedX, 0);
-		
+
 			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
 			{
 				kidentity->anim.play("walk");
@@ -159,8 +178,7 @@ void kid::control()
 			}
 			vel.y = 0;
 		}
-		
-		
+	}
 }
 void kid::MGetEvent(Event event)
 {
