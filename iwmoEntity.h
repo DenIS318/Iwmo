@@ -5,7 +5,7 @@
 #include "Animation.h"
 //#include "MyEntityEngine.h"
 #include "tinyxml\tinyxml.h"
-
+#include "MyListener.h"
 
 //#include "Game.h"
  // !GAME_H
@@ -16,6 +16,7 @@ enum EntityState {
 	fall,
 	slide,
 	channel,
+	death,
 	unknown
 };
 
@@ -44,9 +45,11 @@ public:
 	EntityState state = unknown;
 	void updatetime(float t);
 	float time=0.0;
+	void GetEventSource(CSource* sourc);
+	CSource* m_souc;
 private:
 	float x = 0;
 	float y = 0;
-
+	
 };
 

@@ -154,7 +154,7 @@ public:
 				anim.frames.push_back(IntRect(x, y, w, h));
 				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
 				cut = cut->NextSiblingElement("cut");
-				
+				//anim.sprite.setOrigin(0, anim.frames[0].height);
 				
 			}
 			animList[currentAnim] = anim;

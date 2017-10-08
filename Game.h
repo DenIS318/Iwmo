@@ -33,13 +33,10 @@ public:
 	/*
 	Initalizates games with engine.
 	*/
-	Game(Engine*, RenderWindow*);
+	Game(Engine*, RenderWindow*,CSource*);
 	~Game();
-	void StartGame(Engine* engine);
-	/*
-	Sending event source and handler to Game, yeap, perfect explanation
-	*/
-	void EventHandling(CSource* sourc);
+	void StartGame(Engine* engine,CSource*);
+	//void EventHandling(CSource* sourc);
 
 
 	virtual void m_hookEvent(CSource* pSource);
@@ -76,7 +73,7 @@ class GameHandler : public Game
 {
 
 public:
-
+	void OnCustomEvent(CustomEvent event);
 	GameHandler();
 	GameHandler(const Game*);
 	~GameHandler();

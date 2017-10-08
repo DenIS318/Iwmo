@@ -8,6 +8,8 @@
 #include "tmx\MapLayer.hpp"
 #include "tmx\MapObject.hpp"
 #include "Collision.h"
+
+using namespace Iwmo::Events;
 class kid : public iwmoEntity
 {
 public:
@@ -15,7 +17,7 @@ public:
 	/*
 	Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
 	*/
-	void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine);
+	void createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine,CSource* eventsource);
 	void control();
 	Engine* m_engine;
 	bool grounded = false;
@@ -30,8 +32,14 @@ public:
 	int JumpPower = -230;
 	bool Alive = true;
 	void death();
+	//bool IsMove = false;
+
 private:
+	//Vector2f LastPos;
+	void ProcessKeyboard(Event event);
+	//bool animchanged=false;
 	void Col();
+	void CheckState();
 	bool m_p = false;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 

@@ -220,5 +220,6 @@ void Engine::init(int Width, int Height, string title, short fm)
 
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
+	window.setSize(Vector2u(Width, Height));
 	//window.setVerticalSyncEnabled(true);
 }

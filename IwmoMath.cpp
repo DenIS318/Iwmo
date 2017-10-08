@@ -13,6 +13,33 @@ namespace Iwmo
 	Iwmo::Math::~Math()
 	{
 	}
+	/*bool Iwmo::Math::colTest(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f* out_mtv)
+	{
+		const sf::FloatRect &rectSp1 = sp1.getGlobalBounds();
+		const sf::FloatRect &rectSp2 = sp2.getGlobalBounds();
+		const sf::FloatRect &rectSp1Y = sp1.getGlobalBounds();
+		const sf::FloatRect &rectSp2Y = sp2.getGlobalBounds();
+		float proj_x, proj_y, overlap_x, overlap_y;
+
+		// test overlap in x axis
+		proj_x = std::max(rectSp1.left + rectSp1.width, rectSp2.left + rectSp2.width) - std::min(rectSp1.left, rectSp2.left);
+		if (proj_x < rectSp1.width + rectSp2.width) {
+				// calculate mtv in x
+				overlap_x = rectSp1.width + rectSp2.width - proj_x;
+		}
+		cout << rectSp1Y.height << ", " << rectSp2Y.top << endl;
+		if (rectSp1Y.height >= rectSp2Y.top)
+		{
+			cout << "colided" << endl;
+			out_mtv->x = overlap_x;
+			out_mtv->y = rectSp2Y.top - rectSp1Y.height;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}*/
 	bool Iwmo::Math::sat_test(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f *out_mtv) {
 		const sf::FloatRect &rectSp1 = sp1.getGlobalBounds();
 		const sf::FloatRect &rectSp2 = sp2.getGlobalBounds();

@@ -98,13 +98,13 @@ void Game::InitIwmoBlocks()
 
 }
 const Vector2f KidSpawn(50, 3100);
-void Game::EventHandling(CSource* sourc)
+/*void Game::EventHandling(CSource* sourc)
 {
 	m_ls = sourc;
 	instanceEH = dynamic_cast<Game*>(eventhandler);
 	instanceEH->m_hookEvent(m_ls);
 	__raise sourc->OnEvent(sf::Event());
-}
+}*/
 void Game::m_hookEvent(CSource* pSource)
 {
 	if (debug)
@@ -135,22 +135,21 @@ void Game::LS()
 	m_engine->AddSoundBuffer("kidfire");
 	m_engine->LoadSound("fire.wav", "kidfire");
 }
-void Game::StartGame(Engine* engine)
+void Game::StartGame(Engine* engine,CSource* source)
 {
-
-	for (int i = 0; i < 5; i++)
-	{
-		engine->AddLayer(i);
-	}
-
-	camera.setCenter(CAM_CENTER);
-	camera.setSize(CAM_SIZE);
-	window->setView(camera);
-	engine->SetCam(&camera);
 	eventhandler = new GameHandler(this);
 	instanceEH = eventhandler;
-	engine->GetWindow()->setKeyRepeatEnabled(false);
 	
+	m_ls = source;
+	instanceEH = dynamic_cast<Game*>(eventhandler);
+	instanceEH->m_hookEvent(m_ls);
+	__raise source->OnEvent(sf::Event());
+	static kid mykid;
+	auto lss = this->m_ls;
+	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine, lss);
+	m_engine->Addentity(&mykid, 0);
+	mykid.setPos(KidSpawn);
+	m_engine->gamestarted = true;
 	cout << "Game started!" << endl;
 
 	if (debug)
@@ -168,7 +167,7 @@ Game* Game::getGame()
 	return (Game*)this;
 
 }
-Game::Game(Engine* engine, RenderWindow* wind)
+Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
 	InitIwmoBlocks();
 	
@@ -190,11 +189,17 @@ Game::Game(Engine* engine, RenderWindow* wind)
 		cout << "Kid spritesheet loaded" << endl;
 	}
 	LS();
-	static kid mykid;
-	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine);
-	//mykid.SettingHandler((GameHandler*)eventhandler);
-	m_engine->Addentity(&mykid, 0);
-	mykid.setPos(KidSpawn);
+
+	for (int i = 0; i < 5; i++)
+	{
+		engine->AddLayer(i);
+	}
+
+	camera.setCenter(CAM_CENTER);
+	camera.setSize(CAM_SIZE);
+	window->setView(camera);
+	engine->SetCam(&camera);
+	engine->GetWindow()->setKeyRepeatEnabled(false);
 	Texture* wall = GetBlockTextureByName("wall.png");
 	for (int i = 0; i < 10; i++)
 	{
@@ -203,9 +208,10 @@ Game::Game(Engine* engine, RenderWindow* wind)
 		
 		m_engine->AddBlock(Block(wall, Vector2f(0,3200) + offset));
 	}
-	m_engine->gamestarted = true;
+
+
 	//
-	StartGame(m_engine);
+	StartGame(m_engine,source);
 }
 
 
@@ -220,6 +226,8 @@ GameHandler::GameHandler()
 GameHandler::GameHandler(const Game* geim)
 {
 	gameinstance = const_cast<Game*> (geim);
+	m_engine = gameinstance->m_engine;
+	//cout << "kek"<<endl;
 }
 GameHandler::~GameHandler()
 {
@@ -230,54 +238,77 @@ void GameHandler::m_hookEvent(CSource* pSource) {
 	cout << "Hooked! Called from GameHandler!" << endl;
 
 	__hook(&CSource::OnEvent, pSource, &GameHandler::OnEvent, this);
+	__hook(&CSource::OnCustomEvent, pSource, &GameHandler::OnCustomEvent, this);
 }
 
 void GameHandler::m_unhookEvent(CSource* pSource) {
 	__unhook(&CSource::OnEvent, pSource, &GameHandler::OnEvent);
 }
+void GameHandler::OnCustomEvent(CustomEvent event)
+{
+	switch (event.eventtype)
+	{
+	case Types::EntityMoveEvent:
+		cout << "EntityMoveEvent" << endl;
+		break;
+	}
+}
 void GameHandler::OnEvent(Event eventt)
 {
+	
 	event = eventt;
-	//cout << "0 BIETCH" << endl;
-	try {
-		vector<vector<iwmoEntity*>> entities = gameinstance->m_engine->GetEntities();
-		for (unsigned int i = 0; i < entities.size(); i++)
+	if (m_engine != NULL)
+	{
+		if (event.type == Event::Resized)
 		{
-			for (unsigned int i1 = 0; i1 <  entities.at(i).size(); i1++)
+			auto win = m_engine->GetWindow();
+			sf::Vector2u size = win->getSize();
+			win->setSize(size);
+
+			camera.setSize(size.x, size.y);
+		}
+		//cout << "0 BIETCH" << endl;
+		try {
+			vector<vector<iwmoEntity*>> entities = gameinstance->m_engine->GetEntities();
+			for (unsigned int i = 0; i < entities.size(); i++)
 			{
+				for (unsigned int i1 = 0; i1 < entities.at(i).size(); i1++)
 				{
+					{
 
-					entities.at(i).at(i1)->MGetEvent(eventt);
+						entities.at(i).at(i1)->MGetEvent(eventt);
+					}
+
 				}
-
 			}
 		}
-	}
-	catch (exception e)
-	{
-		cout << e.what() << endl;
-	}
-	if (debug)
-	{
-	}
-	if (event.type == sf::Event::KeyPressed)
-	{
-		if (event.key.code == sf::Keyboard::X)
+		catch (exception e)
 		{
+			cout << e.what() << endl;
+		}
 
-			if (debug)
+		if (debug)
+		{
+		}
+		if (event.type == sf::Event::KeyPressed)
+		{
+			if (event.key.code == sf::Keyboard::X)
 			{
-				int x = 0;
-				int y = 0;
-				cout << "Enter x" << endl;
-				cin >> x;
-				cout << "Enter y" << endl;
-				cin >> y;
-				Vector2f vec(x, y);
-				cout << "Camera centered to " << x << ", " << y << endl;
-				gameinstance->camera.setCenter(vec);
-				//cout << "Camera pointer in derived is %p" << camerapointer << endl;
-				cout << "And now camera centered to " << camerapointer->getCenter().x << ", " << camerapointer->getCenter().y << endl;
+
+				if (debug)
+				{
+					int x = 0;
+					int y = 0;
+					cout << "Enter x" << endl;
+					cin >> x;
+					cout << "Enter y" << endl;
+					cin >> y;
+					Vector2f vec(x, y);
+					cout << "Camera centered to " << x << ", " << y << endl;
+					gameinstance->camera.setCenter(vec);
+					//cout << "Camera pointer in derived is %p" << camerapointer << endl;
+					cout << "And now camera centered to " << camerapointer->getCenter().x << ", " << camerapointer->getCenter().y << endl;
+				}
 			}
 		}
 	}

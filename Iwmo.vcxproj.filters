@@ -69,6 +69,7 @@
     <ClInclude Include="IwmoMath.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="CustomEvents.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="maploader">

@@ -51,6 +51,10 @@ void iwmoEntity::m_move(float xm, float ym)
 	x += (xm*30)/1000;
 	y += (ym*30)/1000;
 	this->setPos(Vector2f(x, y));
+	EntityMoveEvent e;
+	e.eventtype = Types::EventTypes::EntityMoveEvent;
+	e.whichEntity = this;
+	__raise m_souc->OnCustomEvent(e);
 }
 iwmoEntity::~iwmoEntity()
 {
@@ -59,6 +63,12 @@ iwmoEntity::~iwmoEntity()
 float iwmoEntity::GetX()
 {
 	return x;
+}
+void iwmoEntity::GetEventSource(CSource* source)
+{
+	
+	//cout << "Entity hooked!" << endl;
+	m_souc = source;
 }
 float iwmoEntity::GetY()
 {

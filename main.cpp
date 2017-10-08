@@ -62,8 +62,7 @@ inline void beginbind(IpAddress address, RenderWindow* window)
 
 void startgame(Engine* engine, RenderWindow* window)
 {
-	static Game game(engine, window);
-	game.EventHandling(source);
+	static Game game(engine, window,source);
 
 }
 inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
