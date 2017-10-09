@@ -249,7 +249,7 @@ void GameHandler::OnCustomEvent(CustomEvent event)
 	switch (event.eventtype)
 	{
 	case Types::EntityMoveEvent:
-		cout << "EntityMoveEvent" << endl;
+	//	cout << "EntityMoveEvent" << endl;
 		break;
 	}
 }
@@ -277,6 +277,7 @@ void GameHandler::OnEvent(Event eventt)
 					{
 
 						entities.at(i).at(i1)->MGetEvent(eventt);
+						
 					}
 
 				}
@@ -290,7 +291,7 @@ void GameHandler::OnEvent(Event eventt)
 		if (debug)
 		{
 		}
-		if (event.type == sf::Event::KeyPressed)
+		/*if (event.type == sf::Event::KeyPressed)
 		{
 			if (event.key.code == sf::Keyboard::X)
 			{
@@ -310,6 +311,6 @@ void GameHandler::OnEvent(Event eventt)
 					cout << "And now camera centered to " << camerapointer->getCenter().x << ", " << camerapointer->getCenter().y << endl;
 				}
 			}
-		}
+		}*/
 	}
 }

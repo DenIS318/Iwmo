@@ -32,6 +32,7 @@ public:
 	int JumpPower = -230;
 	bool Alive = true;
 	void death();
+	bool JumpPassed = false;
 	//bool IsMove = false;
 
 private:

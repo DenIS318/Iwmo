@@ -194,8 +194,8 @@ void Engine::Render()
 			
 			{
 				//cout << this_thread::get_id() << " THREAD ID IN RENDER" << endl;
-				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 				Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
+				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 				Engine::layerrentity.at(i).at(i1)->control();
 				//cout << Engine::layerrentity.at(i).at(i1)->anim.currentAnim.at(0) << endl;
 				Engine::layerrentity.at(i).at(i1)->draw(&window);

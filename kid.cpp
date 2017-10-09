@@ -1,5 +1,6 @@
 #include "kid.h"
 using namespace tmx;
+const Vector2f koctil(0,1.1);
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
@@ -31,11 +32,12 @@ void kid::Col()
 				if (bl->blocktype == Block::BlockType::solid)
 				{
 					
-					cout << beforecol << endl;
+					//cout << beforecol << endl;
 					//cout << "kidpos " << kidentity->GetPos().y << endl;
-					kidentity->setPos(kidentity->GetPos() + mtv);
-					kidspr->setPosition(kidentity->GetPos());
-					cout << "mtv " << mtv.y << ", " << mtv.y << endl;
+					kidentity->setPos(kidentity->GetPos() + mtv + koctil);
+					//kidspr->setPosition(kidentity->GetPos() + mtv);
+					//kidspr->setPosition(kidentity->GetPos());
+					//cout << "mtv " << mtv.x << ", " << mtv.y << endl;
 					//cout << "kidposchanged " << kidentity->GetPos().y << endl;
 					//cout << "kid " << kidentity->GetPos().y + k<< endl;
 					//cout << "block "<< bl->sprite.getPosition().y << endl;
@@ -61,13 +63,48 @@ void kid::Col()
 	}
 	if (!m_p)
 	{
-		//	cout << "isnt ground " << kidentity->GetX() << ", " << kidentity->GetY() << endl;
+	//		cout << "isnt ground " << kidentity->GetX() << ", " << kidentity->GetY() << endl;
 		
 		grounded = false;
 	}
-	
-	if (kidentity->state == jump && !grounded)
+	else
 	{
+		//cout << "grounded " << kidentity->GetX() << ", " << kidentity->GetY() << endl;
+	}
+	if (JumpPassed)
+	{
+		JumpPassed = false;
+		if (jumpcount <= 1)
+		{
+
+			if (jumpcount == 0)
+			{
+				jumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+				jumps.play();
+				vel.y = JumpPower;
+
+			}
+			else if (jumpcount == 1)
+			{
+				doublejumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+				doublejumps.play();
+				vel.y = (JumpPower) * 0.8;
+				//cout << vel.y << endl;
+			}
+			jumpcount++;
+			grounded = false;
+			if (kidentity->state != jump)
+			{
+
+				kidentity->state = jump;
+
+			}
+		}
+	}
+	if (kidentity->state == jump)
+	{
+		//grounded = false;
+		//скорость отрицательная!
 		if (vel.y < 0)
 		{
 			vel.y += GRAVITY;
@@ -167,7 +204,12 @@ void kid::CheckState()
 			//kidentity->setPos(kidentity->GetPos() + Vector2f(0, -1));
 			break;
 		}*/
-		
+		/*if (anim.currentAnim == "fall")
+		{
+			cout << "ALERT FALL SWITCH" << endl;
+			anim.play("idle");
+			//kidentity->setPos(kidentity->GetPos() + Vector2f(0,2));
+		}*/
 		if (anim.currentAnim!= "idle")
 		{
 			anim.play("idle");
@@ -298,32 +340,7 @@ void kid::ProcessKeyboard(Event event)
 			}
 			if (event.key.code == Keyboard::LShift)
 			{
-				if (jumpcount <= 1)
-				{
-
-					if (jumpcount == 0)
-					{
-						jumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
-						jumps.play();
-						vel.y = JumpPower;
-
-					}
-					else if (jumpcount == 1)
-					{
-						doublejumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
-						doublejumps.play();
-						vel.y = (JumpPower) * 0.8;
-						//cout << vel.y << endl;
-					}
-					jumpcount++;
-					//grounded = false;
-					if (kidentity->state != jump)
-					{
-
-						kidentity->state = jump;
-
-					}
-				}
+				JumpPassed = true;
 			}
 		}
 	}
