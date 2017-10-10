@@ -53,6 +53,7 @@ void kid::Col()
 						grounded = true;
 						m_p = true;
 						vel.y = 0;
+						lshiftcounter = 0;
 						jumpcount = 0;
 						//mtv = Vector2f(0, 0);
 						
@@ -309,12 +310,59 @@ void kid::control()
 		}
 		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
 		{
-			if (!grounded && kidentity->state != fall)
+			if (!grounded)
 			{
-				kidentity->state = fall;
-	
+				if (vel.y < 0)
+				{
+					if (lshiftcounter < 2)
+					{
+						vel.y += GRAVITY;
+						kidentity->m_move(0, vel.y);
+						cout << vel.y << endl;
+						kidentity->state = jump;
+						lshiftcounter++;
+					}
+					else
+					{
+						state = fall;
+					}
+				}
+				
 			}
-			vel.y = 0;
+			/*if (!grounded && kidentity->state != fall)
+			{
+				kidentity->state == fall;
+			}
+			if (!grounded && kidentity->state == fall)
+			{
+				if (lshiftcounter == 0)
+				{
+					lshiftcounter = 10;
+				}
+				else
+				{
+					lshiftcounter++;
+				}
+				if (m_engine->m_math.InRange(lshiftcounter,10,13))
+				{
+					cout << "INRANGE" << endl;
+					vel.y += GRAVITY;
+					kidentity->m_move(0, vel.y);
+					cout << vel.y << endl;
+				}
+				else
+				{
+					vel.y = 0;
+					state = fall;
+					lshiftcounter = 0;
+				}
+				if (lshiftcounter > 15)
+				{
+					lshiftcounter = 0;
+				}
+			}*/
+			
+			
 		}
 	}
 	

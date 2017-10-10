@@ -37,6 +37,7 @@ public:
 
 private:
 	//Vector2f LastPos;
+	int lshiftcounter = 0;
 	void ProcessKeyboard(Event event);
 	//bool animchanged=false;
 	void Col();

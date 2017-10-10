@@ -15,7 +15,7 @@ public:
 	std::vector<IntRect> frames;
 	std::vector<IntRect> frames_flip;
 	float currentFrame, speed;
-	bool loop, flip, isPlaying;  
+	bool loop, flip, isPlaying;
 	Sprite sprite;
 
 	Animation()
@@ -42,7 +42,7 @@ public:
 
 		if (currentFrame > frames.size()) {
 			currentFrame -= frames.size();
-			if (!loop) { 
+			if (!loop) {
 				isPlaying = false;
 				return;
 			}
@@ -51,19 +51,23 @@ public:
 		int i = currentFrame;
 		if (i < frames.size())
 		{
-			
+
 			if (!flip)
 			{
 				sprite.setTextureRect(frames[i]);
-				
+
 			}
 			if (flip) {
 				sprite.setTextureRect(frames_flip[i]);
-				
+
 			}
 			sprite.setOrigin(frames[i].width / 2, frames[i].height / 2);
 		}
-
+		auto R = sprite.getTextureRect();
+		if (R == IntRect(0, 0, 0, 0)  || R == IntRect(0, 0, 174, 277))
+		{
+			cout << i << endl;
+		}
 	}
 
 };

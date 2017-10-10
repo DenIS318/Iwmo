@@ -142,19 +142,20 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>TMX_STATIC;SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\boost_1_65_1;C:\Users\Денис\Desktop\1\SFMLX86\include;C:\Users\Денис\Desktop\1\tiledloader\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\boost;C:\Users\Денис\Desktop\1\SFMLX86\include;C:\Users\Денис\Desktop\1\tiledloader\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>zlibstat.lib;winmm.lib;sfml-system-s.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-network-s.lib;opengl32.lib;gdi32.lib;freetype.lib;jpeg.lib;wsock32.lib;ws2_32.lib;zlibwapi.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;sfml-audio-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\boost\libs;C:\Users\Денис\Desktop\1\someincludes\libs;C:\Users\Денис\Desktop\1\SFMLX86\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\boost\stage\lib;C:\Users\Денис\Desktop\1\someincludes\libs;C:\Users\Денис\Desktop\1\SFMLX86\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

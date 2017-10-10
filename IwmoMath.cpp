@@ -6,7 +6,10 @@ namespace Iwmo
 	Iwmo::Math::Math()
 	{
 	}
-
+	bool Iwmo::Math::InRange(int val, int minimum, int maximum)
+	{
+		return ((minimum <= val) && (val <= maximum));
+	}
 	double  Iwmo::Math::distanceBetweenTwoPoints(double x, double y, double a, double b) {
 		return sqrt(pow(x - a, 2) + pow(y - b, 2));
 	}

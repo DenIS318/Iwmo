@@ -22,6 +22,7 @@ namespace Iwmo {
 	public:
 		~Math();
 		Math();
+		bool InRange(int val, int minimum, int maximum);
 		//bool colTest(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f* out_mtv);
 		static double distanceBetweenTwoPoints(double x, double y, double a, double b);
 		static  bool sat_test(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f *out_mtv);
