@@ -128,6 +128,10 @@
     <OutDir>$(SolutionDir)\bin\</OutDir>
     <IntDir>$(SolutionDir)\bin\intermeditate\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)\bin32\</OutDir>
+    <IntDir>$(SolutionDir)\bin32\intermeditate</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>

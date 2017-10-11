@@ -277,9 +277,23 @@ void kid::control()
 					}
 					else
 					{
-						int val2 = ((JumpPower * 0.05)*(vel.y*0.01)*7);
-						vel.y += val2;
-						kidentity->m_move(0, vel.y);
+						if (vel.y > JumpPower*0.4)
+						{
+							//- потомучто там и так на +гравити постоянно, нам нужно немного поднять кида вверх
+							vel.y += (-GRAVITY/1.75);
+							//cout << vel.y << endl;
+							//мы не двигаем кида здесь!
+						}
+						else
+						{
+							int val2 = ((JumpPower * 0.05)*(vel.y*0.01) * 7);
+							vel.y += val2;
+							if (vel.y < 0)
+							{
+								kidentity->m_move(0, vel.y);
+							}
+						}
+						
 					}
 				}
 				else
