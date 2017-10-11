@@ -1,0 +1,10 @@
+<!DOCTYPE SpriteDecomposer>
+<sprites image="poof.png" transparentColor="">
+ <animation title="poof" delay="80">
+  <cut w="120" x="4" y="9.5" h="107.5" row="1" col="1"/>
+  <cut w="116" x="140" y="8.5" h="112.5" row="1" col="1"/>
+  <cut w="113.5" x="268.5" y="8" h="109" row="1" col="1"/>
+  <cut w="92.5" x="21.5" y="144" h="100" row="1" col="1"/>
+  <cut w="81" x="155" y="150.5" h="83.5" row="1" col="1"/>
+ </animation>
+</sprites>

@@ -29,13 +29,15 @@ void kid::Col()
 					if (bl2->blocktype == Block::BlockType::solid)
 					{
 						kidentity->setPos(kidentity->GetPos() + mtv + koctil);
-						if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x < 1)
+						//cout << mtv.x << endl;
+						if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) /*&&TODO*/)
 						{
 							grounded = true;
 							m_p = true;
 							vel.y = 0;
 							lshiftcounter = 0;
 							jumpcount = 0;
+						//	cout << "grounded" << endl;
 						}
 					}
 				}
@@ -43,7 +45,7 @@ void kid::Col()
 		}
 		if (!m_p)
 		{
-
+			//cout << "!grounded" << endl;
 			grounded = false;
 		}
 		if (JumpPassed)
@@ -237,69 +239,72 @@ void kid::control()
 	Col();
 	if (Alive)
 	{
-		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		if (m_engine->GetWindow()->hasFocus())
 		{
-			kidentity->m_move(-SpeedX, 0);
-
-
-			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
+			
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
+				kidentity->m_move(-SpeedX, 0);
 
-				kidentity->state = walk;
-			}
 
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		{
-			kidentity->m_move(SpeedX, 0);
-
-			if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
-			{
-
-				kidentity->state = walk;
-			}
-		}
-		if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-		{
-			if (!grounded)
-			{
-				//мизерное замедление вверху чтоб не грохался сразу
-				if (vel.y < 0)
+				if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
 				{
-					if (lshiftcounter < 2)
+
+					kidentity->state = walk;
+				}
+
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+			{
+				kidentity->m_move(SpeedX, 0);
+
+				if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
+				{
+
+					kidentity->state = walk;
+				}
+			}
+			if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+			{
+				if (!grounded)
+				{
+					//мизерное замедление вверху чтоб не грохался сразу
+					if (vel.y < 0)
 					{
-						int val = (-GRAVITY *(-vel.y * 0.005));
-						vel.y += val;
-						kidentity->m_move(0, vel.y);
-						kidentity->state = jump;
-						lshiftcounter++;
-					}
-					else
-					{
-						if (vel.y > JumpPower*0.4)
+						if (lshiftcounter < 2)
 						{
-							//- потомучто там и так на +гравити постоянно, нам нужно немного поднять кида вверх
-							vel.y += (-GRAVITY/1.75);
-							//cout << vel.y << endl;
-							//мы не двигаем кида здесь!
+							int val = (-GRAVITY *(-vel.y * 0.005));
+							vel.y += val;
+							kidentity->m_move(0, vel.y);
+							kidentity->state = jump;
+							lshiftcounter++;
 						}
 						else
 						{
-							int val2 = ((JumpPower * 0.05)*(vel.y*0.01) * 7);
-							vel.y += val2;
-							if (vel.y < 0)
+							if (vel.y > JumpPower*0.4)
 							{
-								kidentity->m_move(0, vel.y);
+								//- потомучто там и так на +гравити постоянно, нам нужно немного поднять кида вверх
+								vel.y += (-GRAVITY / 1.75);
+								//cout << vel.y << endl;
+								//мы не двигаем кида здесь!
 							}
-						}
-						
-					}
-				}
-				else
-				{
+							else
+							{
+								int val2 = ((JumpPower * 0.05)*(vel.y*0.01) * 7);
+								vel.y += val2;
+								if (vel.y < 0)
+								{
+									kidentity->m_move(0, vel.y);
+								}
+							}
 
-					state = fall;
+						}
+					}
+					else
+					{
+
+						state = fall;
+					}
 				}
 			}
 		}
