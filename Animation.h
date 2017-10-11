@@ -60,13 +60,16 @@ public:
 				sprite.setTextureRect(frames_flip[i]);
 
 			}
-			sprite.setOrigin(frames[i].width / 2, frames[i].height / 2);
+			sprite.setOrigin(int(frames[i].width / 2), int(frames[i].height / 2));
 		}
 		auto R = sprite.getTextureRect();
-		if (R == IntRect(0, 0, 0, 0)  || R == IntRect(0, 0, 174, 277))
+		cout << "origin = " << sprite.getOrigin().x << ", " << sprite.getOrigin().y << endl;
+		cout << "position = " << sprite.getPosition().x << ", " << sprite.getPosition().y << endl;
+		//coutFloatRect(FloatRect(R));
+		/*if (R == IntRect(0, 0, 0, 0)  || R == IntRect(0, 0, 174, 277))
 		{
 			cout << i << endl;
-		}
+		}*/
 	}
 
 };
@@ -173,7 +176,7 @@ public:
 		
 	}
 
-	void draw(RenderWindow *window, float x, float y)
+	void draw(RenderWindow *window, int x, int y)
 	{
 		animList[currentAnim].sprite.setPosition(x, y);
 		window->draw(animList[currentAnim].sprite);

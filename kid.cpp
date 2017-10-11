@@ -236,6 +236,20 @@ void kid::CheckState()
 }
 void kid::control()
 {
+	if (sf::Keyboard::isKeyPressed(Keyboard::Left))
+	{
+		if (!anim.isFlip())
+		{
+		anim.flip(true);
+		}
+	}
+	if (sf::Keyboard::isKeyPressed(Keyboard::Right))
+	{
+		if (anim.isFlip())
+		{
+			anim.flip(false);
+		}
+	}
 	Col();
 	if (Alive)
 	{
@@ -325,7 +339,7 @@ void kid::ProcessKeyboard(Event event)
 	{
 		if (event.type == Event::KeyPressed)
 		{
-			if (event.key.code == sf::Keyboard::Left)
+			/*if (event.key.code == sf::Keyboard::Left)
 			{
 
 				kidentity->anim.flip(true);
@@ -336,7 +350,7 @@ void kid::ProcessKeyboard(Event event)
 
 				kidentity->anim.flip(false);
 
-			}
+			}*/
 			if (event.key.code == Keyboard::LShift)
 			{
 				JumpPassed = true;

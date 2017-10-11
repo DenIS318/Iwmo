@@ -28,7 +28,7 @@ class iwmoEntity
 public:
 	iwmoEntity();
 	void setPos(Vector2f);
-	void m_move(float, float);
+	void m_move(int x, int y);
 	void initEntit(std::string fileName, Texture* t);
 	~iwmoEntity();
 	void draw(RenderWindow*);

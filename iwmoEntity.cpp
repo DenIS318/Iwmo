@@ -12,8 +12,8 @@ void iwmoEntity::control()
 void iwmoEntity::setPos(Vector2f pos)
 {
 
-	x = pos.x;
-	y = pos.y;
+	x = int(pos.x);
+	y = int(pos.y);
 }
 Vector2f iwmoEntity::GetPos()
 {
@@ -40,11 +40,25 @@ void iwmoEntity::MGetEvent(Event event)
 	
 	//cout << "fukyou";
 }
-void iwmoEntity::m_move(float xm, float ym)
+void iwmoEntity::m_move(int xm, int ym)
 {
 	//cout << time << endl;
-	x += (xm*30)/1000;
-	y += (ym*30)/1000;
+	x += (int)(xm*30)/1000;
+	y += (int)(ym*30)/1000;
+	/*if (xm > 0)
+	{
+		if (anim.isFlip())
+		{
+			anim.flip(false);
+		}
+	}
+	else
+	{
+		if (!anim.isFlip())
+		{
+			anim.flip(true);
+		}
+	}*/
 	this->setPos(Vector2f(x, y));
 	EntityMoveEvent e;
 	e.eventtype = Types::EventTypes::EntityMoveEvent;
