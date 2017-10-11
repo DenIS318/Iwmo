@@ -24,7 +24,9 @@ public:
 	//CONSTRUCT
 	Engine();
 	void SetCam(View*);
-	void AddBlock(Block b);
+	void AddBlock(Block* b);
+	void ResetBlock(Block* b);
+	void ResetBlocks();
 	vector<Sprite*> maptiles;
 	///PROTOTYPES
 	/*
@@ -92,7 +94,7 @@ public:
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
-	vector<Block> MapBlocks;
+	vector<Block*> MapBlocks;
 	Math m_math;
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);

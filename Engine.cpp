@@ -12,6 +12,22 @@ map<string, sf::SoundBuffer>* Engine::buflist()
 {
 	return bufferlist;
 }
+void Engine::ResetBlock(Block* b)
+{
+	Block ResetedBlock = b->Reset();
+	b = new Block(ResetedBlock);
+}
+void Engine::ResetBlocks()
+{
+	for (auto it = MapBlocks.begin(); it != MapBlocks.end(); ++it)
+	{
+		auto p = *it;
+		if (p->Resetable)
+		{
+			this->ResetBlock(p);
+		}
+	}
+}
 bool Engine::LoadSound(string name,string buffername)
 {
 	
@@ -100,7 +116,7 @@ void Engine::Removeentity(iwmoEntity* man)
 
 	delete man;
 }
-void Engine::AddBlock(Block b)
+void Engine::AddBlock(Block* b)
 {
 	MapBlocks.push_back(b);
 }
@@ -168,7 +184,7 @@ void Engine::Render()
 
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
-			window.draw((Engine::MapBlocks.at(i).sprite));
+			window.draw((Engine::MapBlocks.at(i)->sprite));
 			//cout << MapBlocks[i].sprite.getPosition().x << ", " << MapBlocks[i].sprite.getPosition().y << endl;
 		
 		}
@@ -198,7 +214,10 @@ void Engine::Render()
 				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 				Engine::layerrentity.at(i).at(i1)->control();
 				//cout << Engine::layerrentity.at(i).at(i1)->anim.currentAnim.at(0) << endl;
-				Engine::layerrentity.at(i).at(i1)->draw(&window);
+				if (Engine::layerrentity.at(i).at(i1)->visible)
+				{
+					Engine::layerrentity.at(i).at(i1)->draw(&window);
+				}
 			}
 
 		}

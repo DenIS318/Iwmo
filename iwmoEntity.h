@@ -47,6 +47,7 @@ public:
 	float time=0.0;
 	void GetEventSource(CSource* sourc);
 	CSource* m_souc;
+	bool visible = true;
 private:
 	float x = 0;
 	float y = 0;

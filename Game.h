@@ -63,9 +63,12 @@ public:
 private:
 	void LS();
 	void InitIwmoBlocks();
+	void LoadSheets();
 	TiXmlDocument kidXML;
+//	TiXmlDocument kidDeathXML;
 	TiXmlDocument LevelXML;
 	Texture* kidSheet = new Texture;
+	//Texture* kidDeathSheet = new Texture;
 	 map<string, Texture*> IwmoBlocks;
 };
 [event_receiver(native)]
@@ -91,20 +94,4 @@ public:
 private:
 	View* camerapointer = gameinstance->GetCam();
 	void GameHandler::OnEvent(Event eventt);
-
-
-};
-class MyEntityEngine
-{
-public:
-	MyEntityEngine();
-	~MyEntityEngine();
-	void initEntEng(GameHandler* handlerr, iwmoEntity* ent);
-	void MPassEvent(Event);
-	MyEntityEngine* GetThis();
-	GameHandler* m_handler;
-	iwmoEntity* m__entity;
-private:
-
-
 };

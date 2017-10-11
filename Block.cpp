@@ -10,6 +10,15 @@ namespace Iwmo {
 	{
 		TextureManager::loadTexture(texturename,"resources/blocks/"+texturename);
 	}
+	Block Block::Reset()
+	{
+		Texture* t = const_cast<Texture*>(sprite.getTexture());
+		float mx = sprite.getPosition().x;
+		float my = sprite.getPosition().y;
+		//mx = 0;
+		//my = 0;
+		return Block(t, mx, my);
+	}
 	Block::Block(string str)
 	{
 		AddToManager(str);

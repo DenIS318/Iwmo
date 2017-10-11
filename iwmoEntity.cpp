@@ -28,14 +28,9 @@ iwmoEntity* iwmoEntity::MGetBase()
 }
 void iwmoEntity::initEntit(std::string fileName, sf::Texture* t)
 {
+	
 	anim.loadFromXML(fileName, t);
-
-
-}//TODO 1
-/*void iwmoEntity::SettingHandler(GameHandler* h)
-{
-	eng->initEntEng(h, MGetBase());
-}*/
+}
 AnimationManager* iwmoEntity::GetTextureAnimation()
 {
 	return &anim;

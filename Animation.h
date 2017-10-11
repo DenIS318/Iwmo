@@ -17,7 +17,6 @@ public:
 	float currentFrame, speed;
 	bool loop, flip, isPlaying;
 	Sprite sprite;
-
 	Animation()
 	{
 

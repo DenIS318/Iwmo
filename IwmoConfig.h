@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <SFML\Graphics.hpp>
 //CONFIG
 namespace Iwmo {
 	extern int Width;
@@ -11,4 +12,6 @@ namespace Iwmo {
 	extern bool debug;
 	extern unsigned short port;
 	extern int GRAVITY;
+	const sf::Vector2f KidSpawn(50, 3100);
+	extern sf::Texture* kidDeathSheet;
 }

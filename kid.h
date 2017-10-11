@@ -8,7 +8,8 @@
 #include "tmx\MapLayer.hpp"
 #include "tmx\MapObject.hpp"
 #include "Collision.h"
-
+#include "iwmoConfig.h"
+using namespace Iwmo;
 using namespace Iwmo::Events;
 class kid : public iwmoEntity
 {
@@ -34,7 +35,8 @@ public:
 	void death();
 	bool JumpPassed = false;
 	//bool IsMove = false;
-
+	void Restart();
+	Vector2f LastSave = KidSpawn;
 private:
 	//Vector2f LastPos;
 	int lshiftcounter = 0;
