@@ -15,13 +15,22 @@
 */
 
 using namespace std;
+using namespace sf;
 namespace Iwmo {
+	void coutFloatRect(FloatRect R);
 	class Math
 	{
 		
 	public:
 		~Math();
 		Math();
+		/*
+		ALL RECTS MUST BE ON GLOBAL BOUNDS!!!
+		Entityrect = kid rect or any else entity
+		targetrect = block rect or any target to validating position
+		*/
+		
+		bool ValidateDownPos(int entityY, int* Yoffset, int targetTOP);
 		bool InRange(int val, int minimum, int maximum);
 		//bool colTest(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f* out_mtv);
 		static double distanceBetweenTwoPoints(double x, double y, double a, double b);

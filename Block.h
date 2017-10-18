@@ -17,10 +17,11 @@ namespace Iwmo {
 		};
 		Block(string str);
 		Block(Texture* texture,int x,int y);
-		Block(Texture* texture, Vector2<int>  position);
-		Block(Texture* texture, Vector2f  position);
+		Block(Texture* texture, sf::Vector2<int>  position);
+		Block(Texture* texture, sf::Vector2f  position);
 		Block Reset();
-		void SetPos(Vector2f pos);
+		void SetPos(sf::Vector2f pos);
+		sf::FloatRect GetGlobalRect();
 		~Block();
 		Sprite sprite;
 		BlockType blocktype = solid;

@@ -5,13 +5,16 @@
 #include <iostream>
 #include <vector> 
 #include <chrono>
-#include <tmx\MapLoader.hpp>
+//#include <tmx\MapLoader.hpp>
 #include "Animation.h"
 #include "IwmoConfig.h"
 #include "iwmoEntity.h"
-#include "tmx\MapLayer.hpp"
+//#include "tmx\MapLayer.hpp"
 #include "Block.h"
 #include "IwmoMath.h"
+#include <tmx\MapLoader.hpp>
+#include <tmx\Log.hpp>
+#define LOG_OUTPUT_CONSOLE
 using namespace sf;
 using namespace std;
 using namespace tmx;
@@ -95,18 +98,19 @@ public:
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
 	vector<Block*> MapBlocks;
-	Math m_math;
+	Math m_math = Iwmo::IWMOMATH;
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
-	
+
 	
 private:
+	
 	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;
 	const int maxlayersize = 1;
 	vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);
 	vector<vector<iwmoEntity*>> layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
-
+	//vector<tmx::Layer::Tile*> maptiles;
 	sf::Clock clock;
 	sf::Time time;
 	RenderWindow window;

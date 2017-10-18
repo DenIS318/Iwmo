@@ -6,7 +6,10 @@
 //#include "MyEntityEngine.h"
 #include "tinyxml\tinyxml.h"
 #include "MyListener.h"
-
+#include "IwmoMath.h"
+#include "IwmoConfig.h"
+#include "Block.h"
+#include "Bullet.h"
 //#include "Game.h"
  // !GAME_H
 enum EntityState {
@@ -22,13 +25,24 @@ enum EntityState {
 
 using namespace sf;
 using namespace std;
+using namespace Iwmo;
+//class Engine {
+//public:
+//	vector<Block*> MapBlocks;
+//};
 
+//class Engine;
+//extern vector<Block*> Engine::MapBlocks;
 class iwmoEntity
 {
 public:
 	iwmoEntity();
 	void setPos(Vector2f);
 	void m_move(int x, int y);
+	/*
+	m_move with validating down block
+	*/
+	void m_moveValid(int x, int y, Block* b);
 	void initEntit(std::string fileName, Texture* t);
 	~iwmoEntity();
 	void draw(RenderWindow*);
@@ -43,11 +57,14 @@ public:
 	float SpeedX = 50.0;
 	float SpeedY = 70.0;
 	EntityState state = unknown;
-	void updatetime(float t);
+	void updatetime(float time);
+	virtual void deleteentity();
+	virtual void tick(float time);
 	float time=0.0;
 	void GetEventSource(CSource* sourc);
 	CSource* m_souc;
 	bool visible = true;
+	virtual void shoot(Texture* bullettexture, Vector2i pos);
 private:
 	float x = 0;
 	float y = 0;

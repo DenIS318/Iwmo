@@ -1,6 +1,7 @@
 #include "iwmoEntity.h"
 
 
+
 iwmoEntity::iwmoEntity()
 {
 
@@ -9,18 +10,36 @@ void iwmoEntity::control()
 {
 	
 }
+void iwmoEntity::deleteentity()
+{
+	delete this;
+}
 void iwmoEntity::setPos(Vector2f pos)
 {
 
 	x = int(pos.x);
 	y = int(pos.y);
 }
+void iwmoEntity::shoot(Texture* bullettexture,Vector2i pos)
+{
+	auto vec = Vector2i(1, 1);
+	Bullet b(vec,bullettexture,pos);
+	EntityShootEvent e;
+	e.eventtype = Types::EventTypes::EntityShootEvent;
+	e.whichEntity = this;
+	e.whichBullet = &b;//пуля локальная! измени это потом!
+	__raise m_souc->OnCustomEvent(e);
+}
 Vector2f iwmoEntity::GetPos()
 {
 	return Vector2f(x, y);
 }
-void iwmoEntity::updatetime(float t) {
+void iwmoEntity::updatetime(float t)
+{
 	time = t;
+}
+void iwmoEntity::tick(float t) {
+	
 }
 iwmoEntity* iwmoEntity::MGetBase()
 {
@@ -28,8 +47,8 @@ iwmoEntity* iwmoEntity::MGetBase()
 }
 void iwmoEntity::initEntit(std::string fileName, sf::Texture* t)
 {
-	
 	anim.loadFromXML(fileName, t);
+	
 }
 AnimationManager* iwmoEntity::GetTextureAnimation()
 {
@@ -37,29 +56,28 @@ AnimationManager* iwmoEntity::GetTextureAnimation()
 }
 void iwmoEntity::MGetEvent(Event event)
 {
+}
+void iwmoEntity::m_moveValid(int xm, int ym,Block* b)
+{
+	int Yoff = (ym * 30) / 1000;
+	x += (int)(xm * 30) / 1000;
 	
-	//cout << "fukyou";
+	IWMOMATH.ValidateDownPos(y, &Yoff, b->GetGlobalRect().top);
+	y += Yoff;
+	Vector2f newpos(x, y);
+	this->setPos(newpos);
+	EntityMoveEvent e;
+	e.eventtype = Types::EventTypes::EntityMoveEvent;
+	e.whichEntity = this;
+	__raise m_souc->OnCustomEvent(e);
 }
 void iwmoEntity::m_move(int xm, int ym)
 {
-	//cout << time << endl;
+	int Yoff = (ym * 30) / 1000;
 	x += (int)(xm*30)/1000;
-	y += (int)(ym*30)/1000;
-	/*if (xm > 0)
-	{
-		if (anim.isFlip())
-		{
-			anim.flip(false);
-		}
-	}
-	else
-	{
-		if (!anim.isFlip())
-		{
-			anim.flip(true);
-		}
-	}*/
-	this->setPos(Vector2f(x, y));
+	y += Yoff;
+	Vector2f newpos(x, y);
+	this->setPos(newpos);
 	EntityMoveEvent e;
 	e.eventtype = Types::EventTypes::EntityMoveEvent;
 	e.whichEntity = this;
@@ -67,7 +85,6 @@ void iwmoEntity::m_move(int xm, int ym)
 }
 iwmoEntity::~iwmoEntity()
 {
-	//cout << "entity destructor" << endl;
 }
 float iwmoEntity::GetX()
 {
@@ -75,8 +92,6 @@ float iwmoEntity::GetX()
 }
 void iwmoEntity::GetEventSource(CSource* source)
 {
-	
-	//cout << "Entity hooked!" << endl;
 	m_souc = source;
 }
 float iwmoEntity::GetY()
@@ -85,6 +100,5 @@ float iwmoEntity::GetY()
 }
 void iwmoEntity::draw(RenderWindow* win)
 {
-	//cout << 1;
 	anim.draw(win, x, y);
 }

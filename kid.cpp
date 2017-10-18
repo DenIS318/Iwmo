@@ -1,6 +1,6 @@
 #include "kid.h"
 using namespace tmx;
-const Vector2f koctil(0,1.1);
+const sf::Vector2f koctil(0,2);
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
@@ -9,35 +9,38 @@ kid::kid()
 {
 
 }
+kid::~kid()
+{
+}
 void kid::Col()
 {
 	if (Alive)
 	{
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
-		Vector2f mtv;
+		sf::Vector2f mtv;
 		for (auto bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)
 		{
 
 			if (!m_p)
 			{
 				auto bl2 = *bl._Ptr;
-				float beforecol = kidentity->GetY();
+				//float beforecol = kidentity->GetY();
 				if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
 				{
 
-					if (bl2->blocktype == Block::BlockType::solid)
+					if (bl2->blocktype == Iwmo::Block::BlockType::solid)
 					{
-						kidentity->setPos(kidentity->GetPos() + mtv + koctil);
-						//cout << mtv.x << endl;
-						if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) /*&&TODO*/)
+						//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
+						kidentity->setPos(kidentity->GetPos() + mtv + koctil );
+						if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
 						{
 							grounded = true;
 							m_p = true;
 							vel.y = 0;
 							lshiftcounter = 0;
 							jumpcount = 0;
-						//	cout << "grounded" << endl;
+				
 						}
 					}
 				}
@@ -45,7 +48,7 @@ void kid::Col()
 		}
 		if (!m_p)
 		{
-			//cout << "!grounded" << endl;
+	
 			grounded = false;
 		}
 		if (JumpPassed)
@@ -169,7 +172,7 @@ void kid::death()
 	state = EntityState::death;
 	visible = false;
 	iwmoEntity eff;
-	eff.initEntit("resources/effects/poof.xml", kidDeathSheet);
+	eff.initEntit("resources/effects/poof.xml",m_deathsheet);
 }
 void kid::CheckState()
 {
@@ -233,6 +236,57 @@ void kid::CheckState()
 			}
 		}
 	}
+}
+void kid::tick(float time)
+{
+	int x = GetX();
+	int y = GetY();
+	float posx,posy;
+	/*
+	ORIGINAL KAIYAN FORMULA
+	X( "Player" ) - ( X( "Player" ) mod 800 ) + 400
+	Y( "Player" ) - ( Y( "Player" ) mod 608 ) + 304
+	MOD = %
+	*/
+	posx = x - (x % 800) + 400;
+	posy = y - (y % 600) + 300;
+	Vector2f vec(posx, posy);
+	coutVector2(vec);
+	m_camera->setCenter(vec);
+	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end();)
+	{
+		auto bullet = *bull._Ptr;
+		if (bullet->finisheddistance < bullet->maxdistance)
+		{
+			bullet->tick(m_engine->GetWindow(),time);
+		}
+		else
+		{
+			
+			delete bullet;
+			Bulletlist.erase(bull);
+			currentbullets--;
+			if (bull != Bulletlist.end())
+			{
+				++bull;
+			}
+			else
+			{
+				break;
+			}
+			
+		}
+	}
+}
+void kid::deleteentity()
+{
+	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end(); ++bull)
+	{
+		delete *bull;
+	}
+	Bulletlist.clear();
+	kid::~kid();
+	
 }
 void kid::control()
 {
@@ -326,6 +380,34 @@ void kid::control()
 	
 	CheckState();
 }
+void kid::shoot()
+{
+	
+	if (state != slide)
+	{
+		if (currentbullets < maxbullets)
+		{
+			currentbullets++;
+
+			fires.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+			fires.play();
+			auto b = kidentity->anim.getSprite()->getGlobalBounds();
+			sf::Vector2i bulpoint(b.left + b.width,b.top+(b.height/2));
+			if (state == jump)
+			{
+				bulpoint.y -= 2;
+			}
+			Bullet* bul = new Bullet(bulletscale, m_texture, bulpoint);
+			Bulletlist.push_back(bul);
+			KidShootEvent e;
+			e.eventtype = Types::EventTypes::KidShootEvent;
+			e.whichEntity = this;
+			e.whichBullet = bul;
+			//cout << "1 " << this;
+			__raise m_souc->OnCustomEvent(e);
+		}
+	}
+}
 void kid::ProcessKeyboard(Event event)
 {
 	if (event.type == Event::KeyPressed)
@@ -355,6 +437,10 @@ void kid::ProcessKeyboard(Event event)
 			{
 				JumpPassed = true;
 			}
+			if (event.key.code == Keyboard::Z)
+			{
+				shoot();
+			}
 			if (event.key.code == Keyboard::Q)
 			{
 				death();
@@ -366,8 +452,11 @@ void kid::MGetEvent(Event event)
 {
 	ProcessKeyboard(event);
 }
-void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine* engine,CSource* eventsource)
+void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, Engine* engine,CSource* eventsource,Texture*  kidDeathSheet,View* camera)
 {
+	m_camera = camera;
+	m_texture = kidTexture;
+	m_deathsheet = kidDeathSheet;
 	kidentity->initEntit(filen, kidTexture);
 	kidentity->setPos(position);
 	kidentity->anim.animList["idle"].loop = true;
@@ -384,7 +473,5 @@ void kid::createKid(string filen, Texture* kidTexture, Vector2f position, Engine
 	doublejumps.setBuffer(buflist->at("kiddoublejump"));
 	deaths.setBuffer(buflist->at("kiddeath"));
 	fires.setBuffer(buflist->at("kidfire"));
-	kidentity->anim.flip(true);
-	kidentity->anim.flip(false);
 	
 }

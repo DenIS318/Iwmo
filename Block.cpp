@@ -19,6 +19,10 @@ namespace Iwmo {
 		//my = 0;
 		return Block(t, mx, my);
 	}
+	FloatRect Block::GetGlobalRect()
+	{
+		return sprite.getGlobalBounds();
+	}
 	Block::Block(string str)
 	{
 		AddToManager(str);

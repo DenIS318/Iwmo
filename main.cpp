@@ -25,7 +25,7 @@ sf::IntRect makerrect(600 - 105, 381, 105, 40);
 sf::IntRect startrect(280 + 70, 500, 88, 40);
 sf::IntRect boxrect(startrect.left - 60, startrect.top - 50, 200, 20);
 sf::IntRect serverrect(650, 500, 104, 40);
-mytextbox ipbox(Vector2f(200, 20));
+mytextbox ipbox(sf::Vector2f(200, 20));
 static string ip;
 bool ready = false;
 sf::Text iptext;
@@ -158,7 +158,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 		break;
 	case sf::Event::KeyPressed:
 
-		if (debug) {
+		/*if (debug) {
 			if (event.key.code == sf::Keyboard::Z)
 			{
 				sf::Vector2i position = sf::Mouse::getPosition(*window);
@@ -166,7 +166,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 
 			}
 
-		}
+		}*/
 		if (event.key.code == sf::Keyboard::BackSpace)
 		{
 			if (sizeof(ip) > 0 && ip != "")
@@ -212,7 +212,7 @@ int main()
 {
 
 	font.loadFromFile("resources/Arial.otf");
-	Engine engine;
+	static Engine engine;
 	engine.init(Width, Height, WindowName, framerate);
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
@@ -221,7 +221,7 @@ int main()
 	engine.AddLayer(textlayer);
 	text.loadFromFile("resources/bg.jpg");
 	Sprite bg;
-	bg.setTextureRect(IntRect(0, 0, Width, Height));
+	bg.setTextureRect(sf::IntRect(0, 0, Width, Height));
 	bg.setTexture(text);
 
 	//creating

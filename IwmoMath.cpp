@@ -3,6 +3,10 @@
 
 namespace Iwmo
 {
+	void Iwmo::coutFloatRect(FloatRect R)
+	{
+		cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
+	}
 	Iwmo::Math::Math()
 	{
 	}
@@ -15,6 +19,20 @@ namespace Iwmo
 	}
 	Iwmo::Math::~Math()
 	{
+	}
+	bool Iwmo::Math::ValidateDownPos(int entityY,int* Yoffset,int targetTOP)
+	{
+		
+		auto offsetedval = entityY + *Yoffset;
+		if (offsetedval > targetTOP)
+		{
+			*Yoffset = offsetedval-targetTOP;
+			cout << "VALIDATED " << endl;
+			cout << Yoffset << endl;
+			return true;
+		}
+		return false;
+		
 	}
 	/*bool Iwmo::Math::colTest(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f* out_mtv)
 	{

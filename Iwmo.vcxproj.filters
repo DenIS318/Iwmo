@@ -2,33 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="maploader\DebugShape.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\Log.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\MapLayer.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\MapLoaderPrivate.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\MapLoaderPublic.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\MapObject.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\miniz.c">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\QuadTreeNode.cpp">
-      <Filter>maploader</Filter>
-    </ClCompile>
-    <ClCompile Include="maploader\pugixml\pugixml.cpp">
-      <Filter>maploader\pugixml</Filter>
-    </ClCompile>
     <ClCompile Include="mytextbox.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -47,13 +20,38 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="iwmoEffect.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="QuadTreeNode.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugShape.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapLayer.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapLoaderPrivate.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapLoaderPublic.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObject.cpp">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>maploader</Filter>
+    </ClCompile>
+    <ClCompile Include="pugixml.cpp">
+      <Filter>maploader\pugixml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />
     <ClInclude Include="IwmoConfig.h" />
-    <ClInclude Include="maploader\miniz.h">
-      <Filter>maploader</Filter>
-    </ClInclude>
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />
     <ClInclude Include="Network.h" />
@@ -72,13 +70,20 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="CustomEvents.h" />
     <ClInclude Include="iwmoEffect.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="miniz.h">
+      <Filter>maploader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="zlibstat.lib" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="maploader">
-      <UniqueIdentifier>{5105a61f-443e-44df-b28e-b93bbe646ba4}</UniqueIdentifier>
+      <UniqueIdentifier>{21aa2fe2-e65e-4592-bf04-96239b31b7b2}</UniqueIdentifier>
     </Filter>
     <Filter Include="maploader\pugixml">
-      <UniqueIdentifier>{4bdd699b-783d-49a9-a727-4514fcc80f20}</UniqueIdentifier>
+      <UniqueIdentifier>{41b14041-bca8-40a0-bdc5-b0d66b0f5166}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

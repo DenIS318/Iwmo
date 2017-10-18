@@ -1,11 +1,22 @@
 ﻿#include "Engine.h"
-static tmx::MapLoader m_map("resources/");
 const string m_spath = "resources/sounds/";
 float fps;
 bool CameraSetted = false;
 View* CamPointer;
+MapLoader m_map("resources/");
+//defines layers
+#define bg2 0
+#define bg 1
+#define tiles 2
+#define tiles2 3
+#define bounds 4
+#define deathzone 5
+#define objects 6
+#define textlayer 7
+//
 void Engine::AddSoundBuffer(string name)
 {
+	
 	bufferlist->insert(pair<string,SoundBuffer>(name,SoundBuffer()));
 }
 map<string, sf::SoundBuffer>* Engine::buflist()
@@ -45,12 +56,19 @@ bool Engine::LoadSound(string name,string buffername)
 }
 void Engine::RemoveAll()
 {
+	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+	{
+		for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
+		{
+			delete Engine::layerrentity.at(i).at(i1);
+		}
+	}
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
 }
 Engine::Engine()
 {
-
+	
 }
 void Engine::SetCam(View* campoint)
 {
@@ -120,13 +138,15 @@ void Engine::AddBlock(Block* b)
 {
 	MapBlocks.push_back(b);
 }
-void Engine::LoadMap(string mapname)
+void Engine::LoadMap(string s)
 {
-
 	m_map.addSearchPath("resources/blocks/");
-	if (m_map.load(mapname))
+	m_map.addSearchPath("resources/animatedblocks/");
+	tmx::setLogLevel(Logger::Info);
+	if (m_map.load(s))
 	{
 		if (debug) {
+
 			cout << "m_map loaded!" << endl;
 		}
 	}
@@ -137,17 +157,21 @@ void Engine::LoadMap(string mapname)
 		}
 	}
 	
-	auto l = m_map.getLayers();
-	cout << "SIZE IS " << l.at(0).tiles.size() << endl;
+	auto boundslayer = m_map.getLayers()[bounds];
+	boundslayer.visible = false;
+	auto tileslayer = m_map.getLayers()[tiles];
+	tileslayer.visible = true;
+	//tileslayer.GetTile(0, 0).
 	
-	for each (tmx::MapTile tile in l.at(0).tiles)
+	
+	/*for each (tmx::MapTile tile in l.at(0).tiles)
 	{
 		maptiles.push_back(&tile.sprite);
 	}
 	for each (tmx::MapTile tile in l.at(1).tiles)
 	{
 		maptiles.push_back(&tile.sprite);
-	}
+	}*/
 }
 tmx::MapLoader* Engine::GetMap()
 {
@@ -181,7 +205,13 @@ void Engine::Render()
 	if (gamestarted)
 	{
 		//window.draw(m_map);
+		/*for (auto it = maplayers.begin(); it != maplayers.end(); ++it)
+		{
+			auto layerpointer = *it._Ptr;
 
+			window.draw(*layerpointer);
+		}*/
+		window.draw(m_map);
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
 			window.draw((Engine::MapBlocks.at(i)->sprite));
@@ -211,6 +241,7 @@ void Engine::Render()
 			{
 				//cout << this_thread::get_id() << " THREAD ID IN RENDER" << endl;
 				Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
+				Engine::layerrentity.at(i).at(i1)->tick(m__time);
 				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 				Engine::layerrentity.at(i).at(i1)->control();
 				//cout << Engine::layerrentity.at(i).at(i1)->anim.currentAnim.at(0) << endl;
@@ -239,6 +270,6 @@ void Engine::init(int Width, int Height, string title, short fm)
 
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
-	window.setSize(Vector2u(Width, Height));
+	window.setSize(sf::Vector2u(Width, Height));
 	//window.setVerticalSyncEnabled(true);
 }

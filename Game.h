@@ -4,14 +4,13 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "MyListener.h"
-#include <tmx\MapLayer.hpp>
 #include "Animation.h"
 #include "kid.h"
 #include "Engine.h"
 #include "Block.h"
 #include <boost/filesystem.hpp>
+#include <boost/any.hpp>
 //#include "Player.h"
-#include "tmx\Log.hpp"
 
 using namespace boost::filesystem;
 using namespace std;
@@ -43,8 +42,9 @@ public:
 	virtual void m_unhookEvent(CSource* pSource);
 	View* GetCam();
 	Game* getGame();
-	const Vector2f CAM_SIZE = Vector2f(800, 600);
-	const Vector2f CAM_CENTER = Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
+	
+	const sf::Vector2f CAM_SIZE = sf::Vector2f(800, 600);
+	const sf::Vector2f CAM_CENTER = sf::Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
 	RenderWindow* window;
 	RenderWindow* Getwindow();
 	Engine* m_engine;
@@ -60,6 +60,8 @@ public:
 	Texture* GetBlockTextureByName(string name);
 	map<string,Texture*>* GetBlockList();
 	void AddIwmoBlock(string name);
+	 sf::Texture* kidDeathSheet = new Texture;
+	 sf::Texture* kidSheet = new Texture;
 private:
 	void LS();
 	void InitIwmoBlocks();
@@ -67,7 +69,7 @@ private:
 	TiXmlDocument kidXML;
 //	TiXmlDocument kidDeathXML;
 	TiXmlDocument LevelXML;
-	Texture* kidSheet = new Texture;
+	//Texture* kidSheet = new Texture;
 	//Texture* kidDeathSheet = new Texture;
 	 map<string, Texture*> IwmoBlocks;
 };

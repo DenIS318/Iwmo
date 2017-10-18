@@ -12,8 +12,8 @@ class Animation
 {
 
 public:
-	std::vector<IntRect> frames;
-	std::vector<IntRect> frames_flip;
+	std::vector<sf::IntRect> frames;
+	std::vector<sf::IntRect> frames_flip;
 	float currentFrame, speed;
 	bool loop, flip, isPlaying;
 	Sprite sprite;
@@ -29,10 +29,7 @@ public:
 	{
 		return flip;
 	}
-	void coutFloatRect(FloatRect R)
-	{
-		cout << R.left << " " << R.top << " " << R.width << " " << R.height << endl;
-	}
+	
 	void tick(float time)
 	{
 		if (!isPlaying) return;
@@ -62,14 +59,7 @@ public:
 			}
 			sprite.setOrigin(int(frames[i].width / 2), int(frames[i].height / 2));
 		}
-		auto R = sprite.getTextureRect();
-		cout << "origin = " << sprite.getOrigin().x << ", " << sprite.getOrigin().y << endl;
-		cout << "position = " << sprite.getPosition().x << ", " << sprite.getPosition().y << endl;
-		//coutFloatRect(FloatRect(R));
-		/*if (R == IntRect(0, 0, 0, 0)  || R == IntRect(0, 0, 174, 277))
-		{
-			cout << i << endl;
-		}*/
+		
 	}
 
 };
@@ -118,8 +108,8 @@ public:
 
 		for (int i = 0; i < count; i++)
 		{
-			a.frames.push_back(IntRect(x + i*step, y, w, h));
-			a.frames_flip.push_back(IntRect(x + i*step + w, y, -w, h));
+			a.frames.push_back(sf::IntRect(x + i*step, y, w, h));
+			a.frames_flip.push_back(sf::IntRect(x + i*step + w, y, -w, h));
 		}
 		animList[name] = a;
 		currentAnim = name;
@@ -157,8 +147,8 @@ public:
 				int y = atoi(cut->Attribute("y"));
 				int w = atoi(cut->Attribute("w"));
 				int h = atoi(cut->Attribute("h"));
-				anim.frames.push_back(IntRect(x, y, w, h));
-				anim.frames_flip.push_back(IntRect(x+w, y, -w, h));
+				anim.frames.push_back(sf::IntRect(x, y, w, h));
+				anim.frames_flip.push_back(sf::IntRect(x+w, y, -w, h));
 				cut = cut->NextSiblingElement("cut");
 				//anim.sprite.setOrigin(0, anim.frames[0].height);
 				

@@ -22,7 +22,7 @@ public:
 	/*
 	Creates textbox with given size.
 	*/
-	mytextbox(Vector2f);
+	mytextbox(sf::Vector2f);
 	/*
 	Enables or disables textbox.
 	*/

@@ -237,6 +237,7 @@ void MapLayer::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 		//draw tiles used on objects
 		for(const auto& tile : tiles)
 		{
+			
 			rt.draw(tile.sprite, tile.renderStates);
 		}
 	}

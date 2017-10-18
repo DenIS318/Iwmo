@@ -131,9 +131,9 @@ void Game::LS()
 	m_engine->AddSoundBuffer("kiddoublejump");
 	m_engine->LoadSound("jump2.ogg", "kiddoublejump");
 	m_engine->AddSoundBuffer("kiddeath");
-	m_engine->LoadSound("death.wav", "kiddeath");
+	m_engine->LoadSound("death.ogg", "kiddeath");
 	m_engine->AddSoundBuffer("kidfire");
-	m_engine->LoadSound("fire.wav", "kidfire");
+	m_engine->LoadSound("fire.ogg", "kidfire");
 }
 void Game::StartGame(Engine* engine,CSource* source)
 {
@@ -146,7 +146,7 @@ void Game::StartGame(Engine* engine,CSource* source)
 	__raise source->OnEvent(sf::Event());
 	static kid mykid;
 	auto lss = this->m_ls;
-	mykid.createKid("resources/kid.xml", kidSheet, Vector2f(100, 100), m_engine, lss);
+	mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss,kidDeathSheet,&camera);
 	m_engine->Addentity(&mykid, 0);
 	mykid.setPos(Iwmo::KidSpawn);
 	m_engine->gamestarted = true;
@@ -173,7 +173,7 @@ void Game::LoadSheets()
 	{
 		cout << "Kid spritesheet not loaded!" << endl;
 	}
-	if (!Iwmo::kidDeathSheet->loadFromFile("resources/effects/poof.png"))
+	if (!kidDeathSheet->loadFromFile("resources/effects/poof.png"))
 	{
 		cout << "Poof spritesheet not loaded!" << endl;
 	}
@@ -185,23 +185,15 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	window = wind;
 	m_engine = engine;
 	m_engine->RemoveAll();
-	if (debug)
-	{
-		//cout << "debug detected!" << endl;
-		tmx::setLogLevel(tmx::Logger::Error);
-	}
-	else
-	{
-		//cout << "debug disabled..." << endl;
-	}
 	LoadSheets();
 	
 	LS();
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		engine->AddLayer(i);
 	}
+	engine->LoadMap("map.tmx");
 
 	camera.setCenter(CAM_CENTER);
 	camera.setSize(CAM_SIZE);
@@ -211,8 +203,8 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	Texture* wall = GetBlockTextureByName("wall.png");
 	for (int i = 0; i < 10; i++)
 	{
-		Vector2f offset(wall->getSize().x*i, (-32));
-		m_engine->AddBlock(new Block(wall, Vector2f(0,3200) + offset));
+		sf::Vector2f offset(wall->getSize().x*i, (-32));
+		m_engine->AddBlock(new Block(wall, sf::Vector2f(0,3200) + offset));
 	}
 	//
 	StartGame(m_engine,source);
@@ -248,11 +240,25 @@ void GameHandler::m_unhookEvent(CSource* pSource) {
 }
 void GameHandler::OnCustomEvent(CustomEvent event)
 {
+
 	switch (event.eventtype)
 	{
 	case Types::EntityMoveEvent:
 		break;
+	case Types::EntityShootEvent:
+		{	
+		EntityShootEvent* e = reinterpret_cast<EntityShootEvent*>(&event);
+		//cout << e->whichEntity << endl;
+		}
+		break;
+	case Types::KidShootEvent:
+		{	
+		KidShootEvent* e = reinterpret_cast<KidShootEvent*>(&event);
+		e->whichKid = static_cast<kid*>(e->whichEntity);
+		}
+		break;
 	}
+
 }
 void GameHandler::OnEvent(Event eventt)
 {
