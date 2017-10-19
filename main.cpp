@@ -31,7 +31,7 @@ bool ready = false;
 sf::Text iptext;
 static Game game;
 #define mainlayer 0
-#define bglayer 1
+#define bgmainlayer 1
 #define textlayer 2
 #define isclient iskid
 #define socket sockett
@@ -217,12 +217,12 @@ int main()
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
 	engine.AddLayer(0);
-	engine.AddLayer(bglayer);
+	engine.AddLayer(bgmainlayer);
 	engine.AddLayer(textlayer);
 	text.loadFromFile("resources/bg.jpg");
-	Sprite bg;
-	bg.setTextureRect(sf::IntRect(0, 0, Width, Height));
-	bg.setTexture(text);
+	Sprite bgmain;
+	bgmain.setTextureRect(sf::IntRect(0, 0, Width, Height));
+	bgmain.setTexture(text);
 
 	//creating
 	kidbuttext.loadFromFile(res + but + "kid.png");
@@ -260,7 +260,7 @@ int main()
 	}
 	//adding
 	
-	engine.AddSprite(&bg, 0);
+	engine.AddSprite(&bgmain, 0);
 	engine.AddSprite(&kidbut, 0);
 	engine.AddSprite(&makerbut, 0);
 	engine.AddSprite(&start, 0);

@@ -1,37 +1,45 @@
 #include "Game.h"
 #include <future>
+#include <tuple>
 const string m_res = "resources/blocks/";
 
 GameHandler* eventhandler;
 Game* instanceEH ;
 
-map<string,Texture*>* Game::GetBlockList()
+vector<IwmoBlock>* Game::GetBlockList()
 {
 	return &IwmoBlocks;
 }
-void Game::AddIwmoBlock(string name)
+void Game::AddIwmoBlock(string name,BlockType type)
 {
+	/*
+	name,texture,type
+	*/
 	Texture* texture = TextureManager::loadTexture(name, m_res+name);
-	IwmoBlocks.insert(std::pair<string, Texture*>(name, texture));
+	IwmoBlock blockmap;
+	blockmap.blockname = name;
+	blockmap.textureptr = texture;
+	blockmap.blocktype = type;
+	IwmoBlocks.push_back(blockmap);
 }
 
 Block Game::CreateBlockByName(string name)
 {
 	for (auto it = IwmoBlocks.begin(); it != IwmoBlocks.end(); ++it)
 	{
-		if (it->first == name)
+		if (it->blockname == name)
 		{
-			return Block(it->first);
+			return Block(it->textureptr,0,0,it->blocktype);
 		}
 	}
 	cout << "Block '" << name << "'" << " not found!" << endl;
-	return Block(new Texture(), 0, 0);
+	return Block(new Texture(), 0, 0,BlockType::unknownblock);
 }
 Texture* Game::GetBlockTextureByName(string name)
 {
 	for (auto it = IwmoBlocks.begin(); it != IwmoBlocks.end(); ++it)
 	{
-		if (it->first == name)
+		if (it->blockname == name)
 		{
 		return	TextureManager::getTexture(name);
 		}
@@ -63,19 +71,54 @@ vector<map<string, string>> get_file_list(const std::string& path)
 	}
 	return filevector;
 }
-void Game::InitIwmoBlocks()
+void Game::InitIwmoBlocks(string filter)
 {
-	path p("resources/blocks/");  // avoid repeated path construction below
+	BlockType bltype = BlockType::unknownblock;
+	path p;
+	string path = "resources/";
+	string subpath;
+	if (filter == "solids")
+	{
+		// avoid repeated path construction below
+		subpath = path+"blocks/";
+		bltype = BlockType::solid;
+		p = subpath;
+	}
+	else if (filter == "traps")
+	{
+		// avoid repeated path construction below
+		subpath = path + "traps/";
+		bltype = BlockType::trap;
+		p = subpath;
+	}
+	else if (filter == "decorations")
+	{
+		// avoid repeated path construction below
+		subpath = path + "traps/";
+		bltype = BlockType::decoration;
+		p = subpath;
+	}
+	else if (filter == "animated")
+	{
+		// avoid repeated path construction below
+		subpath = path + "animated/";
+		p = subpath;
+	}
+	else
+	{
+		cout << "Invalid filter '"<<filter<<"', blocks not initialized" << endl;
+		return;
+	}
 	std::vector<std::map<string, string>> filevector(0);
 	filevector.reserve(0);
 	if (exists(p))    // does path p actually exist?
 	{
 
-		filevector = get_file_list("resources/blocks/");
+		filevector = get_file_list(subpath);
 	}
 	else
 	{
-		cout << "ERROR!!!! resources/blocks dont exists!!!" << endl;
+		cout << "ERROR!!!! "<<subpath<<" dont exists!!!" << endl;
 	}
 	map<string, string>::const_iterator map_iter;
 	for (unsigned int i = 0; i < filevector.size(); i++)
@@ -91,7 +134,7 @@ void Game::InitIwmoBlocks()
 			cout << map_iter->first << " not loaded!" << endl;
 		}*/
 		bname = map_iter->second;
-		AddIwmoBlock(bname);
+		AddIwmoBlock(bname, bltype);
 	}
 	}
 	
@@ -126,6 +169,8 @@ View* Game::GetCam()
 }
 void Game::LS()
 {
+	m_engine->AddSoundBuffer("castleentrance");
+	m_engine->LoadSound("castleentrance.ogg", "castleentrance");
 	m_engine->AddSoundBuffer("kidjump");
 	m_engine->LoadSound("jump1.ogg", "kidjump");
 	m_engine->AddSoundBuffer("kiddoublejump");
@@ -133,25 +178,31 @@ void Game::LS()
 	m_engine->AddSoundBuffer("kiddeath");
 	m_engine->LoadSound("death.ogg", "kiddeath");
 	m_engine->AddSoundBuffer("kidfire");
-	m_engine->LoadSound("fire.ogg", "kidfire");
+	m_engine->LoadSound("bullet.flac", "kidfire");
 }
-void Game::StartGame(Engine* engine,CSource* source)
+void Game::StartGame(Engine* engine, CSource* source)
 {
 	eventhandler = new GameHandler(this);
 	instanceEH = eventhandler;
-	
+
 	m_ls = source;
 	instanceEH = dynamic_cast<Game*>(eventhandler);
 	instanceEH->m_hookEvent(m_ls);
 	__raise source->OnEvent(sf::Event());
 	static kid mykid;
 	auto lss = this->m_ls;
-	mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss,kidDeathSheet,&camera);
+	mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss, kidDeathSheet, &camera);
 	m_engine->Addentity(&mykid, 0);
 	mykid.setPos(Iwmo::KidSpawn);
 	m_engine->gamestarted = true;
 	cout << "Game started!" << endl;
 
+	if (!castleent.openFromFile("resources/sounds/castleentrance.ogg"))
+	{
+		cout << "castle entrance not loaded!" << endl;
+	}
+	castleent.setLoop(true);
+	castleent.play();
 	if (debug)
 	{
 
@@ -178,34 +229,69 @@ void Game::LoadSheets()
 		cout << "Poof spritesheet not loaded!" << endl;
 	}
 }
+//TODO
+void Game::INITMAP()
+{
+	Texture* castle2 = GetBlockTextureByName("castle2.png");
+	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
+	for (int i = 0; i < 25; i++)
+	{
+		if (i == 0)
+		{
+			sf::Vector2f offset(castle2->getSize().x*i, (-32));
+			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
+			/*
+			creating vertical wall
+			*/
+			for (int i1 = -19; i1 > 0; i1++)
+			{
+				{
+					auto size = castle2->getSize().y;
+					sf::Vector2f offset(0, (-64) + size*i1);
+					m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
+				}
+			}
+		}
+		else
+		{
+			//horizontal wall
+			sf::Vector2f offset(castlewall2->getSize().x*i, (-32));
+			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
+		}
+	}
+}
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
-	InitIwmoBlocks();
-	
-	window = wind;
-	m_engine = engine;
-	m_engine->RemoveAll();
-	LoadSheets();
-	
-	LS();
-
-	for (int i = 0; i < 10; i++)
+	/*
+	Inits layers
+	*/
+	for (int i = 0; i < 7; i++)
 	{
 		engine->AddLayer(i);
 	}
-	engine->LoadMap("map.tmx");
-
+	
+	//
+	//init blocks by filters
+	InitIwmoBlocks("solids");
+	InitIwmoBlocks("traps");
+	InitIwmoBlocks("decorations");
+	InitIwmoBlocks("animated");
+	//
+	window = wind;
+	m_engine = engine;
+	m_engine->RemoveAll();
+	//load sprite sheet
+	LoadSheets();
+	//load sounds
+	LS();
+	//camera
 	camera.setCenter(CAM_CENTER);
 	camera.setSize(CAM_SIZE);
 	window->setView(camera);
 	engine->SetCam(&camera);
 	engine->GetWindow()->setKeyRepeatEnabled(false);
-	Texture* wall = GetBlockTextureByName("wall.png");
-	for (int i = 0; i < 10; i++)
-	{
-		sf::Vector2f offset(wall->getSize().x*i, (-32));
-		m_engine->AddBlock(new Block(wall, sf::Vector2f(0,3200) + offset));
-	}
+	INITMAP();
+	
 	//
 	StartGame(m_engine,source);
 }

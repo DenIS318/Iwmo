@@ -22,7 +22,6 @@
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Collision.cpp" />
-    <ClCompile Include="DebugShape.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="IwmoConfig.cpp" />
@@ -30,18 +29,10 @@
     <ClCompile Include="IwmoEntity.cpp" />
     <ClCompile Include="IwmoMath.cpp" />
     <ClCompile Include="kid.cpp" />
-    <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MapLayer.cpp" />
-    <ClCompile Include="MapLoaderPrivate.cpp" />
-    <ClCompile Include="MapLoaderPublic.cpp" />
-    <ClCompile Include="MapObject.cpp" />
-    <ClCompile Include="miniz.c" />
     <ClCompile Include="mytextbox.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="pugixml.cpp" />
-    <ClCompile Include="QuadTreeNode.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="tinyxml\tinystr.cpp" />
@@ -62,7 +53,6 @@
     <ClInclude Include="IwmoEntity.h" />
     <ClInclude Include="IwmoMath.h" />
     <ClInclude Include="kid.h" />
-    <ClInclude Include="miniz.h" />
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />
     <ClInclude Include="Network.h" />
@@ -178,7 +168,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SFML_STATIC;STP_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Users\Денис\Desktop\1\tiledloader\include;C:\Program Files %28x86%29\boost;C:\Users\Денис\Desktop\1\SFML-2.4.2\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost;C:\Users\Денис\Desktop\1\SFML-2.4.2\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>

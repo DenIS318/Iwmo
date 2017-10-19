@@ -1,6 +1,6 @@
 <!DOCTYPE SpriteDecomposer>
 <sprites image="kid.png" transparentColor="FFFFFF">
- <animation title="shoot" delay="10">
+ <animation title="shoot" delay="30">
   <cut w="4" x="84" y="266" h="4" row="1" col="1"/>
   <cut w="4" x="92" y="266" h="4" row="1" col="1"/>
  </animation>

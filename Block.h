@@ -2,29 +2,27 @@
 #include <SFML\Graphics.hpp>
 #include <iostream>
 #include "TextureManager.h"
+#include "IwmoConfig.h"
 using namespace sf;
 using namespace std;
+using namespace Iwmo;
 namespace Iwmo {
 	class Block
 	{
 	public:
-		enum BlockType
-		{
-			solid,
-			decoration,
-			killing,
-			trap
-		};
-		Block(string str);
-		Block(Texture* texture,int x,int y);
-		Block(Texture* texture, sf::Vector2<int>  position);
-		Block(Texture* texture, sf::Vector2f  position);
+		
+		Block(string str, BlockType blocktype);
+		Block(Texture* texture,int x,int y,BlockType blocktype);
+		Block(Texture* texture, sf::Vector2<int>  position, BlockType blocktype);
+		Block(Texture* texture, sf::Vector2f  position, BlockType blocktype);
 		Block Reset();
 		void SetPos(sf::Vector2f pos);
 		sf::FloatRect GetGlobalRect();
 		~Block();
 		Sprite sprite;
-		BlockType blocktype = solid;
+		BlockType blocktype = unknownblock;
+		bool killable = false;
+		bool animated = false;
 		bool Resetable = false;
 	private:
 		void AddToManager(string texturename);

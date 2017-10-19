@@ -19,10 +19,11 @@ public:
 	Sprite sprite;
 	void deletebullet();
 	AnimationManager anim;
-	int bulletspeed = 2;
+	bool HasAnim = true;
+	float bulletspeed = 10000;
 	int finisheddistance = 0;
-	int maxdistance = 400;
-	Vector2i bulletpos;
+	int maxdistance = 600;
+	sf::Vector2f bulletpos;
 };
 #undef Vector2i
 

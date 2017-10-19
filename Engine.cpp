@@ -3,16 +3,7 @@ const string m_spath = "resources/sounds/";
 float fps;
 bool CameraSetted = false;
 View* CamPointer;
-MapLoader m_map("resources/");
-//defines layers
-#define bg2 0
-#define bg 1
-#define tiles 2
-#define tiles2 3
-#define bounds 4
-#define deathzone 5
-#define objects 6
-#define textlayer 7
+
 //
 void Engine::AddSoundBuffer(string name)
 {
@@ -28,17 +19,25 @@ void Engine::ResetBlock(Block* b)
 	Block ResetedBlock = b->Reset();
 	b = new Block(ResetedBlock);
 }
+#define vector2d MapBlocks
 void Engine::ResetBlocks()
 {
-	for (auto it = MapBlocks.begin(); it != MapBlocks.end(); ++it)
-	{
-		auto p = *it;
-		if (p->Resetable)
-		{
-			this->ResetBlock(p);
+	//TODO vector2d iterator template
+
+	vector< vector<Block*> >::iterator row;
+	vector<Block*>::iterator col;
+	for (row = vector2d.begin(); row != vector2d.end(); row++) {
+		for (col = row->begin(); col != row->end(); col++) {
+			// do stuff ...
+			auto p = *col;
+			if (p->Resetable)
+			{
+				this->ResetBlock(p);
+			}
 		}
 	}
 }
+#undef vector2d
 bool Engine::LoadSound(string name,string buffername)
 {
 	
@@ -82,11 +81,13 @@ void Engine::AddLayer(unsigned short layernum)
 {
 	vector<Drawable*> tempvector;
 	Engine::layerr.push_back(tempvector);
+	vector<Block*> tempvectorblock;
+	Engine::MapBlocks.push_back(tempvectorblock);
 }
 void Engine::RemoveLayer(unsigned short layernum)
 {
-
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
+	Engine::MapBlocks.erase(std::remove(Engine::MapBlocks.begin(), Engine::MapBlocks.end(), Engine::MapBlocks[layernum]), Engine::MapBlocks.end());
 }
 vector<vector<iwmoEntity*>>& Engine::GetEntities()
 {
@@ -134,48 +135,24 @@ void Engine::Removeentity(iwmoEntity* man)
 
 	delete man;
 }
-void Engine::AddBlock(Block* b)
+void Engine::AddBlock(Block* b,int layernumber)
 {
-	MapBlocks.push_back(b);
+	MapBlocks[layernumber].push_back(b);
 }
-void Engine::LoadMap(string s)
+void Engine::RemoveBlock(Block* b, unsigned short layernumber)
 {
-	m_map.addSearchPath("resources/blocks/");
-	m_map.addSearchPath("resources/animatedblocks/");
-	tmx::setLogLevel(Logger::Info);
-	if (m_map.load(s))
-	{
-		if (debug) {
+	Engine::MapBlocks[layernumber].erase(std::remove(Engine::MapBlocks[layernumber].begin(), Engine::MapBlocks[layernumber].end(), b), Engine::MapBlocks[layernumber].end());
 
-			cout << "m_map loaded!" << endl;
-		}
-	}
-	else
-	{
-		if (debug) {
-			cout << "m_map NOT LOADED!" << endl;
-		}
-	}
-	
-	auto boundslayer = m_map.getLayers()[bounds];
-	boundslayer.visible = false;
-	auto tileslayer = m_map.getLayers()[tiles];
-	tileslayer.visible = true;
-	//tileslayer.GetTile(0, 0).
-	
-	
-	/*for each (tmx::MapTile tile in l.at(0).tiles)
-	{
-		maptiles.push_back(&tile.sprite);
-	}
-	for each (tmx::MapTile tile in l.at(1).tiles)
-	{
-		maptiles.push_back(&tile.sprite);
-	}*/
+
+	delete b;
 }
-tmx::MapLoader* Engine::GetMap()
+void Engine::RemoveBlock(Block* b)
 {
-	return &m_map;
+	for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
+	{
+		Engine::MapBlocks[i].erase(std::remove(Engine::MapBlocks[i].begin(), Engine::MapBlocks[i].end(), b), Engine::MapBlocks[i].end());
+	}
+	delete b;
 }
 unsigned int Engine::GetFrameRate()
 {
@@ -204,61 +181,43 @@ void Engine::Render()
 	}
 	if (gamestarted)
 	{
-		//window.draw(m_map);
-		/*for (auto it = maplayers.begin(); it != maplayers.end(); ++it)
-		{
-			auto layerpointer = *it._Ptr;
-
-			window.draw(*layerpointer);
-		}*/
-		window.draw(m_map);
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
-			window.draw((Engine::MapBlocks.at(i)->sprite));
-			//cout << MapBlocks[i].sprite.getPosition().x << ", " << MapBlocks[i].sprite.getPosition().y << endl;
-		
+			for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].size(); i1++)
+			{
+				window.draw((Engine::MapBlocks.at(i)[i1]->sprite));
+
+			}
+		}
+		for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+		{
+			for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
+			{
+				{
+					Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
+					Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
+					Engine::layerrentity.at(i).at(i1)->tick(m__time);
+					Engine::layerrentity.at(i).at(i1)->control();
+					if (Engine::layerrentity.at(i).at(i1)->visible)
+					{
+						Engine::layerrentity.at(i).at(i1)->draw(&window);
+					}
+				}
+
+			}
 		}
 	}
-	
-		for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
-		{
-			for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
-			{
-				//cout << Engine::layerr.at(myi).size()<<endl; 
-
-				window.draw(*(Engine::layerr.at(myi).at(myi1)));
-			}
-		}
-	
-
-	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+	for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
 	{
-		for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
+		for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
 		{
-			//cout << Engine::layerrentity.at(i).size()<<endl; 
-			//cout << 0;
-			
-			{
-				//cout << this_thread::get_id() << " THREAD ID IN RENDER" << endl;
-				Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
-				Engine::layerrentity.at(i).at(i1)->tick(m__time);
-				Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
-				Engine::layerrentity.at(i).at(i1)->control();
-				//cout << Engine::layerrentity.at(i).at(i1)->anim.currentAnim.at(0) << endl;
-				if (Engine::layerrentity.at(i).at(i1)->visible)
-				{
-					Engine::layerrentity.at(i).at(i1)->draw(&window);
-				}
-			}
+			//cout << Engine::layerr.at(myi).size()<<endl; 
 
+			window.draw(*(Engine::layerr.at(myi).at(myi1)));
 		}
 	}
 	//cout << GetFrameRate() << endl;
 	window.display();
-
-
-
-
 }
 RenderWindow* Engine::GetWindow()
 {

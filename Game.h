@@ -10,12 +10,10 @@
 #include "Block.h"
 #include <boost/filesystem.hpp>
 #include <boost/any.hpp>
-//#include "Player.h"
 
 using namespace boost::filesystem;
 using namespace std;
 using namespace sf;
-using namespace tmx;
 using namespace Iwmo;
 class Game
 {
@@ -36,13 +34,13 @@ public:
 	~Game();
 	void StartGame(Engine* engine,CSource*);
 	//void EventHandling(CSource* sourc);
-
+	Music castleent;
 
 	virtual void m_hookEvent(CSource* pSource);
 	virtual void m_unhookEvent(CSource* pSource);
 	View* GetCam();
 	Game* getGame();
-	
+	void INITMAP();
 	const sf::Vector2f CAM_SIZE = sf::Vector2f(800, 600);
 	const sf::Vector2f CAM_CENTER = sf::Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
 	RenderWindow* window;
@@ -58,20 +56,29 @@ public:
 	Get block texture* with given name in blocks folder with extension
 	*/
 	Texture* GetBlockTextureByName(string name);
-	map<string,Texture*>* GetBlockList();
-	void AddIwmoBlock(string name);
+	vector<IwmoBlock>* GetBlockList();
+	
 	 sf::Texture* kidDeathSheet = new Texture;
 	 sf::Texture* kidSheet = new Texture;
 private:
 	void LS();
-	void InitIwmoBlocks();
+	/*
+	Avivable filters:
+	solids
+	decorations
+	traps
+	animated
+	*/
+	void InitIwmoBlocks(string filter);
+	void AddIwmoBlock(string name, BlockType blocktype);
 	void LoadSheets();
 	TiXmlDocument kidXML;
 //	TiXmlDocument kidDeathXML;
 	TiXmlDocument LevelXML;
 	//Texture* kidSheet = new Texture;
 	//Texture* kidDeathSheet = new Texture;
-	 map<string, Texture*> IwmoBlocks;
+
+	 vector<IwmoBlock> IwmoBlocks;
 };
 [event_receiver(native)]
 class GameHandler : public Game

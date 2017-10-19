@@ -1,6 +1,5 @@
 #include "kid.h"
-using namespace tmx;
-const sf::Vector2f koctil(0,2);
+const sf::Vector2f koctil(0,1);
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
@@ -12,6 +11,7 @@ kid::kid()
 kid::~kid()
 {
 }
+#define vector2d m_engine->MapBlocks
 void kid::Col()
 {
 	if (Alive)
@@ -19,33 +19,63 @@ void kid::Col()
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		sf::Vector2f mtv;
-		for (auto bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)
-		{
 
-			if (!m_p)
-			{
-				auto bl2 = *bl._Ptr;
-				//float beforecol = kidentity->GetY();
-				if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
+		vector< vector<Block*> >::iterator row;
+		vector<Block*>::iterator col;
+		for (row = vector2d.begin(); row != vector2d.end(); row++) {
+			for (col = row->begin(); col != row->end(); col++) {
+				if (!m_p)
 				{
-
-					if (bl2->blocktype == Iwmo::Block::BlockType::solid)
+					auto bl2 = *col._Ptr;
+					//float beforecol = kidentity->GetY();
+					if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
 					{
-						//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
-						kidentity->setPos(kidentity->GetPos() + mtv + koctil );
-						if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+
+						if (bl2->blocktype == Iwmo::BlockType::solid)
 						{
-							grounded = true;
-							m_p = true;
-							vel.y = 0;
-							lshiftcounter = 0;
-							jumpcount = 0;
-				
+							//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
+							kidentity->setPos(kidentity->GetPos() + mtv + koctil);
+							if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+							{
+								grounded = true;
+								m_p = true;
+								vel.y = 0;
+								lshiftcounter = 0;
+								jumpcount = 0;
+
+							}
 						}
 					}
 				}
 			}
 		}
+		/*for (auto bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)
+		{
+
+			//if (!m_p)
+			//{
+			//	auto bl2 = *bl._Ptr;
+			//	//float beforecol = kidentity->GetY();
+			//	if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
+			//	{
+
+			//		if (bl2->blocktype == Iwmo::BlockType::solid)
+			//		{
+			//			//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
+			//			kidentity->setPos(kidentity->GetPos() + mtv + koctil );
+			//			if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+			//			{
+			//				grounded = true;
+			//				m_p = true;
+			//				vel.y = 0;
+			//				lshiftcounter = 0;
+			//				jumpcount = 0;
+			//	
+			//			}
+			//		}
+			//	}
+			//}
+			*/
 		if (!m_p)
 		{
 	
@@ -158,6 +188,7 @@ void kid::Col()
 		}
 	}
 }
+#undef vector2d
 void kid::Restart()
 {
 	m_engine->ResetBlocks();
@@ -251,7 +282,7 @@ void kid::tick(float time)
 	posx = x - (x % 800) + 400;
 	posy = y - (y % 600) + 300;
 	Vector2f vec(posx, posy);
-	coutVector2(vec);
+	//coutVector2(vec);
 	m_camera->setCenter(vec);
 	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end();)
 	{
@@ -259,6 +290,10 @@ void kid::tick(float time)
 		if (bullet->finisheddistance < bullet->maxdistance)
 		{
 			bullet->tick(m_engine->GetWindow(),time);
+			if (bull != Bulletlist.end())
+			{
+				++bull;
+			}
 		}
 		else
 		{
@@ -377,7 +412,6 @@ void kid::control()
 			}
 		}
 	}
-	
 	CheckState();
 }
 void kid::shoot()
@@ -391,13 +425,29 @@ void kid::shoot()
 
 			fires.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
 			fires.play();
+			
 			auto b = kidentity->anim.getSprite()->getGlobalBounds();
-			sf::Vector2i bulpoint(b.left + b.width,b.top+(b.height/2));
+			sf::Vector2i bulpoint;
+			bool flipped;
+			if (!kidentity->anim.isFlip())
+			{
+				bulpoint = sf::Vector2i(b.left + b.width, b.top + (b.height / 2));
+				flipped = false;
+			}
+			else
+			{
+				bulpoint = sf::Vector2i(b.left, b.top + (b.height / 2));
+				flipped = true;
+			}
 			if (state == jump)
 			{
 				bulpoint.y -= 2;
 			}
 			Bullet* bul = new Bullet(bulletscale, m_texture, bulpoint);
+			if (flipped)
+			{
+				bul->sprite.setRotation(180);
+			}
 			Bulletlist.push_back(bul);
 			KidShootEvent e;
 			e.eventtype = Types::EventTypes::KidShootEvent;
@@ -421,18 +471,6 @@ void kid::ProcessKeyboard(Event event)
 	{
 		if (event.type == Event::KeyPressed)
 		{
-			/*if (event.key.code == sf::Keyboard::Left)
-			{
-
-				kidentity->anim.flip(true);
-
-			}
-			if (event.key.code == sf::Keyboard::Right)
-			{
-
-				kidentity->anim.flip(false);
-
-			}*/
 			if (event.key.code == Keyboard::LShift)
 			{
 				JumpPassed = true;

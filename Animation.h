@@ -166,7 +166,7 @@ public:
 		
 	}
 
-	void draw(RenderWindow *window, int x, int y)
+	void draw(RenderWindow *window, float x, float y)
 	{
 		animList[currentAnim].sprite.setPosition(x, y);
 		window->draw(animList[currentAnim].sprite);

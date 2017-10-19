@@ -22,7 +22,6 @@ enum EntityState {
 	death,
 	unknown
 };
-
 using namespace sf;
 using namespace std;
 using namespace Iwmo;

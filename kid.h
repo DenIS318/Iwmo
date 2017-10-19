@@ -27,6 +27,7 @@ public:
 	Sound doublejumps;
 	Sound deaths;
 	Sound fires;
+	
 	void MGetEvent(Event event);
 	sf::Vector2f vel;
 	int JumpPower = -260;
@@ -42,7 +43,7 @@ public:
 	void shoot();
 	vector<Bullet*>Bulletlist;
 	void tick(float time);
-	sf::Vector2i bulletscale = sf::Vector2i(5,5);
+	sf::Vector2i bulletscale = sf::Vector2i(1,1);
 private:
 	View* m_camera;
 	//sf::Vector2f LastPos;

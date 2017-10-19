@@ -5,21 +5,14 @@
 #include <iostream>
 #include <vector> 
 #include <chrono>
-//#include <tmx\MapLoader.hpp>
 #include "Animation.h"
 #include "IwmoConfig.h"
 #include "iwmoEntity.h"
-//#include "tmx\MapLayer.hpp"
 #include "Block.h"
 #include "IwmoMath.h"
-#include <tmx\MapLoader.hpp>
-#include <tmx\Log.hpp>
-#define LOG_OUTPUT_CONSOLE
 using namespace sf;
 using namespace std;
-using namespace tmx;
 using namespace Iwmo;
-//using namespace IwmoEngine;
 class Engine
 {
 
@@ -27,7 +20,7 @@ public:
 	//CONSTRUCT
 	Engine();
 	void SetCam(View*);
-	void AddBlock(Block* b);
+	void AddBlock(Block* b, int layernumber);
 	void ResetBlock(Block* b);
 	void ResetBlocks();
 	vector<Sprite*> maptiles;
@@ -52,6 +45,15 @@ public:
 	Adding iwmoEntity pointer to layer and render.
 	*/
 	void Addentity(iwmoEntity*, unsigned short);
+	/*
+	Removes block by layer permament and clearing RAM.
+	*/
+	void RemoveBlock(Block*, unsigned short);
+	/*
+	Removes block permament and clearing RAM.
+	*/
+	void RemoveBlock(Block*);
+	/*
 	/*
 	Removes iwmoEntity by layer permament and clearing RAM.
 	*/
@@ -91,13 +93,11 @@ public:
 	//DESTRUCT
 	~Engine();
 	bool gamestarted = false;
-	tmx::MapLoader* GetMap();
-	void LoadMap(string);
 	/*
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
-	vector<Block*> MapBlocks;
+	vector<vector<Block*>> MapBlocks;
 	Math m_math = Iwmo::IWMOMATH;
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
