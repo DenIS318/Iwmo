@@ -29,7 +29,6 @@
     <ClCompile Include="IwmoEntity.cpp" />
     <ClCompile Include="IwmoMath.cpp" />
     <ClCompile Include="kid.cpp" />
-    <ClCompile Include="level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mytextbox.cpp" />
     <ClCompile Include="Network.cpp" />
@@ -54,7 +53,6 @@
     <ClInclude Include="IwmoEntity.h" />
     <ClInclude Include="IwmoMath.h" />
     <ClInclude Include="kid.h" />
-    <ClInclude Include="level.h" />
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />
     <ClInclude Include="Network.h" />

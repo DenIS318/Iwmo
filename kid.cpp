@@ -424,6 +424,8 @@ void kid::shoot()
 			currentbullets++;
 
 			fires.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+			fires.setVolume(10);
+			
 			fires.play();
 			
 			auto b = kidentity->anim.getSprite()->getGlobalBounds();

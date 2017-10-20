@@ -181,7 +181,7 @@ void Engine::Render()
 	}
 	if (gamestarted)
 	{
-		Map.Draw(window);
+		
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
 			for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].size(); i1++)

@@ -232,35 +232,27 @@ void Game::LoadSheets()
 //TODO
 void Game::INITMAP()
 {
-	/*
+	
 	Texture* castle2 = GetBlockTextureByName("castle2.png");
 	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
 	for (int i = 0; i < 25; i++)
 	{
 		if (i == 0)
 		{
-		//vertical wall
+			//vertical wall
 			sf::Vector2f offset(castle2->getSize().x*i, (-32));
-			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
-			
-			for (int i1 = -19; i1 > 0; i1++)
-			{
-				{
-					auto size = castle2->getSize().y;
-					sf::Vector2f offset(0, (-64) + size*i1);
-					m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
-				}
-			}
+			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
+
 		}
 		else
 		{
 			//horizontal wall
 			sf::Vector2f offset(castlewall2->getSize().x*i, (-32));
-			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
+			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
 		}
-		}
-		*/
-	m_engine->Map.LoadFromFile("resources/map.tmx");
+	}
+		
+		
 	
 }
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
