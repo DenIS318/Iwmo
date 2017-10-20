@@ -10,6 +10,7 @@
 #include "iwmoEntity.h"
 #include "Block.h"
 #include "IwmoMath.h"
+#include "level.h"
 using namespace sf;
 using namespace std;
 using namespace Iwmo;
@@ -102,8 +103,7 @@ public:
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
-
-	
+	LEVELH::Level Map;
 private:
 	
 	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;

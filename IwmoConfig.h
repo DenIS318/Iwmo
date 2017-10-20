@@ -6,14 +6,14 @@
 
 namespace Iwmo {
 	//defines layers
-#define bg2 0
-#define bg 1
-#define tiles 2
-#define tiles2 3
-#define bounds 4
-#define deathzone 5
-#define objects 6
-#define textlayer 7
+#define bg2l 0
+#define bgl 1
+#define tilesl 2
+#define tiles2l 3
+#define boundsl 4
+#define deathzonel 5
+#define objectsl 6
+#define textlayerl 7
 	enum BlockType
 	{
 		solid,

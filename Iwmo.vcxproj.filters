@@ -21,6 +21,7 @@
     <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="iwmoEffect.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="level.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="CustomEvents.h" />
     <ClInclude Include="iwmoEffect.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="level.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="zlibstat.lib" />

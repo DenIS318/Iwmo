@@ -2,30 +2,30 @@
 <tileset name="decorations" tilewidth="400" tileheight="542" tilecount="9" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
-  <image width="400" height="542" source="blocks/thechosenone.png"/>
+  <image width="400" height="542" source="decorations/thechosenone.png"/>
  </tile>
  <tile id="1">
-  <image width="32" height="32" source="blocks/backgroundtrube.png"/>
+  <image width="32" height="32" source="decorations/backgroundtrube.png"/>
  </tile>
  <tile id="2">
-  <image width="213" height="331" source="blocks/bigtree.png"/>
+  <image width="213" height="331" source="decorations/bigtree.png"/>
  </tile>
  <tile id="3">
-  <image width="128" height="128" source="blocks/blackhole.png"/>
+  <image width="128" height="128" source="decorations/blackhole.png"/>
  </tile>
  <tile id="4">
-  <image width="32" height="32" source="blocks/brick.png"/>
+  <image width="32" height="32" source="decorations/brick.png"/>
  </tile>
  <tile id="5">
-  <image width="96" height="32" source="blocks/columndown.png"/>
+  <image width="96" height="32" source="decorations/columndown.png"/>
  </tile>
  <tile id="6">
-  <image width="96" height="32" source="blocks/columnup.png"/>
+  <image width="96" height="32" source="decorations/columnup.png"/>
  </tile>
  <tile id="7">
-  <image width="126" height="92" source="blocks/texttable.png"/>
+  <image width="126" height="92" source="decorations/texttable.png"/>
  </tile>
  <tile id="8">
-  <image width="128" height="64" source="blocks/texttableonwall.png"/>
+  <image width="128" height="64" source="decorations/texttableonwall.png"/>
  </tile>
 </tileset>

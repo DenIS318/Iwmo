@@ -20,10 +20,10 @@
   <image width="32" height="32" source="blocks/castlewall2.png"/>
  </tile>
  <tile id="6">
-  <image width="96" height="32" source="blocks/columndown.png"/>
+  <image width="96" height="32" source="decorations/columndown.png"/>
  </tile>
  <tile id="7">
-  <image width="96" height="32" source="blocks/columnup.png"/>
+  <image width="96" height="32" source="decorations/columnup.png"/>
  </tile>
  <tile id="8">
   <image width="32" height="32" source="blocks/grass.png"/>

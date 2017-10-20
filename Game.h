@@ -10,7 +10,6 @@
 #include "Block.h"
 #include <boost/filesystem.hpp>
 #include <boost/any.hpp>
-
 using namespace boost::filesystem;
 using namespace std;
 using namespace sf;

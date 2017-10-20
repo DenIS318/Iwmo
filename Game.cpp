@@ -80,7 +80,7 @@ void Game::InitIwmoBlocks(string filter)
 	if (filter == "solids")
 	{
 		// avoid repeated path construction below
-		subpath = path+"blocks/";
+		subpath = path + "blocks/";
 		bltype = BlockType::solid;
 		p = subpath;
 	}
@@ -106,7 +106,7 @@ void Game::InitIwmoBlocks(string filter)
 	}
 	else
 	{
-		cout << "Invalid filter '"<<filter<<"', blocks not initialized" << endl;
+		cout << "Invalid filter '" << filter << "', blocks not initialized" << endl;
 		return;
 	}
 	std::vector<std::map<string, string>> filevector(0);
@@ -118,26 +118,26 @@ void Game::InitIwmoBlocks(string filter)
 	}
 	else
 	{
-		cout << "ERROR!!!! "<<subpath<<" dont exists!!!" << endl;
+		cout << "ERROR!!!! " << subpath << " dont exists!!!" << endl;
 	}
 	map<string, string>::const_iterator map_iter;
 	for (unsigned int i = 0; i < filevector.size(); i++)
 	{
-	
-	for (map_iter = filevector[i].begin(); map_iter != filevector[i].end(); ++map_iter)
-	{
-		
-		string bname;
-		//auto btexture = TextureManager::loadTexture(bname, m_res);
-	/*	if (!btexture.loadFromFile(map_iter->first))
+
+		for (map_iter = filevector[i].begin(); map_iter != filevector[i].end(); ++map_iter)
 		{
-			cout << map_iter->first << " not loaded!" << endl;
-		}*/
-		bname = map_iter->second;
-		AddIwmoBlock(bname, bltype);
+
+			string bname;
+			//auto btexture = TextureManager::loadTexture(bname, m_res);
+		/*	if (!btexture.loadFromFile(map_iter->first))
+			{
+				cout << map_iter->first << " not loaded!" << endl;
+			}*/
+			bname = map_iter->second;
+			AddIwmoBlock(bname, bltype);
+		}
 	}
-	}
-	
+
 
 }
 
@@ -232,17 +232,17 @@ void Game::LoadSheets()
 //TODO
 void Game::INITMAP()
 {
+	/*
 	Texture* castle2 = GetBlockTextureByName("castle2.png");
 	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
 	for (int i = 0; i < 25; i++)
 	{
 		if (i == 0)
 		{
+		//vertical wall
 			sf::Vector2f offset(castle2->getSize().x*i, (-32));
 			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
-			/*
-			creating vertical wall
-			*/
+			
 			for (int i1 = -19; i1 > 0; i1++)
 			{
 				{
@@ -258,7 +258,10 @@ void Game::INITMAP()
 			sf::Vector2f offset(castlewall2->getSize().x*i, (-32));
 			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tiles);
 		}
-	}
+		}
+		*/
+	m_engine->Map.LoadFromFile("resources/map.tmx");
+	
 }
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
