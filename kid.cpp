@@ -179,22 +179,26 @@ void kid::Restart()
 	visible = true;
 	state = unknown;
 	setPos(LastSave);
+	if (effect != NULL)
+	{
+		m_engine->RemoveEffect(effect, 1);
+	}
 }
 void kid::death()
 {
-	Alive = false;
-	state = EntityState::death;
-	visible = false;
-	if (effect == NULL)
+	if (Alive)
 	{
+		Alive = false;
+		state = EntityState::death;
+		visible = false;
 		effect = new iwmoEffect;
+		effect->initEntit("resources/effects/poof2.xml", m_deathsheet, m_souc);
+		effect->anim.animList["poof"].loop = false;
+		effect->DestroyAfterFinish = true;
+		effect->setPos(kidentity->GetPos());
+		effect->play("poof");
+		m_engine->AddEffect(effect, 1);
 	}
-	effect->initEntit("resources/effects/poof2.xml", m_deathsheet, m_souc);
-	effect->anim.animList["poof"].loop = false;
-	effect->DestroyAfterFinish = true;
-	effect->setPos(kidentity->GetPos());
-	effect->play("poof");
-	m_engine->AddEffect(effect, 1);
 }
 void kid::CheckState()
 {

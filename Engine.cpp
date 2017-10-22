@@ -135,13 +135,17 @@ void Engine::AddEffect(iwmoEffect* effect, unsigned short layernum)
 void Engine::RemoveEffect(iwmoEffect* man, unsigned short layernum)
 {
 	Engine::effectlayers[layernum].erase(std::remove(Engine::effectlayers[layernum].begin(), Engine::effectlayers[layernum].end(), man), Engine::effectlayers[layernum].end());
+	delete man;
 }
 void Engine::RemoveEffect(iwmoEffect* man)
 {
+	//cout << man << endl;
 	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
 	{
 		Engine::effectlayers[i].erase(std::remove(Engine::effectlayers[i].begin(), Engine::effectlayers[i].end(), man), Engine::effectlayers[i].end());
 	}
+	//cout << man << endl;
+	delete static_cast<iwmoEffect*>(man);
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {

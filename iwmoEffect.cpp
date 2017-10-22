@@ -31,7 +31,9 @@ void iwmoEffect::tick(float t)
 		{
 			DestroyEffectEvent e;
 			e.eventtype = Types::EventTypes::DestroyEffectEvent;
-			e.whichEffect = this;
+			iwmoEffect* ef = this;
+			e.whichEffect = ef;
+			cout << e.eventtype << endl;
 			__raise m_souc->OnCustomEvent(e);
 		}
 }

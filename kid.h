@@ -57,5 +57,5 @@ private:
 	Texture* m_deathsheet;
 	Texture* m_texture;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
-	iwmoEffect* effect = new iwmoEffect;
+	iwmoEffect* effect;
 };

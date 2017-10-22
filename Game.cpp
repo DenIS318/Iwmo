@@ -330,7 +330,7 @@ void GameHandler::OnCustomEvent(CustomEvent event)
 		{
 		cout << "DESTROYEFFECT EVENT" << endl;
 		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(&event);
-		m_engine->Removeentity(e->whichEffect);
+		m_engine->RemoveEffect(e->whichEffect);
 		}
 		break;
 	case Types::EntityShootEvent:
