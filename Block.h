@@ -2,7 +2,8 @@
 #include <SFML\Graphics.hpp>
 #include <iostream>
 #include "TextureManager.h"
-#include "IwmoConfig.h"
+//#include "IwmoConfig.h"
+#include "iwmoTypes.h"
 using namespace sf;
 using namespace std;
 using namespace Iwmo;

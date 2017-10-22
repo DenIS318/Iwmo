@@ -62,8 +62,10 @@ void Engine::RemoveAll()
 			delete Engine::layerrentity.at(i).at(i1);
 		}
 	}
+	Engine::layerrentity.clear();
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
+	Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 }
 Engine::Engine()
 {
@@ -81,12 +83,18 @@ void Engine::AddLayer(unsigned short layernum)
 {
 	vector<Drawable*> tempvector;
 	Engine::layerr.push_back(tempvector);
+	vector<iwmoEntity*> tempvectorentity;
+	Engine::layerrentity.push_back(tempvectorentity);
 	vector<Block*> tempvectorblock;
 	Engine::MapBlocks.push_back(tempvectorblock);
+	vector<iwmoEffect*> tempvectoreffects;
+	Engine::effectlayers.push_back(tempvectoreffects);
 }
 void Engine::RemoveLayer(unsigned short layernum)
 {
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
+	Engine::effectlayers.erase(std::remove(Engine::effectlayers.begin(), Engine::effectlayers.end(), Engine::effectlayers[layernum]), Engine::effectlayers.end());
+	Engine::layerrentity.erase(std::remove(Engine::layerrentity.begin(), Engine::layerrentity.end(), Engine::layerrentity[layernum]), Engine::layerrentity.end());
 	Engine::MapBlocks.erase(std::remove(Engine::MapBlocks.begin(), Engine::MapBlocks.end(), Engine::MapBlocks[layernum]), Engine::MapBlocks.end());
 }
 vector<vector<iwmoEntity*>>& Engine::GetEntities()
@@ -96,6 +104,10 @@ vector<vector<iwmoEntity*>>& Engine::GetEntities()
 vector<vector<Drawable*>>& Engine::getLayers()
 {
 	return Engine::layerr;
+}
+vector<vector<iwmoEntity*>>& Engine::getEntityLayers()
+{
+	return Engine::layerrentity;
 }
 void Engine::AddSprite(Drawable* drawable, unsigned short layernum)
 {
@@ -115,6 +127,21 @@ void Engine::RemoveSprite(Drawable* drawable)
 	}
 
 	delete drawable;
+}
+void Engine::AddEffect(iwmoEffect* effect, unsigned short layernum)
+{
+	Engine::effectlayers.at(layernum).push_back(effect);
+}
+void Engine::RemoveEffect(iwmoEffect* man, unsigned short layernum)
+{
+	Engine::effectlayers[layernum].erase(std::remove(Engine::effectlayers[layernum].begin(), Engine::effectlayers[layernum].end(), man), Engine::effectlayers[layernum].end());
+}
+void Engine::RemoveEffect(iwmoEffect* man)
+{
+	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
+	{
+		Engine::effectlayers[i].erase(std::remove(Engine::effectlayers[i].begin(), Engine::effectlayers[i].end(), man), Engine::effectlayers[i].end());
+	}
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {
@@ -212,9 +239,17 @@ void Engine::Render()
 	{
 		for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
 		{
-			//cout << Engine::layerr.at(myi).size()<<endl; 
-
 			window.draw(*(Engine::layerr.at(myi).at(myi1)));
+		}
+	}
+	for (unsigned int myi = 0; myi < Engine::effectlayers.size(); myi++)
+	{
+		for (unsigned int myi1 = 0; myi1 < Engine::effectlayers.at(myi).size(); myi1++)
+		{
+			Engine::effectlayers.at(myi).at(myi1)->updatetime(m__time);
+			Engine::effectlayers.at(myi).at(myi1)->anim.tick(m__time);
+			Engine::effectlayers.at(myi).at(myi1)->tick(m__time);
+			Engine::effectlayers.at(myi).at(myi1)->draw(&window);
 		}
 	}
 	//cout << GetFrameRate() << endl;

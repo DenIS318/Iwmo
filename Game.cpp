@@ -257,6 +257,10 @@ void Game::INITMAP()
 }
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
+	window = wind;
+	m_engine = engine;
+	m_engine->RemoveAll();
+	//
 	/*
 	Inits layers
 	*/
@@ -264,7 +268,6 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	{
 		engine->AddLayer(i);
 	}
-	
 	//
 	//init blocks by filters
 	InitIwmoBlocks("solids");
@@ -272,9 +275,6 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	InitIwmoBlocks("decorations");
 	InitIwmoBlocks("animated");
 	//
-	window = wind;
-	m_engine = engine;
-	m_engine->RemoveAll();
 	//load sprite sheet
 	LoadSheets();
 	//load sounds
@@ -325,6 +325,13 @@ void GameHandler::OnCustomEvent(CustomEvent event)
 	switch (event.eventtype)
 	{
 	case Types::EntityMoveEvent:
+		break;
+	case Types::DestroyEffectEvent:
+		{
+		cout << "DESTROYEFFECT EVENT" << endl;
+		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(&event);
+		m_engine->Removeentity(e->whichEffect);
+		}
 		break;
 	case Types::EntityShootEvent:
 		{	

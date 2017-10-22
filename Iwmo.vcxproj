@@ -52,6 +52,7 @@
     <ClInclude Include="iwmoEffect.h" />
     <ClInclude Include="IwmoEntity.h" />
     <ClInclude Include="IwmoMath.h" />
+    <ClInclude Include="iwmoTypes.h" />
     <ClInclude Include="kid.h" />
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />

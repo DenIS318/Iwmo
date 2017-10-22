@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <vector>
-
+#include "Block.h"
 /**
 * Test if two sprites overlap using Separating Axis Theorem (http://www.dyn4j.org/2010/01/sat/),
 * optionally can receive a pointer to a sf::Vector2f to output the MTV (Minimum Translation Vector)
@@ -24,6 +24,7 @@ namespace Iwmo {
 	public:
 		~Math();
 		Math();
+		bool onblock(Iwmo::Block* block, FloatRect entityrect);
 		/*
 		ALL RECTS MUST BE ON GLOBAL BOUNDS!!!
 		Entityrect = kid rect or any else entity

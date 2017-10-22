@@ -1,5 +1,6 @@
 #include "kid.h"
 const sf::Vector2f koctil(0,1);
+#define math m_engine->m_math
 iwmoEntity* kid::GetEntity()
 {
 	return kidentity;
@@ -19,7 +20,7 @@ void kid::Col()
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		sf::Vector2f mtv;
-
+		auto curf = anim.animList[anim.currentAnim].currentFrame;
 		vector< vector<Block*> >::iterator row;
 		vector<Block*>::iterator col;
 		for (row = vector2d.begin(); row != vector2d.end(); row++) {
@@ -28,57 +29,39 @@ void kid::Col()
 				{
 					auto bl2 = *col._Ptr;
 					//float beforecol = kidentity->GetY();
-					if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
-					{
-
-						if (bl2->blocktype == Iwmo::BlockType::solid)
+					
+						if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
 						{
-							//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
-							kidentity->setPos(kidentity->GetPos() + mtv + koctil);
-							if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+
+							if (bl2->blocktype == Iwmo::BlockType::solid)
+							{
+								kidentity->setPos(kidentity->GetPos() + mtv);
+								if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+								{
+									grounded = true;
+									m_p = true;
+									vel.y = 0;
+									lshiftcounter = 0;
+									jumpcount = 0;
+
+								}
+
+							}
+						}
+						else
+							if (m_engine->m_math.onblock(bl2, kidentity->anim.getSprite()->getGlobalBounds()))
 							{
 								grounded = true;
 								m_p = true;
 								vel.y = 0;
 								lshiftcounter = 0;
 								jumpcount = 0;
-
 							}
-						}
-					}
 				}
 			}
 		}
-		/*for (auto bl = m_engine->MapBlocks.begin(); bl != m_engine->MapBlocks.end(); bl++)
-		{
-
-			//if (!m_p)
-			//{
-			//	auto bl2 = *bl._Ptr;
-			//	//float beforecol = kidentity->GetY();
-			//	if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
-			//	{
-
-			//		if (bl2->blocktype == Iwmo::BlockType::solid)
-			//		{
-			//			//m_move(mtv.x,IWMOMATH.ValidateDownPos(GetPos().y, new int(mtv.y), bl2->GetGlobalRect().top));
-			//			kidentity->setPos(kidentity->GetPos() + mtv + koctil );
-			//			if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
-			//			{
-			//				grounded = true;
-			//				m_p = true;
-			//				vel.y = 0;
-			//				lshiftcounter = 0;
-			//				jumpcount = 0;
-			//	
-			//			}
-			//		}
-			//	}
-			//}
-			*/
 		if (!m_p)
 		{
-	
 			grounded = false;
 		}
 		if (JumpPassed)
@@ -202,8 +185,16 @@ void kid::death()
 	Alive = false;
 	state = EntityState::death;
 	visible = false;
-	iwmoEntity eff;
-	eff.initEntit("resources/effects/poof.xml",m_deathsheet);
+	if (effect == NULL)
+	{
+		effect = new iwmoEffect;
+	}
+	effect->initEntit("resources/effects/poof2.xml", m_deathsheet, m_souc);
+	effect->anim.animList["poof"].loop = false;
+	effect->DestroyAfterFinish = true;
+	effect->setPos(kidentity->GetPos());
+	effect->play("poof");
+	m_engine->AddEffect(effect, 1);
 }
 void kid::CheckState()
 {
@@ -422,12 +413,9 @@ void kid::shoot()
 		if (currentbullets < maxbullets)
 		{
 			currentbullets++;
-
 			fires.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
-			fires.setVolume(10);
-			
+			fires.setVolume(15);
 			fires.play();
-			
 			auto b = kidentity->anim.getSprite()->getGlobalBounds();
 			sf::Vector2i bulpoint;
 			bool flipped;
@@ -455,7 +443,6 @@ void kid::shoot()
 			e.eventtype = Types::EventTypes::KidShootEvent;
 			e.whichEntity = this;
 			e.whichBullet = bul;
-			//cout << "1 " << this;
 			__raise m_souc->OnCustomEvent(e);
 		}
 	}
@@ -497,13 +484,12 @@ void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, En
 	m_camera = camera;
 	m_texture = kidTexture;
 	m_deathsheet = kidDeathSheet;
-	kidentity->initEntit(filen, kidTexture);
+	kidentity->initEntit(filen, kidTexture,eventsource);
 	kidentity->setPos(position);
 	kidentity->anim.animList["idle"].loop = true;
 	kidentity->anim.animList["walk"].loop = true;
 	kidentity->anim.animList["slide"].loop = true;
 	kidentity->anim.animList["fall"].loop = true;
-	kidentity->GetEventSource(eventsource);
 	kidentity->state = idle;
 	SpeedX = 70;
 	SpeedY = 100;
@@ -514,4 +500,5 @@ void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, En
 	deaths.setBuffer(buflist->at("kiddeath"));
 	fires.setBuffer(buflist->at("kidfire"));
 	
+	m_deathsheet = TextureManager::loadTexture("poof2.png", "resources/effects/poof2.png");
 }

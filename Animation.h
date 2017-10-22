@@ -19,7 +19,6 @@ public:
 	Sprite sprite;
 	Animation()
 	{
-
 		currentFrame = 0;
 		isPlaying = true;
 		flip = false;
@@ -29,7 +28,6 @@ public:
 	{
 		return flip;
 	}
-	
 	void tick(float time)
 	{
 		if (!isPlaying) return;
@@ -40,6 +38,7 @@ public:
 			currentFrame -= frames.size();
 			if (!loop) {
 				isPlaying = false;
+
 				return;
 			}
 		}
@@ -57,7 +56,7 @@ public:
 				sprite.setTextureRect(frames_flip[i]);
 
 			}
-			sprite.setOrigin(int(frames[i].width / 2), int(frames[i].height / 2));
+			sprite.setOrigin(int(frames[i].width / 2), int(frames[i].height ));
 		}
 		
 	}
@@ -70,6 +69,7 @@ class AnimationManager
 {
 
 public:
+
 	std::string currentAnim;
 	std::map<std::string, Animation> animList;
 
@@ -131,7 +131,7 @@ public:
 
 		TiXmlElement *animElement;
 		animElement = head->FirstChildElement("animation");
-		
+
 		while (animElement)
 		{
 			Animation anim;
@@ -148,18 +148,13 @@ public:
 				int w = atoi(cut->Attribute("w"));
 				int h = atoi(cut->Attribute("h"));
 				anim.frames.push_back(sf::IntRect(x, y, w, h));
-				anim.frames_flip.push_back(sf::IntRect(x+w, y, -w, h));
+				anim.frames_flip.push_back(sf::IntRect(x + w, y, -w, h));
 				cut = cut->NextSiblingElement("cut");
-				//anim.sprite.setOrigin(0, anim.frames[0].height);
-				
 			}
 			animList[currentAnim] = anim;
-			
 			animElement = animElement->NextSiblingElement("animation");
 		}
-		
 	}
-
 	void set(std::string name)
 	{
 		currentAnim = name;
@@ -197,7 +192,6 @@ public:
 	}
 
 	bool isPlaying() { return animList[currentAnim].isPlaying; }
-
 	bool isPlaying(string s) {
 		if (s == currentAnim)
 		{
@@ -205,11 +199,8 @@ public:
 		}
 		return false;
 	}
-
 	float getH() { return animList[currentAnim].frames[0].height; }
-
 	float getW() { return animList[currentAnim].frames[0].width; }
-
 };
 
 #endif ANIMATION_H

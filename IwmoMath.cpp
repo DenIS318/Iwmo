@@ -61,6 +61,17 @@ namespace Iwmo
 			return false;
 		}
 	}*/
+	bool Iwmo::Math::onblock(Iwmo::Block* b, FloatRect entityrect)
+	{
+		
+		entityrect.top +=  0.1;
+		FloatRect brect = b->GetGlobalRect();
+		if (brect.intersects(entityrect))
+		{
+			return true;
+		}
+		return false;
+	}
 	bool Iwmo::Math::sat_test(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f *out_mtv) {
 		const sf::FloatRect &rectSp1 = sp1.getGlobalBounds();
 		const sf::FloatRect &rectSp2 = sp2.getGlobalBounds();

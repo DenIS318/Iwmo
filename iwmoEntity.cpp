@@ -27,6 +27,7 @@ void iwmoEntity::shoot(Texture* bullettexture,Vector2i pos)
 	EntityShootEvent e;
 	e.eventtype = Types::EventTypes::EntityShootEvent;
 	e.whichEntity = this;
+	//TODO
 	e.whichBullet = &b;//пуля локальная! измени это потом!
 	__raise m_souc->OnCustomEvent(e);
 }
@@ -39,16 +40,16 @@ void iwmoEntity::updatetime(float t)
 	time = t;
 }
 void iwmoEntity::tick(float t) {
-	
+
 }
 iwmoEntity* iwmoEntity::MGetBase()
 {
 	return ((iwmoEntity*)this);
 }
-void iwmoEntity::initEntit(std::string fileName, sf::Texture* t)
+void iwmoEntity::initEntit(std::string fileName, sf::Texture* t, CSource* source)
 {
 	anim.loadFromXML(fileName, t);
-	
+	m_souc = source;
 }
 AnimationManager* iwmoEntity::GetTextureAnimation()
 {
@@ -56,20 +57,6 @@ AnimationManager* iwmoEntity::GetTextureAnimation()
 }
 void iwmoEntity::MGetEvent(Event event)
 {
-}
-void iwmoEntity::m_moveValid(int xm, int ym,Block* b)
-{
-	int Yoff = (ym * 30) / 1000;
-	x += (int)(xm * 30) / 1000;
-	
-	IWMOMATH.ValidateDownPos(y, &Yoff, b->GetGlobalRect().top);
-	y += Yoff;
-	Vector2f newpos(x, y);
-	this->setPos(newpos);
-	EntityMoveEvent e;
-	e.eventtype = Types::EventTypes::EntityMoveEvent;
-	e.whichEntity = this;
-	__raise m_souc->OnCustomEvent(e);
 }
 void iwmoEntity::m_move(int xm, int ym)
 {
@@ -90,15 +77,13 @@ float iwmoEntity::GetX()
 {
 	return x;
 }
-void iwmoEntity::GetEventSource(CSource* source)
-{
-	m_souc = source;
-}
+
 float iwmoEntity::GetY()
 {
 	return y;
 }
 void iwmoEntity::draw(RenderWindow* win)
 {
+	
 	anim.draw(win, x, y);
 }

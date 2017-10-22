@@ -7,6 +7,7 @@
 #include "Collision.h"
 #include "iwmoConfig.h"
 #include "Bullet.h"
+#include "iwmoEffect.h"
 using namespace Iwmo;
 using namespace Iwmo::Events;
 class kid : public iwmoEntity
@@ -56,5 +57,5 @@ private:
 	Texture* m_deathsheet;
 	Texture* m_texture;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
-
+	iwmoEffect* effect = new iwmoEffect;
 };

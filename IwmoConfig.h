@@ -3,7 +3,7 @@
 #include <SFML\Graphics.hpp>
 #include "IwmoMath.h"
 //CONFIG
-
+#include "iwmoTypes.h"
 namespace Iwmo {
 	//defines layers
 #define bg2l 0
@@ -14,13 +14,7 @@ namespace Iwmo {
 #define deathzonel 5
 #define objectsl 6
 #define textlayerl 7
-	enum BlockType
-	{
-		solid,
-		decoration,
-		trap,
-		unknownblock
-	};
+	
 	extern int Width;
 	extern int Height;
 	extern std::string WindowName;
@@ -37,6 +31,8 @@ namespace Iwmo {
 	{
 		cout << vector.x << ", " << vector.y << endl;
 	}
+	
+
 	struct IwmoBlock {
 		/*
 		Block name without dot

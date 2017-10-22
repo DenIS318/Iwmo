@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 class iwmoEntity;
+class iwmoEffect;
 class kid;
 class Bullet;
 namespace Iwmo
@@ -14,7 +15,8 @@ namespace Iwmo
 				unknown,
 				EntityMoveEvent,
 				EntityShootEvent,
-				KidShootEvent
+				KidShootEvent,
+				DestroyEffectEvent
 			};
 		}
 		class CustomEvent {
@@ -25,6 +27,11 @@ namespace Iwmo
 		{
 		public:
 			iwmoEntity* whichEntity;
+		};
+		class DestroyEffectEvent : public CustomEvent
+		{
+		public:
+			iwmoEffect* whichEffect;
 		};
 		class EntityShootEvent : public CustomEvent
 		{

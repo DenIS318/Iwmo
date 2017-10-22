@@ -10,7 +10,7 @@
 #include "iwmoEntity.h"
 #include "Block.h"
 #include "IwmoMath.h"
-
+#include "iwmoEffect.h"
 using namespace sf;
 using namespace std;
 using namespace Iwmo;
@@ -42,6 +42,10 @@ public:
 	Getting layers pointer.
 	*/
 	vector<vector<Drawable*>>& getLayers();
+	/*
+	Getting entity layers pointer.
+	*/
+	vector<vector<iwmoEntity*>>& getEntityLayers();
 	/*
 	Adding iwmoEntity pointer to layer and render.
 	*/
@@ -98,12 +102,15 @@ public:
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
+	void RemoveEffect(iwmoEffect* effect);
+	void RemoveEffect(iwmoEffect* effect, unsigned short layernum);
+	void AddEffect(iwmoEffect* effect,unsigned short layernum);
 	vector<vector<Block*>> MapBlocks;
 	Math m_math = Iwmo::IWMOMATH;
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
-
+	vector<vector<iwmoEffect*>> effectlayers;
 private:
 	
 	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;

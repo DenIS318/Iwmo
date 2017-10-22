@@ -6,6 +6,10 @@ class iwmoEffect :
 public:
 	iwmoEffect();
 	~iwmoEffect();
+	void play(string animationname);
+	bool DestroyAfterFinish = false;
+	void tick(float t);
+	bool Started = false;
 	//TODO
 };
 
