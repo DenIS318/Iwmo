@@ -1,6 +1,6 @@
 <!DOCTYPE SpriteDecomposer>
 <sprites image="poof2.png" transparentColor="">
- <animation title="poof" delay="60">
+ <animation title="poof" delay="50">
   <cut w="62" x="3" y="4" h="59" row="1" col="1"/>
   <cut w="61.25" x="69.75" y="3" h="59" row="1" col="1"/>
   <cut w="57" x="138" y="4.5" h="57.5" row="1" col="1"/>

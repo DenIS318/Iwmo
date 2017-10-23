@@ -25,6 +25,8 @@ namespace Iwmo {
 		bool killable = false;
 		bool animated = false;
 		bool Resetable = false;
+		bool flipped = false;
+		bool trap = false;
 	private:
 		void AddToManager(string texturename);
 	};

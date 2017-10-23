@@ -4,7 +4,7 @@ namespace Iwmo {
 	{
 		solid,
 		decoration,
-		trap,
+		slidable,
 		unknownblock
 	};
 }

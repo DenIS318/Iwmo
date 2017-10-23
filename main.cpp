@@ -216,9 +216,9 @@ int main()
 	engine.init(Width, Height, WindowName, framerate);
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
-	engine.AddLayer(0);
-	engine.AddLayer(bgmainlayer);
-	engine.AddLayer(textlayer);
+	engine.AddLayer();
+	engine.AddLayer();
+	engine.AddLayer();
 	text.loadFromFile("resources/bg.jpg");
 	Sprite bgmain;
 	bgmain.setTextureRect(sf::IntRect(0, 0, Width, Height));

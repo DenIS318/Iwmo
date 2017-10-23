@@ -16,7 +16,7 @@ public:
 	Bullet(Vector2i scale,const Texture* bullettextute, Vector2i pos, string bulletxml = "resources/bullet.xml");
 	~Bullet();
 	Vector2i scale;
-	Sprite sprite;
+	Sprite* sprite();
 	void deletebullet();
 	AnimationManager anim;
 	bool HasAnim = true;

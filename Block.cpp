@@ -38,7 +38,6 @@ namespace Iwmo {
 		sprite.setTexture(*texture);
 		SetPos(Vector2f(vecpos));
 		blocktype = bltype;
-		//sprite.setTextureRect(IntRect(x, y, texture->getSize().x, texture->getSize().y));
 	}
 	Block::Block( Texture* texture,Vector2<int> position, BlockType bltype)
 	{
@@ -46,7 +45,6 @@ namespace Iwmo {
 		sprite.setTexture(*texture);
 		SetPos(Vector2f(position));
 		blocktype = bltype;
-		//sprite.setTextureRect(IntRect(position.x, position.y, texture->getSize().x, texture->getSize().y));
 	}
 	Block::Block(Texture* texture, Vector2f position, BlockType bltype)
 	{
@@ -54,7 +52,6 @@ namespace Iwmo {
 		sprite.setTexture(*texture);
 		SetPos(position);
 		blocktype = bltype;
-		//sprite.setTextureRect(IntRect(position.x, position.y, texture->getSize().x, texture->getSize().y));
 	}
 
 	Block::~Block()

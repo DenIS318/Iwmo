@@ -56,6 +56,7 @@ private:
 	bool m_p = false;
 	Texture* m_deathsheet;
 	Texture* m_texture;
-	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 	iwmoEffect* effect;
+	float volCounter = 100;
+	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 };

@@ -33,7 +33,7 @@ public:
 	/*
 	Adding layer.
 	*/
-	void AddLayer(unsigned short);
+	void AddLayer();
 	/*
 	Removing layer.
 	*/
@@ -111,6 +111,8 @@ public:
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
 	vector<vector<iwmoEffect*>> effectlayers;
+	vector<Sound*> allsounds;
+	vector<Music*> allmusic;
 private:
 	
 	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;

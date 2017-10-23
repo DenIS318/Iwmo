@@ -7,7 +7,7 @@ iwmoEntity* kid::GetEntity()
 }
 kid::kid()
 {
-
+	
 }
 kid::~kid()
 {
@@ -33,6 +33,12 @@ void kid::Col()
 						if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
 						{
 
+							if (bl2->killable)
+							{
+								death();
+								m_p = true;
+								return;
+							}
 							if (bl2->blocktype == Iwmo::BlockType::solid)
 							{
 								kidentity->setPos(kidentity->GetPos() + mtv);
@@ -45,8 +51,20 @@ void kid::Col()
 									jumpcount = 0;
 
 								}
+								else if(state != slide)
+								{
+									state = fall;
+									vel.y = 0;
+								}
 
 							}
+							if (bl2->blocktype == slidable && mtv.x != 0)
+							{
+								jumpcount = 1;
+								m_p = true;
+								state = slide;
+							}
+							
 						}
 						else
 							if (m_engine->m_math.onblock(bl2, kidentity->anim.getSprite()->getGlobalBounds()))
@@ -56,6 +74,7 @@ void kid::Col()
 								vel.y = 0;
 								lshiftcounter = 0;
 								jumpcount = 0;
+								
 							}
 				}
 			}
@@ -63,6 +82,14 @@ void kid::Col()
 		if (!m_p)
 		{
 			grounded = false;
+			if (state == slide)
+			{
+				if (state != jump && state != fall)
+				{
+					state == fall;
+					cout << "state now fall" << endl;
+				}
+			}
 		}
 		if (JumpPassed)
 		{
@@ -82,7 +109,6 @@ void kid::Col()
 					doublejumps.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
 					doublejumps.play();
 					vel.y = (JumpPower) * 0.8;
-					//cout << vel.y << endl;
 				}
 				jumpcount++;
 				grounded = false;
@@ -128,46 +154,55 @@ void kid::Col()
 			}
 
 		}
-		if (grounded)
+		if (state != slide)
 		{
-
-			if (kidentity->state != walk && kidentity->state != idle) {
-				kidentity->state = idle;
-
-
-			}
-			if (kidentity->state != jump && kidentity->state != fall)
+			if (grounded)
 			{
-				if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
-					!sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
-					!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+
+				if (kidentity->state != walk && kidentity->state != idle) {
+					kidentity->state = idle;
+
+
+				}
+				if (kidentity->state != jump && kidentity->state != fall)
 				{
-					if (kidentity->state != idle)
+					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
+						!sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
+						!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
 					{
-						kidentity->state = idle;
+						if (kidentity->state != idle)
+						{
+							kidentity->state = idle;
+						}
+
 					}
+				}
+			}
+			if (!grounded)
+			{
+				if (kidentity->state != fall && kidentity->state != jump)
+				{
+					kidentity->state = fall;
+				}
+				if (kidentity->state != jump)
+				{
+					if (kidentity->state == fall)
+					{
+						if (jumpcount == 0)
+						{
+							jumpcount = 1;
+						}
+					}
+					kidentity->m_move(0, SpeedY);
 
 				}
 			}
 		}
-		if (!grounded)
+		else
 		{
-			if (kidentity->state != fall && kidentity->state != jump)
-			{
-				kidentity->state = fall;
-			}
-			if (kidentity->state != jump)
-			{
-				if (kidentity->state == fall)
-				{
-					if (jumpcount == 0)
-					{
-						jumpcount = 1;
-					}
-				}
-				kidentity->m_move(0, SpeedY);
-
-			}
+			//slide
+			cout << anim.currentAnim << endl;
+			kidentity->m_move(0, SpeedY/2);
 		}
 	}
 }
@@ -181,8 +216,23 @@ void kid::Restart()
 	setPos(LastSave);
 	if (effect != NULL)
 	{
-		m_engine->RemoveEffect(effect, 1);
+			m_engine->RemoveEffect(effect);
 	}
+	for (auto it = m_engine->allsounds.begin(); it != m_engine->allsounds.end(); ++it)
+	{
+		auto sound = *it._Ptr;
+		sound->setVolume(100);
+		sound->setPlayingOffset(sf::seconds(0));
+		
+	}
+	for (auto it = m_engine->allmusic.begin(); it != m_engine->allmusic.end(); ++it)
+	{
+		auto sound = *it._Ptr;
+		sound->setVolume(100);
+		sound->setPlayingOffset(sf::seconds(0));
+
+	}
+	volCounter = 100;
 }
 void kid::death()
 {
@@ -194,10 +244,13 @@ void kid::death()
 		effect = new iwmoEffect;
 		effect->initEntit("resources/effects/poof2.xml", m_deathsheet, m_souc);
 		effect->anim.animList["poof"].loop = false;
-		effect->DestroyAfterFinish = true;
+		//effect->DestroyAfterFinish = true;
 		effect->setPos(kidentity->GetPos());
 		effect->play("poof");
 		m_engine->AddEffect(effect, 1);
+		deaths.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
+		deaths.play();
+
 	}
 }
 void kid::CheckState()
@@ -247,7 +300,6 @@ void kid::CheckState()
 			if (anim.currentAnim != "slide")
 			{
 				anim.play("slide");
-
 			}
 			break;
 		case EntityState::death:
@@ -279,16 +331,51 @@ void kid::tick(float time)
 	Vector2f vec(posx, posy);
 	//coutVector2(vec);
 	m_camera->setCenter(vec);
+	//TODOFUCKING
 	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end();)
 	{
+
 		auto bullet = *bull._Ptr;
 		if (bullet->finisheddistance < bullet->maxdistance)
 		{
-			bullet->tick(m_engine->GetWindow(),time);
+			vector< vector<Block*> >::iterator row;
+			vector<Block*>::iterator col;
+			#define vector2d m_engine->MapBlocks
+			for (row = vector2d.begin(); row != vector2d.end(); row++) {
+				for (col = row->begin(); col != row->end(); col++) {
+					auto bl2 = *col._Ptr;
+					if (bl2->blocktype == solid)
+					{
+						auto ptr = bullet->sprite();
+						if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
+						{
+							delete bullet;
+							Bulletlist.erase(bull);
+							currentbullets--;
+							if (bull != Bulletlist.end())
+							{
+								++bull;
+								continue;
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
 			if (bull != Bulletlist.end())
 			{
 				++bull;
+				
 			}
+			else
+			{
+				break;
+			}
+			#undef vector2d
+			bullet->tick(m_engine->GetWindow(), time);
 		}
 		else
 		{
@@ -299,6 +386,7 @@ void kid::tick(float time)
 			if (bull != Bulletlist.end())
 			{
 				++bull;
+				continue;
 			}
 			else
 			{
@@ -306,6 +394,36 @@ void kid::tick(float time)
 			}
 			
 		}
+	}
+//	jmpb:
+	//muting sounds
+	if (!Alive)
+	{
+		if (volCounter != 0)
+		{
+			cout << volCounter << endl;
+			volCounter -= 5;
+			for (auto it = m_engine->allsounds.begin(); it != m_engine->allsounds.end(); ++it)
+			{
+				auto sound = *it._Ptr;
+				if (volCounter >= 0)
+				{
+					sound->setVolume(volCounter);
+				}
+
+			}
+			for (auto it = m_engine->allmusic.begin(); it != m_engine->allmusic.end(); ++it)
+			{
+				auto sound = *it._Ptr;
+				if (volCounter >= 0)
+				{
+					sound->setVolume(volCounter);
+				}
+			}
+			
+			
+		}
+		
 	}
 }
 void kid::deleteentity()
@@ -400,8 +518,10 @@ void kid::control()
 					}
 					else
 					{
-
-						state = fall;
+						if (state != slide)
+						{
+							state = fall;
+						}
 					}
 				}
 			}
@@ -412,13 +532,12 @@ void kid::control()
 void kid::shoot()
 {
 	
-	if (state != slide)
-	{
+	
 		if (currentbullets < maxbullets)
 		{
 			currentbullets++;
 			fires.setPosition(Vector3f(kidentity->GetX(), kidentity->GetY(), 0));
-			fires.setVolume(15);
+			//fires.setVolume(15);
 			fires.play();
 			auto b = kidentity->anim.getSprite()->getGlobalBounds();
 			sf::Vector2i bulpoint;
@@ -433,14 +552,31 @@ void kid::shoot()
 				bulpoint = sf::Vector2i(b.left, b.top + (b.height / 2));
 				flipped = true;
 			}
+			if (state == slide)
+			{
+				if (flipped)
+				{
+					bulpoint = sf::Vector2i(b.left + b.width, b.top + (b.height / 2));
+					flipped = false;
+					goto jmp2;
+				}
+				if (!flipped)
+				{
+					bulpoint = sf::Vector2i(b.left, b.top + (b.height / 2));
+					flipped = true;
+					goto jmp2;
+				}
+			
+			}
 			if (state == jump)
 			{
 				bulpoint.y -= 2;
 			}
+		jmp2:
 			Bullet* bul = new Bullet(bulletscale, m_texture, bulpoint);
 			if (flipped)
 			{
-				bul->sprite.setRotation(180);
+				bul->sprite()->setRotation(180);
 			}
 			Bulletlist.push_back(bul);
 			KidShootEvent e;
@@ -449,7 +585,7 @@ void kid::shoot()
 			e.whichBullet = bul;
 			__raise m_souc->OnCustomEvent(e);
 		}
-	}
+	
 }
 void kid::ProcessKeyboard(Event event)
 {
@@ -503,6 +639,9 @@ void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, En
 	doublejumps.setBuffer(buflist->at("kiddoublejump"));
 	deaths.setBuffer(buflist->at("kiddeath"));
 	fires.setBuffer(buflist->at("kidfire"));
-	
+	m_engine->allsounds.push_back(&fires);
+	m_engine->allsounds.push_back(&deaths);
+	m_engine->allsounds.push_back(&jumps);
+	m_engine->allsounds.push_back(&doublejumps);
 	m_deathsheet = TextureManager::loadTexture("poof2.png", "resources/effects/poof2.png");
 }

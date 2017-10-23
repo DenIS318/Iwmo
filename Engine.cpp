@@ -79,7 +79,7 @@ void Engine::SetCam(View* campoint)
 Engine::~Engine()
 {
 }
-void Engine::AddLayer(unsigned short layernum)
+void Engine::AddLayer()
 {
 	vector<Drawable*> tempvector;
 	Engine::layerr.push_back(tempvector);
@@ -139,13 +139,13 @@ void Engine::RemoveEffect(iwmoEffect* man, unsigned short layernum)
 }
 void Engine::RemoveEffect(iwmoEffect* man)
 {
-	//cout << man << endl;
+//	cout << man << endl;
 	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
 	{
 		Engine::effectlayers[i].erase(std::remove(Engine::effectlayers[i].begin(), Engine::effectlayers[i].end(), man), Engine::effectlayers[i].end());
 	}
 	//cout << man << endl;
-	delete static_cast<iwmoEffect*>(man);
+	delete man;
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {

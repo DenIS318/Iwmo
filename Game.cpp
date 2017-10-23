@@ -21,6 +21,11 @@ void Game::AddIwmoBlock(string name,BlockType type)
 	blockmap.textureptr = texture;
 	blockmap.blocktype = type;
 	IwmoBlocks.push_back(blockmap);
+	/*if (name == "liana.png")
+	{
+		auto textureflip = *texture;
+		textureflip.set
+	}*/
 }
 
 Block Game::CreateBlockByName(string name)
@@ -77,6 +82,7 @@ void Game::InitIwmoBlocks(string filter)
 	path p;
 	string path = "resources/";
 	string subpath;
+	bool trap = false;
 	if (filter == "solids")
 	{
 		// avoid repeated path construction below
@@ -88,7 +94,7 @@ void Game::InitIwmoBlocks(string filter)
 	{
 		// avoid repeated path construction below
 		subpath = path + "traps/";
-		bltype = BlockType::trap;
+		bltype = BlockType::solid;
 		p = subpath;
 	}
 	else if (filter == "decorations")
@@ -201,6 +207,7 @@ void Game::StartGame(Engine* engine, CSource* source)
 	{
 		cout << "castle entrance not loaded!" << endl;
 	}
+	m_engine->allmusic.push_back(&castleent);
 	castleent.setLoop(true);
 	castleent.play();
 	if (debug)
@@ -235,6 +242,7 @@ void Game::INITMAP()
 	
 	Texture* castle2 = GetBlockTextureByName("castle2.png");
 	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
+	Texture* liana = GetBlockTextureByName("liana.png");
 	for (int i = 0; i < 25; i++)
 	{
 		if (i == 0)
@@ -251,6 +259,20 @@ void Game::INITMAP()
 			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
 		}
 	}
+	Block* l = new Block(liana, sf::Vector2f(200, 3500), Iwmo::BlockType::slidable);
+	Block* lf = new Block(liana, sf::Vector2f(300, 3500), Iwmo::BlockType::slidable);
+	auto b = lf->sprite.getLocalBounds();
+	IntRect fliprect(b.left+b.width,b.top,-b.width,b.height);
+	//lf->sprite.setTextureRect(fliprect);
+	lf->sprite.setOrigin( (lf->sprite.getLocalBounds().width+2)*2, 0);
+	lf->sprite.setScale(-1.f, 1.f);
+	lf->flipped = true;
+	m_engine->AddBlock(l,tiles2l);
+	auto pos1 = Vector2f(l->sprite.getPosition());
+	auto pos2 = Vector2f(lf->sprite.getPosition());
+	m_engine->AddBlock(new Block(castle2,pos1,BlockType::solid), tilesl);
+	m_engine->AddBlock(new Block(castle2, pos2, BlockType::solid), tilesl);
+	m_engine->AddBlock(lf, tiles2l);
 		
 		
 	
@@ -266,7 +288,7 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	*/
 	for (int i = 0; i < 7; i++)
 	{
-		engine->AddLayer(i);
+		engine->AddLayer();
 	}
 	//
 	//init blocks by filters
@@ -330,7 +352,8 @@ void GameHandler::OnCustomEvent(CustomEvent event)
 		{
 		cout << "DESTROYEFFECT EVENT" << endl;
 		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(&event);
-		m_engine->RemoveEffect(e->whichEffect);
+		cout << e << endl;
+		m_engine->RemoveEffect(const_cast<iwmoEffect*>(e->whichEffect));
 		}
 		break;
 	case Types::EntityShootEvent:
