@@ -21,6 +21,9 @@
     <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="iwmoEffect.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui-SFML.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />

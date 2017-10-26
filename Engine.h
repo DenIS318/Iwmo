@@ -12,6 +12,9 @@
 #include "IwmoMath.h"
 #include "iwmoEffect.h"
 #include <algorithm>
+#include <imgui.h>
+#include <imgui-SFML.h>
+#define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
 using namespace Iwmo;
@@ -114,8 +117,20 @@ public:
 	vector<vector<iwmoEffect*>>* getEffectLayers();
 	vector<Sound*> allsounds;
 	vector<Music*> allmusic;
+	bool ShowImgui = false;
+	bool ShowTilesets = false;
+	void UpdateBlockList(vector<IwmoBlock>*);
+	bool ClientIsMaker = true;
+	Sprite* selectedblock;
+	Block* blockprototype;
+	int selectedlayer = 0;
+	Vector2u WinSize = Vector2u(Width, Height);
 private:
-	
+	int listbox_item_current = 0;
+	void DrawImguiTilesets();
+	vector<string> listboxvector;
+	vector<IwmoBlock>* blocklistptr;
+	void ImguiMaker();
 	map<string, sf::SoundBuffer>* bufferlist = new map<string, sf::SoundBuffer>;
 	const int maxlayersize = 1;
 	vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);

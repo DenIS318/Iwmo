@@ -31,7 +31,6 @@ namespace Iwmo {
 	{
 		cout << vector.x << ", " << vector.y << endl;
 	}
-	
 
 	struct IwmoBlock {
 		/*

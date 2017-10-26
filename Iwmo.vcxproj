@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui-SFML.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui.cpp" />
+    <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui_draw.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Collision.cpp" />
@@ -169,7 +172,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SFML_STATIC;STP_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\boost;C:\Users\Денис\Desktop\1\SFML-2.4.2\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Денис\Desktop\1\Imgui;C:\Program Files %28x86%29\boost;C:\Users\Денис\Desktop\1\SFML-2.4.2\include;C:\Users\Денис\Desktop\1\someincludes\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>

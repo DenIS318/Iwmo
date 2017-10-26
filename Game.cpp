@@ -10,12 +10,18 @@ vector<IwmoBlock>* Game::GetBlockList()
 {
 	return &IwmoBlocks;
 }
+
+
 void Game::AddIwmoBlock(string name,BlockType type)
 {
 	/*
 	name,texture,type
 	*/
 	Texture* texture = TextureManager::loadTexture(name, m_res+name);
+	if (texture == NULL)
+	{
+		return;
+	}
 	IwmoBlock blockmap;
 	blockmap.blockname = name;
 	blockmap.textureptr = texture;
@@ -201,7 +207,7 @@ void Game::StartGame(Engine* engine, CSource* source)
 	m_engine->Addentity(&mykid, 0);
 	mykid.setPos(Iwmo::KidSpawn);
 	m_engine->gamestarted = true;
-	cout << "Game started!" << endl;
+	
 
 	if (!castleent.openFromFile("resources/sounds/castleentrance.ogg"))
 	{
@@ -214,6 +220,9 @@ void Game::StartGame(Engine* engine, CSource* source)
 	{
 
 	}
+	m_engine->ShowTilesets = true;
+	cout << "Game started!" << endl;
+	
 }
 
 Game::Game()
@@ -295,8 +304,9 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	InitIwmoBlocks("traps");
 	InitIwmoBlocks("decorations");
 	InitIwmoBlocks("animated");
+	m_engine->UpdateBlockList(&IwmoBlocks);
 	//
-	//load sprite sheet
+	//load sprites sheets
 	LoadSheets();
 	//load sounds
 	LS();
@@ -382,9 +392,10 @@ void GameHandler::OnEvent(Event eventt)
 			auto win = m_engine->GetWindow();
 			sf::Vector2u size = win->getSize();
 			win->setSize(size);
-
+			m_engine->WinSize = size;
 			camera.setSize(size.x, size.y);
 		}
+		
 		try {
 			vector<vector<iwmoEntity*>> entities = gameinstance->m_engine->GetEntities();
 			for (unsigned int i = 0; i < entities.size(); i++)

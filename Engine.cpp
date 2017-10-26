@@ -195,14 +195,118 @@ unsigned int Engine::GetFrameRate()
 	fps = 1.0f / time.asSeconds();
 	return unsigned int(fps + 0.5);
 }
+///WRAPPERS
+namespace ImGui
+{
+	static auto vector_getter = [](void* vec, int idx, const char** out_text)
+	{
+		auto& vector = *static_cast<std::vector<std::string>*>(vec);
+		if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+		*out_text = vector.at(idx).c_str();
+		return true;
+	};
 
+	bool Combo(const char* label, int* currIndex, std::vector<std::string>& values)
+	{
+		if (values.empty()) { return false; }
+		return Combo(label, currIndex, vector_getter,
+			static_cast<void*>(&values), values.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values)
+	{
+		if (values.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&values), values.size());
+	}
+
+}
+std::string remove_extension(const std::string& filename) {
+	size_t lastdot = filename.find_last_of(".");
+	if (lastdot == std::string::npos) return filename;
+	return filename.substr(0, lastdot);
+}
+void Engine::UpdateBlockList(vector<IwmoBlock>* newlist)
+{
+	//get name without extension
+	for (auto it = newlist->begin(); it != newlist->end(); ++it)
+	{
+		auto val = *it._Ptr;
+		listboxvector.push_back(remove_extension(val.blockname));
+	}
+	blocklistptr = newlist;
+}
+void Engine::DrawImguiTilesets()
+{
+	if (ShowTilesets)
+	{
+		if (ImGui::TreeNode("Tilesets"))
+		{
+			ImGui::BeginChild("BlockList", Vector2f(300, 200), false);
+		
+		if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
+		{
+			
+				BlockType type = solid;
+				//block selected
+				//let allow to create his
+				selectedblock = new Sprite();
+				selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
+				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, type);
+			
+		}
+		///
+		//popup
+		//ImGui::BeginPopup("BlockPop");
+		//blocklist->at(listbox_item_current).textureptr;
+		//ImGui::EndPopup();
+		///
+		ImGui::EndChild();
+		ImGui::TreePop();
+		}
+		else
+		{
+			delete selectedblock;
+			delete blockprototype;
+			if (selectedblock != NULL)
+			{
+				selectedblock = NULL;
+				blockprototype = NULL;
+			}
+		}
+		//ImGui::TreePop();
+	
+	}
+}
+void Engine::ImguiMaker()
+{
+	//main tooltip
+	if (ShowImgui)
+	{
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_AlwaysAutoResize
+			;
+
+		//ImGui::ShowUserGuide();
+		//ImGui::ShowTestWindow(&ShowImgui);
+		//flags |= ImGuiWindowFlags_NoTitleBar;
+		ImGui::Begin("Maker", &ShowImgui, flags);
+		ImGui::SetWindowFocus();
+		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
+		Vector2f v = ImGui::GetWindowSize();
+		ImGui::SetWindowPos(Vector2f(WinSize.x - v.x - 50 , 0));
+		ImGui::Text("Welcome, again!");
+		DrawImguiTilesets();
+		ImGui::End();
+	}
+}
 void Engine::Render()
 {
 
 
 
 	float m__time = clock.getElapsedTime().asMicroseconds();
-	clock.restart();
 
 	m__time = m__time / 500; 
 
@@ -212,8 +316,11 @@ void Engine::Render()
 	{
 		window.setView(*CamPointer);
 	}
+	ImGui::SFML::Update(window, clock.restart());
+
 	if (gamestarted)
 	{
+
 		
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
@@ -265,7 +372,26 @@ void Engine::Render()
 			}
 		}
 	}
-	//cout << GetFrameRate() << endl;
+	if (selectedblock != NULL)
+	{
+		window.draw(*selectedblock);
+	}
+	///
+	if (gamestarted)
+	{
+		if (ClientIsMaker)
+		{
+			if (!ShowImgui)
+			{
+				ShowImgui = true;
+			}
+			ImguiMaker();
+		}
+	}
+
+	///
+	ImGui::SFML::Render(window);
+	//cout << ImGui::GetIO().Framerate << endl;
 	window.display();
 }
 RenderWindow* Engine::GetWindow()
@@ -279,5 +405,6 @@ void Engine::init(int Width, int Height, string title, short fm)
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
 	window.setSize(sf::Vector2u(Width, Height));
+	ImGui::SFML::Init(window);
 	//window.setVerticalSyncEnabled(true);
 }

@@ -9,7 +9,8 @@
 #include <SFML/Network.hpp>
 #include "Server.h"
 #include "Network.h"
-
+#include <imgui.h>
+#include <imgui-SFML.h>
 #include "Game.h"
 using namespace std;
 using namespace myState;
@@ -29,7 +30,8 @@ mytextbox ipbox(sf::Vector2f(200, 20));
 static string ip;
 bool ready = false;
 sf::Text iptext;
-static Game game;
+static Game* game;
+bool gamestarted = false;
 #define mainlayer 0
 #define bgmainlayer 1
 #define textlayer 2
@@ -62,7 +64,8 @@ inline void beginbind(IpAddress address, RenderWindow* window)
 
 void startgame(Engine* engine, RenderWindow* window)
 {
-	static Game game(engine, window,source);
+	game = new Game(engine, window, source);
+	gamestarted = true;
 
 }
 inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
@@ -87,114 +90,155 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 }
 inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 {
-	switch (event.type)
+	if (engine != NULL)
 	{
-	case sf::Event::Closed:
-		window->close();
-		break;
-	case sf::Event::MouseButtonPressed:
-		if (event.mouseButton.button == sf::Mouse::Left)
+		switch (event.type)
 		{
-			sf::Vector2i position = sf::Mouse::getPosition(*window);
-			if (kidrect.contains(position))
+		case Event::MouseMoved:
+		{
+			
+			if (gamestarted)
 			{
-				if (ipbox.getState() != myState::Enabled)
+				if (engine->selectedblock != NULL)
 				{
-					enablebox();
-				}
-
-			}
-			else if (makerrect.contains(position))
-			{
-
-				if (ipbox.getState() != myState::Enabled)
-				{
-					enablebox();
-				}
-
-
-
-			}
-			else if (serverrect.contains(position))
-			{
-				if (!serverstarted)
-				{
-					serverstarted = true;
-					thread thr(&beginbind, IpAddress::getLocalAddress(), window);
-					thr.detach();
-				}
-				else {
-					cout << "Server already started!" << endl;
+					Vector2i pos(event.mouseMove.x, event.mouseMove.y);
+					auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
+					auto b = engine->selectedblock->getGlobalBounds();
+					auto sizedivide2 = Vector2i(b.width/2, b.height/2);
+					newpos -= Vector2f(sizedivide2);
+					engine->selectedblock->setPosition(newpos);
 				}
 			}
-			else if (startrect.contains(position))
+		}
+		break;
+		case sf::Event::Closed:
+			window->close();
+			break;
+		case sf::Event::MouseButtonPressed:
+			if (event.mouseButton.button == Mouse::Button::Left)
 			{
-				if (ipbox.getState() == Enabled)
+				if (gamestarted)
 				{
-					try {
-						char temp[20];
-
-
-						strcpy_s(temp, ip.c_str());
-						inet_addr(temp);
-						stoi(temp);
-
-						thread thr = thread(&beginconnect, true, temp, window, engine);
-
-						thr.detach();
-						while (!ready) {             // wait until main() sets ready...
-							std::this_thread::yield();
-						}
-						startgame(engine, window);
-
-					}
-					catch (exception e)
+					if (engine->blockprototype != NULL)
 					{
-						cout << e.what() << endl;
+						Vector2i pos(event.mouseButton.x, event.mouseButton.y);
+						auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
+						engine->blockprototype->sprite.setPosition(newpos);
+						Block* newblock = new Block(*engine->blockprototype);
+						engine->AddBlock(newblock, engine->selectedlayer);
 					}
 				}
 			}
-		}
-		break;
-	case sf::Event::KeyPressed:
-
-		/*if (debug) {
-			if (event.key.code == sf::Keyboard::Z)
-			{
-				sf::Vector2i position = sf::Mouse::getPosition(*window);
-				cout << "x = " << position.x << endl << "y = " << position.y << endl;
-
-			}
-
-		}*/
-		if (event.key.code == sf::Keyboard::BackSpace)
-		{
-			if (sizeof(ip) > 0 && ip != "")
-			{
-
-				ip.pop_back();
-				iptext.setString(ip);
-
-			}
-
-		}
-		break;
-	case Event::TextEntered:
-		if (ipbox.getState() == Enabled)
-		{
-			if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
-			{
-				ip.push_back((char)event.text.unicode);
-				iptext.setString(ip);
-				if (debug)
+			
+				if (!gamestarted)
 				{
+					if (event.mouseButton.button == sf::Mouse::Left)
+					{
+						sf::Vector2i position = sf::Mouse::getPosition(*window);
+						if (kidrect.contains(position))
+						{
+							if (ipbox.getState() != myState::Enabled)
+							{
+								enablebox();
+							}
+
+						}
+						else if (makerrect.contains(position))
+						{
+
+							if (ipbox.getState() != myState::Enabled)
+							{
+								enablebox();
+							}
+
+
+
+						}
+						else if (serverrect.contains(position))
+						{
+							if (!serverstarted)
+							{
+								serverstarted = true;
+								thread thr(&beginbind, IpAddress::getLocalAddress(), window);
+								thr.detach();
+							}
+							else {
+								cout << "Server already started!" << endl;
+							}
+						}
+						else if (startrect.contains(position))
+						{
+							if (ipbox.getState() == Enabled)
+							{
+								try {
+									char temp[20];
+
+
+									strcpy_s(temp, ip.c_str());
+									inet_addr(temp);
+									stoi(temp);
+
+									thread thr = thread(&beginconnect, true, temp, window, engine);
+
+									thr.detach();
+									while (!ready) {             // wait until main() sets ready...
+										std::this_thread::yield();
+									}
+									startgame(engine, window);
+
+								}
+								catch (exception e)
+								{
+									cout << e.what() << endl;
+								}
+							}
+						}
+					}
+				}
+			break;
+		case sf::Event::KeyPressed:
+
+			/*if (debug) {
+				if (event.key.code == sf::Keyboard::Z)
+				{
+					sf::Vector2i position = sf::Mouse::getPosition(*window);
+					cout << "x = " << position.x << endl << "y = " << position.y << endl;
 
 				}
+
+			}*/
+			if (!gamestarted)
+			{
+				if (event.key.code == sf::Keyboard::BackSpace)
+				{
+					if (sizeof(ip) > 0 && ip != "")
+					{
+
+						ip.pop_back();
+						iptext.setString(ip);
+
+					}
+
+				}
+				break;
+		case Event::TextEntered:
+			if (ipbox.getState() == Enabled)
+			{
+				if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
+				{
+					ip.push_back((char)event.text.unicode);
+					iptext.setString(ip);
+					if (debug)
+					{
+
+					}
+				}
 			}
+			break;
+			}
+		default:
+			break;
 		}
-		break;
-	default:
-		break;
 	}
 }
 inline void continuepool(RenderWindow* window, Engine* engine)
@@ -203,7 +247,7 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 	while (window->pollEvent(event))
 	{
 		__raise (*source).OnEvent(event);
-
+		ImGui::SFML::ProcessEvent(event);
 		checkevent(event, window, engine);
 	}
 }
@@ -274,6 +318,6 @@ int main()
 		continuepool(window, &engine);
 		engine.Render();
 	}
-
+	ImGui::SFML::Shutdown();
 	return EXIT_SUCCESS;
 }

@@ -56,7 +56,7 @@ void kid::Col()
 								}
 
 							}
-							coutVector2(mtv);
+							//coutVector2(mtv);
 							if (bl2->blocktype == slidable)
 							{
 								jumpcount = 1;
