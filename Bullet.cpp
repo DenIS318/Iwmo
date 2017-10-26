@@ -1,13 +1,12 @@
 #include "Bullet.h"
 
-
 void Bullet::move()
 {
 	//DANGER!!!! GREAT MATH!!!!!!!!!!!!!!!!!!!!!!
 	float bulletspeedratio = bulletspeed / 1000;
 	finisheddistance += bulletspeedratio;
-	auto x = cos(sprite()->getRotation()*3.14159265 / 180) * bulletspeedratio;
-	auto y = sin(sprite()->getRotation()*3.14159265 / 180) * bulletspeedratio;
+	auto x = cos(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
+	auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
 	bulletpos += Vector2f(x, y);
 	
 	//Iwmo::coutVector2(bulletpos);

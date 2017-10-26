@@ -14,7 +14,7 @@ namespace Iwmo {
 #define deathzonel 5
 #define objectsl 6
 #define textlayerl 7
-	
+#define IWMOPHIE 3.1415926535897932384626433832795
 	extern int Width;
 	extern int Height;
 	extern std::string WindowName;

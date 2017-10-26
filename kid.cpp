@@ -1,5 +1,4 @@
 #include "kid.h"
-const sf::Vector2f koctil(0,1);
 #define math m_engine->m_math
 iwmoEntity* kid::GetEntity()
 {
@@ -12,27 +11,25 @@ kid::kid()
 kid::~kid()
 {
 }
-#define vector2d m_engine->MapBlocks
+
 void kid::Col()
 {
 	if (Alive)
 	{
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
-		sf::Vector2f mtv;
 		auto curf = anim.animList[anim.currentAnim].currentFrame;
 		vector< vector<Block*> >::iterator row;
 		vector<Block*>::iterator col;
+		#define vector2d m_engine->MapBlocks
 		for (row = vector2d.begin(); row != vector2d.end(); row++) {
 			for (col = row->begin(); col != row->end(); col++) {
 				if (!m_p)
 				{
 					auto bl2 = *col._Ptr;
-					//float beforecol = kidentity->GetY();
-					
+					sf::Vector2f mtv;
 						if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
 						{
-
 							if (bl2->killable)
 							{
 								death();
@@ -54,11 +51,13 @@ void kid::Col()
 								else if(state != slide)
 								{
 									state = fall;
+									grounded = false;
 									vel.y = 0;
 								}
 
 							}
-							if (bl2->blocktype == slidable && mtv.x != 0)
+							coutVector2(mtv);
+							if (bl2->blocktype == slidable)
 							{
 								jumpcount = 1;
 								m_p = true;
@@ -74,7 +73,10 @@ void kid::Col()
 								vel.y = 0;
 								lshiftcounter = 0;
 								jumpcount = 0;
-								
+								if (state != walk && state != idle)
+								{
+									state = idle;
+								}
 							}
 				}
 			}
@@ -86,8 +88,7 @@ void kid::Col()
 			{
 				if (state != jump && state != fall)
 				{
-					state == fall;
-					cout << "state now fall" << endl;
+					state = fall;
 				}
 			}
 		}
@@ -201,7 +202,6 @@ void kid::Col()
 		else
 		{
 			//slide
-			cout << anim.currentAnim << endl;
 			kidentity->m_move(0, SpeedY/2);
 		}
 	}
@@ -216,7 +216,14 @@ void kid::Restart()
 	setPos(LastSave);
 	if (effect != NULL)
 	{
-			m_engine->RemoveEffect(effect);
+		auto effectlayers = *m_engine->getEffectLayers();
+		for (unsigned int i = 0; i < effectlayers.size(); i++)
+		{
+			if (std::find(effectlayers[i].begin(), effectlayers[i].end(), effect) != effectlayers[i].end()) {
+				//contains
+				m_engine->RemoveEffect(effect);
+			}
+		}	
 	}
 	for (auto it = m_engine->allsounds.begin(); it != m_engine->allsounds.end(); ++it)
 	{
@@ -233,6 +240,8 @@ void kid::Restart()
 
 	}
 	volCounter = 100;
+	anim.flip(false);
+	jumpcount = 0;
 }
 void kid::death()
 {
@@ -244,7 +253,7 @@ void kid::death()
 		effect = new iwmoEffect;
 		effect->initEntit("resources/effects/poof2.xml", m_deathsheet, m_souc);
 		effect->anim.animList["poof"].loop = false;
-		//effect->DestroyAfterFinish = true;
+		effect->DestroyAfterFinish = true;
 		effect->setPos(kidentity->GetPos());
 		effect->play("poof");
 		m_engine->AddEffect(effect, 1);
@@ -313,6 +322,7 @@ void kid::CheckState()
 				anim.play("idle");
 			}
 		}
+		//cout << anim.currentAnim << endl;
 	}
 }
 void kid::tick(float time)
@@ -375,7 +385,7 @@ void kid::tick(float time)
 				break;
 			}
 			#undef vector2d
-			bullet->tick(m_engine->GetWindow(), time);
+			
 		}
 		else
 		{
@@ -394,6 +404,7 @@ void kid::tick(float time)
 			}
 			
 		}
+		bullet->tick(m_engine->GetWindow(), time);
 	}
 //	jmpb:
 	//muting sounds
@@ -401,8 +412,8 @@ void kid::tick(float time)
 	{
 		if (volCounter != 0)
 		{
-			cout << volCounter << endl;
-			volCounter -= 5;
+			//cout << volCounter << endl;
+			volCounter -= 2.5;
 			for (auto it = m_engine->allsounds.begin(); it != m_engine->allsounds.end(); ++it)
 			{
 				auto sound = *it._Ptr;
@@ -410,6 +421,7 @@ void kid::tick(float time)
 				{
 					sound->setVolume(volCounter);
 				}
+
 
 			}
 			for (auto it = m_engine->allmusic.begin(); it != m_engine->allmusic.end(); ++it)
@@ -438,32 +450,39 @@ void kid::deleteentity()
 }
 void kid::control()
 {
-	if (sf::Keyboard::isKeyPressed(Keyboard::Left))
-	{
-		if (!anim.isFlip())
-		{
-		anim.flip(true);
-		}
-	}
-	if (sf::Keyboard::isKeyPressed(Keyboard::Right))
-	{
-		if (anim.isFlip())
-		{
-			anim.flip(false);
-		}
-	}
-	Col();
 	if (Alive)
 	{
+		if (sf::Keyboard::isKeyPressed(Keyboard::Left))
+		{
+			if (!anim.isFlip())
+			{
+				anim.flip(true);
+			}
+		}
+		if (sf::Keyboard::isKeyPressed(Keyboard::Right))
+		{
+			if (anim.isFlip())
+			{
+				anim.flip(false);
+			}
+		}
+		Col();
 		if (m_engine->GetWindow()->hasFocus())
 		{
 			
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
-				kidentity->m_move(-SpeedX, 0);
+				if (state != slide)
+				{
+					kidentity->m_move(-SpeedX, 0);
+				}
+				else if (state == slide && anim.isFlip())
+				{
+					kidentity->m_move(-SpeedX, 0);
+				}
 
 
-				if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
+				if (kidentity->state != walk && kidentity->state != fall && state != slide && kidentity->state != jump && grounded)
 				{
 
 					kidentity->state = walk;
@@ -472,9 +491,17 @@ void kid::control()
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 			{
-				kidentity->m_move(SpeedX, 0);
+				if (state != slide)
+				{
+					kidentity->m_move(SpeedX, 0);
+				}
+				else if (state == slide && !anim.isFlip())
+				{
+					kidentity->m_move(SpeedX, 0);
+				}
+				
 
-				if (kidentity->state != walk && kidentity->state != fall && kidentity->state != jump && grounded)
+				if (kidentity->state != walk && kidentity->state != fall &&state != slide && kidentity->state != jump && grounded)
 				{
 
 					kidentity->state = walk;
@@ -526,8 +553,9 @@ void kid::control()
 				}
 			}
 		}
+		CheckState();
 	}
-	CheckState();
+	
 }
 void kid::shoot()
 {
@@ -583,7 +611,7 @@ void kid::shoot()
 			e.eventtype = Types::EventTypes::KidShootEvent;
 			e.whichEntity = this;
 			e.whichBullet = bul;
-			__raise m_souc->OnCustomEvent(e);
+			__raise m_souc->OnCustomEvent(&e);
 		}
 	
 }

@@ -262,8 +262,7 @@ void Game::INITMAP()
 	Block* l = new Block(liana, sf::Vector2f(200, 3500), Iwmo::BlockType::slidable);
 	Block* lf = new Block(liana, sf::Vector2f(300, 3500), Iwmo::BlockType::slidable);
 	auto b = lf->sprite.getLocalBounds();
-	IntRect fliprect(b.left+b.width,b.top,-b.width,b.height);
-	//lf->sprite.setTextureRect(fliprect);
+	//IntRect fliprect(b.left+b.width,b.top,-b.width,b.height);
 	lf->sprite.setOrigin( (lf->sprite.getLocalBounds().width+2)*2, 0);
 	lf->sprite.setScale(-1.f, 1.f);
 	lf->flipped = true;
@@ -341,30 +340,31 @@ void GameHandler::m_hookEvent(CSource* pSource) {
 void GameHandler::m_unhookEvent(CSource* pSource) {
 	__unhook(&CSource::OnEvent, pSource, &GameHandler::OnEvent);
 }
-void GameHandler::OnCustomEvent(CustomEvent event)
+void GameHandler::OnCustomEvent(CustomEvent* event)
 {
 
-	switch (event.eventtype)
+	switch (event->eventtype)
 	{
 	case Types::EntityMoveEvent:
 		break;
 	case Types::DestroyEffectEvent:
 		{
-		cout << "DESTROYEFFECT EVENT" << endl;
-		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(&event);
-		cout << e << endl;
-		m_engine->RemoveEffect(const_cast<iwmoEffect*>(e->whichEffect));
+		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(event);
+		m_engine->RemoveEffect(e->whichEffect);
+		//auto kekus = m_engine->effectlayers;
+		//cout << &kekus << endl;
+		//cout << &m_engine->effectlayers << endl;
 		}
 		break;
 	case Types::EntityShootEvent:
 		{	
-		EntityShootEvent* e = reinterpret_cast<EntityShootEvent*>(&event);
+		EntityShootEvent* e = reinterpret_cast<EntityShootEvent*>(event);
 		//cout << e->whichEntity << endl;
 		}
 		break;
 	case Types::KidShootEvent:
 		{	
-		KidShootEvent* e = reinterpret_cast<KidShootEvent*>(&event);
+		KidShootEvent* e = reinterpret_cast<KidShootEvent*>(event);
 		e->whichKid = static_cast<kid*>(e->whichEntity);
 		}
 		break;

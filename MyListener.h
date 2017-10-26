@@ -10,6 +10,5 @@ using namespace Iwmo::Events;
 class CSource {
 public:
 	__event void OnEvent(sf::Event event);
-	__event void OnMove(EntityMoveEvent e);
-	__event void OnCustomEvent(CustomEvent e);
+	__event void OnCustomEvent(CustomEvent* e);
 };

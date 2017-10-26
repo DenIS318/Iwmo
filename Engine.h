@@ -11,6 +11,7 @@
 #include "Block.h"
 #include "IwmoMath.h"
 #include "iwmoEffect.h"
+#include <algorithm>
 using namespace sf;
 using namespace std;
 using namespace Iwmo;
@@ -110,7 +111,7 @@ public:
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
-	vector<vector<iwmoEffect*>> effectlayers;
+	vector<vector<iwmoEffect*>>* getEffectLayers();
 	vector<Sound*> allsounds;
 	vector<Music*> allmusic;
 private:
@@ -119,7 +120,7 @@ private:
 	const int maxlayersize = 1;
 	vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);
 	vector<vector<iwmoEntity*>> layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
-	//vector<tmx::Layer::Tile*> maptiles;
+	vector<vector<iwmoEffect*>> effectlayers;
 	sf::Clock clock;
 	sf::Time time;
 	RenderWindow window;

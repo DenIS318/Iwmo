@@ -29,7 +29,7 @@ void iwmoEntity::shoot(Texture* bullettexture,Vector2i pos)
 	e.whichEntity = this;
 	//TODO
 	e.whichBullet = &b;//пуля локальная! измени это потом!
-	__raise m_souc->OnCustomEvent(e);
+	__raise m_souc->OnCustomEvent(&e);
 }
 Vector2f iwmoEntity::GetPos()
 {
@@ -68,7 +68,7 @@ void iwmoEntity::m_move(int xm, int ym)
 	EntityMoveEvent e;
 	e.eventtype = Types::EventTypes::EntityMoveEvent;
 	e.whichEntity = this;
-	__raise m_souc->OnCustomEvent(e);
+	__raise m_souc->OnCustomEvent(&e);
 }
 iwmoEntity::~iwmoEntity()
 {

@@ -84,7 +84,7 @@ class GameHandler : public Game
 {
 
 public:
-	void OnCustomEvent(CustomEvent event);
+	void OnCustomEvent(CustomEvent* event);
 	GameHandler();
 	GameHandler(const Game*);
 	~GameHandler();

@@ -109,6 +109,10 @@ vector<vector<iwmoEntity*>>& Engine::getEntityLayers()
 {
 	return Engine::layerrentity;
 }
+vector<vector<iwmoEffect*>>* Engine::getEffectLayers()
+{
+	return &effectlayers;
+}
 void Engine::AddSprite(Drawable* drawable, unsigned short layernum)
 {
 	Engine::layerr.at(layernum).push_back(drawable);
@@ -132,20 +136,18 @@ void Engine::AddEffect(iwmoEffect* effect, unsigned short layernum)
 {
 	Engine::effectlayers.at(layernum).push_back(effect);
 }
-void Engine::RemoveEffect(iwmoEffect* man, unsigned short layernum)
+void Engine::RemoveEffect(iwmoEffect* ef, unsigned short layernum)
 {
-	Engine::effectlayers[layernum].erase(std::remove(Engine::effectlayers[layernum].begin(), Engine::effectlayers[layernum].end(), man), Engine::effectlayers[layernum].end());
-	delete man;
+	effectlayers[layernum].erase(std::remove(effectlayers[layernum].begin(), effectlayers[layernum].end(), ef), effectlayers[layernum].end());
+	delete ef;
 }
-void Engine::RemoveEffect(iwmoEffect* man)
+void Engine::RemoveEffect(iwmoEffect* ef)
 {
-//	cout << man << endl;
-	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
+	for (unsigned int i = 0; i < effectlayers.size(); i++)
 	{
-		Engine::effectlayers[i].erase(std::remove(Engine::effectlayers[i].begin(), Engine::effectlayers[i].end(), man), Engine::effectlayers[i].end());
+		effectlayers[i].erase(std::remove(effectlayers[i].begin(), effectlayers[i].end(), ef), effectlayers[i].end());
 	}
-	//cout << man << endl;
-	delete man;
+	delete ef;
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {
@@ -202,7 +204,7 @@ void Engine::Render()
 	float m__time = clock.getElapsedTime().asMicroseconds();
 	clock.restart();
 
-	m__time = m__time / 500;  // çäåñü ðåãóëèðóåì ñêîðîñòü èãðû
+	m__time = m__time / 500; 
 
 	if (m__time > 40) { m__time = 40; }
 	window.clear();
@@ -246,14 +248,21 @@ void Engine::Render()
 			window.draw(*(Engine::layerr.at(myi).at(myi1)));
 		}
 	}
-	for (unsigned int myi = 0; myi < Engine::effectlayers.size(); myi++)
+	gg:
+	for (unsigned int myi = 0; myi < effectlayers.size(); myi++)
 	{
-		for (unsigned int myi1 = 0; myi1 < Engine::effectlayers.at(myi).size(); myi1++)
+		for (unsigned int myi1 = 0; myi1 < effectlayers.at(myi).size(); myi1++)
 		{
-			Engine::effectlayers.at(myi).at(myi1)->updatetime(m__time);
-			Engine::effectlayers.at(myi).at(myi1)->anim.tick(m__time);
-			Engine::effectlayers.at(myi).at(myi1)->tick(m__time);
-			Engine::effectlayers.at(myi).at(myi1)->draw(&window);
+			try {
+				effectlayers.at(myi).at(myi1)->updatetime(m__time);
+				effectlayers.at(myi).at(myi1)->anim.tick(m__time);
+				effectlayers.at(myi).at(myi1)->tick(m__time);
+				effectlayers.at(myi).at(myi1)->draw(&window);
+			}
+			catch (out_of_range e)
+			{
+				goto gg;
+			}
 		}
 	}
 	//cout << GetFrameRate() << endl;

@@ -4,8 +4,6 @@
 #include "tinyxml\tinyxml.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
-//#include <sstream>
-//#include <boost\math_fwd.hpp>
 using namespace std;
 using namespace sf;
 class Animation
@@ -123,7 +121,7 @@ public:
 
 		if (animFile.LoadFile())
 		{
-			//cout << "Animation loaded" << endl;
+
 		}
 
 		TiXmlElement *head;

@@ -16,7 +16,7 @@ public:
 	~kid();
 	kid();
 	/*
-	Creates a kid with given XML document filename, texture, position, engine and GameHandler*.
+	Creates a kid with given XML document filename, texture, position, engine Event source(CSource)* death texture sheet pointer and camera pointer.
 	*/
 	void createKid(string filen, Texture* kidTexture, sf::Vector2f position, Engine* engine,CSource* eventsource,Texture* kidDeathSheet,View* camera);
 	void control();
@@ -56,7 +56,7 @@ private:
 	bool m_p = false;
 	Texture* m_deathsheet;
 	Texture* m_texture;
-	iwmoEffect* effect;
+	iwmoEffect* effect = static_cast<iwmoEffect*>(new iwmoEffect);
 	float volCounter = 100;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 };
