@@ -232,9 +232,8 @@ void kid::Col()
 void kid::Restart()
 {
 	m_engine->ResetBlocks();
-	Alive = true;
-	visible = true;
-	state = unknown;
+	
+	
 	setPos(LastSave);
 	if (effect != NULL)
 	{
@@ -261,13 +260,19 @@ void kid::Restart()
 		sound->setPlayingOffset(sf::seconds(0));
 
 	}
+
 	volCounter = 100;
+	state = unknown;
+	anim.play("idle");
 	anim.flip(false);
+	updaterect();
 	jumpcount = 0;
+	Alive = true;
+	visible = true;
 }
 void kid::death()
 {
-	if (Alive)
+	if (Alive && state != unknown)
 	{
 		Alive = false;
 		state = EntityState::death;

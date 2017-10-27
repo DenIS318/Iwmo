@@ -236,6 +236,17 @@ void Engine::UpdateBlockList(vector<IwmoBlock>* newlist)
 	}
 	blocklistptr = newlist;
 }
+void Engine::UpdatePrototype()
+{
+	if (blockprototype != NULL)
+	{
+		blockprototype->killable = blockSettings.Killable;
+		blockprototype->Resetable = blockSettings.Resetable;
+		blockprototype->blocktype = blockSettings.blocktype;
+		blockprototype->sprite.setScale(blockSettings.ScaleX, blockSettings.ScaleY);
+		selectedblock->setScale(blockprototype->sprite.getScale());
+	}
+}
 void Engine::DrawImguiTilesets()
 {
 	if (ShowTilesets)
@@ -273,12 +284,6 @@ void Engine::DrawImguiTilesets()
 			}
 			
 		}
-		///
-		//popup
-		//ImGui::BeginPopup("BlockPop");
-		//blocklist->at(listbox_item_current).textureptr;
-		//ImGui::EndPopup();
-		///
 		ImGui::EndChild();
 		ImGui::TreePop();
 		}
@@ -292,8 +297,72 @@ void Engine::DrawImguiTilesets()
 				blockprototype = NULL;
 			}
 		}
-		//ImGui::TreePop();
-	
+		///property editor
+		if (blockprototype != NULL)
+		{
+			ImGui::BeginChild("propeditor", Vector2f(600, 300), false);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Columns(2);
+			ImGui::Separator();
+			ImGui::AlignFirstTextHeightToWidgets();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+			bool node_open = ImGui::TreeNode((remove_extension(blocklistptr->at(listbox_item_current).blockname)).c_str());
+			ImGui::NextColumn();
+			ImGui::AlignFirstTextHeightToWidgets();
+			ImGui::Text("Selected block");
+			ImGui::NextColumn();
+			if (node_open)
+			{
+				string labels[] =
+				{
+					"Type","Killable","Resetable","ScaleX","ScaleY"
+				};
+				for (int i = 0; i < (size(labels)); i++)
+				{
+					{
+						ImGui::AlignFirstTextHeightToWidgets();
+						ImGui::Text(labels[i].c_str());
+						ImGui::NextColumn();
+						ImGui::PushItemWidth(-1);
+						if (i == 0)
+						{
+							if (ImGui::ListBox("Block Types", &curtype, blocktypesStr))
+							{
+								blockSettings.blocktype = blocktypesType[curtype];
+
+							}
+						}
+						if (i == 1)
+						{
+							ImGui::Checkbox("Determines, will block kill kid", &blockSettings.Killable);
+						}
+						if (i == 2)
+						{
+							ImGui::Checkbox("Determines, will block reset on R press", &blockSettings.Resetable);
+						}
+						if (i == 3)
+						{
+							ImGui::InputFloat("Scale by X factor", &blockSettings.ScaleX, 0.1f);
+						}
+						if (i == 4)
+						{
+							ImGui::InputFloat("Scale by Y factor", &blockSettings.ScaleY, 0.1f);
+						}
+						ImGui::PopItemWidth();
+						ImGui::NextColumn();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+
+
+			// Iterate dummy objects with dummy members (all the same data)
+				///
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+			ImGui::EndChild();
+		}
 	}
 }
 void Engine::ImguiMaker()
@@ -391,6 +460,7 @@ void Engine::Render()
 			}
 		}
 	}
+	UpdatePrototype();
 	if (selectedblock != NULL)
 	{
 		window.draw(*selectedblock);
@@ -424,6 +494,15 @@ void Engine::init(int Width, int Height, string title, short fm)
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
 	window.setSize(sf::Vector2u(Width, Height));
+	blocktypesStr.push_back("solid");
+	blocktypesStr.push_back("decoration");
+	blocktypesStr.push_back("slidable");
+	blocktypesStr.push_back("unknownblock");
+	blocktypesType.push_back(solid);
+	blocktypesType.push_back(decoration);
+	blocktypesType.push_back(slidable);
+	blocktypesType.push_back(unknownblock);
 	ImGui::SFML::Init(window);
+
 	//window.setVerticalSyncEnabled(true);
 }

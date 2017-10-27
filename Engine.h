@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <imgui.h>
 #include <imgui-SFML.h>
+#include<cstdlib>
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
@@ -131,7 +132,19 @@ public:
 	Vector2f imguipos = Vector2f(0, 0);
 	Vector2f imguisize = Vector2f(0,0);
 	Vector2f lastemplacedblockpos = Vector2f(-666, -666);
+	vector<string> blocktypesStr;
+	vector<BlockType> blocktypesType;
+	struct PrototypeSettings
+	{
+		bool Killable;
+		bool Resetable;
+		float ScaleX=1.0f, ScaleY=1.0f;
+		BlockType blocktype = solid;
+	};
+	PrototypeSettings blockSettings;
 private:
+	void UpdatePrototype();
+	int curtype = 0;
 	int listbox_item_current = 0;
 	void DrawImguiTilesets();
 	vector<string> listboxvector;

@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <map>
 namespace Iwmo {
 	enum BlockType
 	{
@@ -6,5 +8,9 @@ namespace Iwmo {
 		decoration,
 		slidable,
 		unknownblock
+	};
+	struct BlockTypes {
+		BlockType type;
+		const char* name;
 	};
 }
