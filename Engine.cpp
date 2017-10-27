@@ -242,17 +242,35 @@ void Engine::DrawImguiTilesets()
 	{
 		if (ImGui::TreeNode("Tilesets"))
 		{
+			ImGui::BeginChild("make", Vector2f(60, 30), false);
+			if (ImGui::Checkbox("Make", &make))
+			{
+				if (make)
+				{
+					//duplicate
+					BlockType type = solid;
+					//block selected
+					//let allow to create his prototype
+					selectedblock = new Sprite();
+					selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
+					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, type);
+				}
+			}
+			ImGui::EndChild();
 			ImGui::BeginChild("BlockList", Vector2f(300, 200), false);
 		
 		if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
 		{
-			
+			if (make)
+			{
 				BlockType type = solid;
 				//block selected
-				//let allow to create his
+				//let allow to create his prototype
 				selectedblock = new Sprite();
 				selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
 				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, type);
+				
+			}
 			
 		}
 		///
@@ -264,7 +282,7 @@ void Engine::DrawImguiTilesets()
 		ImGui::EndChild();
 		ImGui::TreePop();
 		}
-		else
+		if(!make)
 		{
 			delete selectedblock;
 			delete blockprototype;
@@ -292,12 +310,13 @@ void Engine::ImguiMaker()
 		//ImGui::ShowTestWindow(&ShowImgui);
 		//flags |= ImGuiWindowFlags_NoTitleBar;
 		ImGui::Begin("Maker", &ShowImgui, flags);
-		ImGui::SetWindowFocus();
 		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
 		Vector2f v = ImGui::GetWindowSize();
 		ImGui::SetWindowPos(Vector2f(WinSize.x - v.x - 50 , 0));
 		ImGui::Text("Welcome, again!");
 		DrawImguiTilesets();
+		imguisize = ImGui::GetWindowSize();
+		imguipos = ImGui::GetWindowPos();
 		ImGui::End();
 	}
 }

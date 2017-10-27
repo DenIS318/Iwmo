@@ -45,7 +45,6 @@ sf::TcpSocket socket;
 sf::SocketSelector selector;
 bool connected = false;
 bool serverrunning = false;
-
 inline void enablebox()
 {
 	ip = "";
@@ -88,6 +87,43 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 
 	}
 }
+/*Getting block pointer that position matching point*/
+inline Block* GetBlockAtPoint(Engine* engine, Vector2f point, int layer)
+{
+	for (auto it = engine->MapBlocks[layer].begin(); it != engine->MapBlocks[layer].end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (val->sprite.getPosition() == point && val != engine->blockprototype)
+		{
+			return val;
+		}
+	}
+	return NULL;
+}
+inline void emplaceBlock(Engine* engine,Vector2f point,int selectedlayer)
+{
+	//get block at this point with selected layer
+	auto B = GetBlockAtPoint(engine, point, selectedlayer);
+	if (B == NULL)
+	{
+		B = new Block(*engine->blockprototype);
+		engine->AddBlock(B, selectedlayer);
+	}
+	else
+	{
+		if (engine->lastemplacedblockpos != point)
+		{
+			engine->RemoveBlock(B);
+			B = new Block(*engine->blockprototype);
+			engine->AddBlock(B, selectedlayer);
+			engine->lastemplacedblockpos = point;
+		}
+	}
+}
+inline void emplaceBlock(Engine* engine, Vector2f point)
+{
+	emplaceBlock(engine, point, engine->selectedlayer);
+}
 inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 {
 	if (engine != NULL)
@@ -99,14 +135,68 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			
 			if (gamestarted)
 			{
-				if (engine->selectedblock != NULL)
+				if (engine->GetWindow()->hasFocus())
 				{
-					Vector2i pos(event.mouseMove.x, event.mouseMove.y);
-					auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
-					auto b = engine->selectedblock->getGlobalBounds();
-					auto sizedivide2 = Vector2i(b.width/2, b.height/2);
-					newpos -= Vector2f(sizedivide2);
-					engine->selectedblock->setPosition(newpos);
+					if (engine->ShowImgui)
+					{
+
+						Vector2f cursorpos = Vector2f(event.mouseMove.x, event.mouseMove.y);
+						Vector2f winsize = engine->imguisize;
+						Vector2f winpos = engine->imguipos;
+						FloatRect ImGuiRect(winpos, winsize);
+						if (!ImGuiRect.contains(cursorpos))
+						{
+							engine->ImGuifocus = false;
+						}
+						else
+						{
+							engine->ImGuifocus = true;
+							if (engine->lastemplacedblockpos != Vector2f(-666, -666))
+							{
+								engine->lastemplacedblockpos = Vector2f(-666, -666);
+							}
+						}
+					}
+
+					if (engine->selectedblock != NULL)
+					{
+
+						if (!engine->ImGuifocus)
+						{
+
+							Vector2i pos(event.mouseMove.x, event.mouseMove.y);
+							auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
+							if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+							{
+								int x = newpos.x;
+								int y = newpos.y;
+								newpos.x = (x / engine->GridSize.x) * engine->GridSize.x;
+								newpos.y = (y / engine->GridSize.y) * engine->GridSize.y;
+							}
+							else
+							{
+								auto b = engine->selectedblock->getGlobalBounds();
+								auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+								newpos -= Vector2f(sizedivide2);
+							}
+							engine->selectedblock->setPosition(newpos);
+						}
+					}
+					if (Keyboard::isKeyPressed(Keyboard::LShift) && Mouse::isButtonPressed(sf::Mouse::Button::Left))
+					{
+						if (engine->blockprototype != NULL)
+						{
+							if (!engine->ImGuifocus)
+							{
+								auto newpos = engine->selectedblock->getPosition();
+								auto b = engine->selectedblock->getGlobalBounds();
+								auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+								newpos += Vector2f(sizedivide2);
+								engine->blockprototype->sprite.setPosition(newpos);
+								emplaceBlock(engine, newpos);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -121,12 +211,17 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				{
 					if (engine->blockprototype != NULL)
 					{
-						Vector2i pos(event.mouseButton.x, event.mouseButton.y);
-						auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
-						engine->blockprototype->sprite.setPosition(newpos);
-						Block* newblock = new Block(*engine->blockprototype);
-						engine->AddBlock(newblock, engine->selectedlayer);
+						if (!engine->ImGuifocus)
+						{
+							auto newpos = engine->selectedblock->getPosition();
+							auto b = engine->selectedblock->getGlobalBounds();
+							auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+							newpos += Vector2f(sizedivide2);
+							engine->blockprototype->sprite.setPosition(newpos);
+							emplaceBlock(engine, newpos);
+						}
 					}
+
 				}
 			}
 			

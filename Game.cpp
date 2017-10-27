@@ -257,14 +257,14 @@ void Game::INITMAP()
 		if (i == 0)
 		{
 			//vertical wall
-			sf::Vector2f offset(castle2->getSize().x*i, (-32));
+			sf::Vector2f offset(castle2->getSize().x*i, (16));
 			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
 
 		}
 		else
 		{
 			//horizontal wall
-			sf::Vector2f offset(castlewall2->getSize().x*i, (-32));
+			sf::Vector2f offset(castlewall2->getSize().x*i, (16));
 			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
 		}
 	}
@@ -394,6 +394,20 @@ void GameHandler::OnEvent(Event eventt)
 			win->setSize(size);
 			m_engine->WinSize = size;
 			camera.setSize(size.x, size.y);
+		}
+		if (event.type == Event::KeyPressed)
+		{
+			if (event.key.code == Keyboard::M)
+			{
+				if (!m_engine->make)
+				{
+					m_engine->make = true;
+				}
+				else
+				{
+					m_engine->make = false;
+				}
+			}
 		}
 		
 		try {

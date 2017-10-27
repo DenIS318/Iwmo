@@ -125,6 +125,12 @@ public:
 	Block* blockprototype;
 	int selectedlayer = 0;
 	Vector2u WinSize = Vector2u(Width, Height);
+	Vector2i GridSize = Vector2i(32, 32);
+	bool make = true;
+	bool ImGuifocus = false;
+	Vector2f imguipos = Vector2f(0, 0);
+	Vector2f imguisize = Vector2f(0,0);
+	Vector2f lastemplacedblockpos = Vector2f(-666, -666);
 private:
 	int listbox_item_current = 0;
 	void DrawImguiTilesets();

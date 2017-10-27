@@ -45,7 +45,9 @@ public:
 	vector<Bullet*>Bulletlist;
 	void tick(float time);
 	sf::Vector2i bulletscale = sf::Vector2i(1,1);
+	void updaterect();
 private:
+	FloatRect kidrect;
 	View* m_camera;
 	//sf::Vector2f LastPos;
 	int lshiftcounter = 0;
@@ -58,5 +60,11 @@ private:
 	Texture* m_texture;
 	iwmoEffect* effect = static_cast<iwmoEffect*>(new iwmoEffect);
 	float volCounter = 100;
+	enum WalkDirection {
+		WalkRight,
+		WalkLeft,
+		None
+	};
+	WalkDirection dir = None;
 	iwmoEntity* kidentity = iwmoEntity::MGetBase();
 };

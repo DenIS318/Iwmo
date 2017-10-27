@@ -16,6 +16,7 @@ void kid::Col()
 {
 	if (Alive)
 	{
+		updaterect();
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		auto curf = anim.animList[anim.currentAnim].currentFrame;
@@ -26,9 +27,28 @@ void kid::Col()
 			for (col = row->begin(); col != row->end(); col++) {
 				if (!m_p)
 				{
+					if (dir != None)
+					{
+						if (dir == WalkLeft)
+						{
+							kidentity->m_move(-SpeedX, 0);
+						}
+						else if (dir == WalkRight)
+						{
+							kidentity->m_move(SpeedX, 0);
+						}
+						if (kidentity->state != walk && kidentity->state != fall &&state != slide && kidentity->state != jump && grounded)
+						{
+
+							kidentity->state = walk;
+						}
+						dir = None;
+					}
+					
 					auto bl2 = *col._Ptr;
 					sf::Vector2f mtv;
-						if (m_engine->m_math.sat_test(*kidspr, bl2->sprite, &mtv))
+					
+						if (m_engine->m_math.sat_test(kidrect, bl2->sprite.getGlobalBounds(), &mtv))
 						{
 							if (bl2->killable)
 							{
@@ -39,6 +59,7 @@ void kid::Col()
 							if (bl2->blocktype == Iwmo::BlockType::solid)
 							{
 								kidentity->setPos(kidentity->GetPos() + mtv);
+								coutVector2(mtv);
 								if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
 								{
 									grounded = true;
@@ -48,7 +69,7 @@ void kid::Col()
 									jumpcount = 0;
 
 								}
-								else if(state != slide)
+								else if(state != slide && mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
 								{
 									state = fall;
 									grounded = false;
@@ -78,6 +99,7 @@ void kid::Col()
 									state = idle;
 								}
 							}
+						
 				}
 			}
 		}
@@ -337,7 +359,7 @@ void kid::tick(float time)
 	MOD = %
 	*/
 	posx = x - (x % 800) + 400;
-	posy = y - (y % 600) + 300;
+	posy = y - (y % 608) + 304;
 	Vector2f vec(posx, posy);
 	//coutVector2(vec);
 	m_camera->setCenter(vec);
@@ -438,6 +460,21 @@ void kid::tick(float time)
 		
 	}
 }
+void kid::updaterect()
+{
+	//kid subrect
+	FloatRect r = anim.getSprite()->getGlobalBounds();
+	if (anim.isFlip())
+	{
+		//убираем пистолет
+		r.left = r.left +3;
+	}
+	else
+	{
+		r.width = r.width -3;
+	}
+	kidrect = r;
+}
 void kid::deleteentity()
 {
 	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end(); ++bull)
@@ -472,40 +509,33 @@ void kid::control()
 			
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
+				
 				if (state != slide)
 				{
-					kidentity->m_move(-SpeedX, 0);
+					dir = WalkLeft;
 				}
 				else if (state == slide && anim.isFlip())
 				{
-					kidentity->m_move(-SpeedX, 0);
+					dir = WalkLeft;
 				}
 
 
-				if (kidentity->state != walk && kidentity->state != fall && state != slide && kidentity->state != jump && grounded)
-				{
 
-					kidentity->state = walk;
-				}
 
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 			{
 				if (state != slide)
 				{
-					kidentity->m_move(SpeedX, 0);
+					dir = WalkRight;
 				}
 				else if (state == slide && !anim.isFlip())
 				{
-					kidentity->m_move(SpeedX, 0);
+					dir = WalkRight;
 				}
 				
 
-				if (kidentity->state != walk && kidentity->state != fall &&state != slide && kidentity->state != jump && grounded)
-				{
-
-					kidentity->state = walk;
-				}
+				
 			}
 			if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
 			{

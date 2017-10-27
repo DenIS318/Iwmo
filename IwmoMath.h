@@ -25,17 +25,13 @@ namespace Iwmo {
 		~Math();
 		Math();
 		bool onblock(Iwmo::Block* block, FloatRect entityrect);
-		/*
-		ALL RECTS MUST BE ON GLOBAL BOUNDS!!!
-		Entityrect = kid rect or any else entity
-		targetrect = block rect or any target to validating position
-		*/
-		
-		bool ValidateDownPos(int entityY, int* Yoffset, int targetTOP);
+		bool hasBlockRight(Iwmo::Block* block, FloatRect entityrect);
+		bool hasBlockLeft(Iwmo::Block* block, FloatRect entityrect);
 		bool InRange(int val, int minimum, int maximum);
 		//bool colTest(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f* out_mtv);
 		static double distanceBetweenTwoPoints(double x, double y, double a, double b);
 		static  bool sat_test(const sf::Sprite &sp1, const sf::Sprite &sp2, sf::Vector2f *out_mtv);
+		static  bool sat_test(FloatRect sprite1rect, FloatRect sprite2rect, sf::Vector2f *out_mtv);
 	};
 
 }
