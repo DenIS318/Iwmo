@@ -17,6 +17,7 @@
 #include<cstdlib>
 #include <stdio.h>
 #include "IwmoLayer.h"
+#include <functional>
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
@@ -44,7 +45,8 @@ public:
 	/*
 	Removing layer.
 	*/
-	void RemoveLayer(unsigned short);
+	void RemoveLayer(unsigned int num);
+	void RemoveBlockLayer(unsigned int num);
 	/*
 	Getting layers pointer.
 	*/

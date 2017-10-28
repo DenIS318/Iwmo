@@ -70,12 +70,21 @@ void Engine::RemoveAll()
 			delete Engine::effectlayers.at(i).at(i1);
 		}
 	}
+	for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
+	{
+		for (unsigned int i1 = 0; i1 < Engine::MapBlocks.at(i).objects.size(); i1++)
+		{
+			delete Engine::MapBlocks.at(i).objects.at(i1);
+		}
+	}
 	effectlayers.clear();
 	Engine::layerrentity.clear();
 	Engine::layerr.clear();
+	MapBlocks.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
 	Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 	Engine::effectlayers = vector<vector<iwmoEffect*>>(maxlayersize);
+	MapBlocks = vector<IwmoLayer>(maxlayersize);
 	intlayer.clear();
 }
 Engine::Engine()
@@ -90,30 +99,22 @@ void Engine::SetCam(View* campoint)
 Engine::~Engine()
 {
 }
-int Sort(const void * a, const void * b)
+bool compareLen(const std::string& a, const std::string& b)
 {
-	if ((*(int *)a) < (*(int *)b))
-		return -1;
-	else
-		return ((*(int *)a) > (*(int *)b));
+	return (a.length() < b.length());
 }
 void sortstr(vector<string>* vec)
 {
-	//TODO
-	/*
-	int a[SIZE] = { 1, 5, 6, 2, 0 }; // массив, который нужно отсортировать
-	int i = 0; // просто счетчик
-							  insertSortASC(&vec, SIZE); //- по возрастанию
+	
 		for (int iX = 0; iX < vec->size(); iX++)
 		{
 			//int diff = std::abs(stoi(vec->at(iX)) - 1); 
-			int intval = stoi(vec->at(iX));
-
-			string str = to_string(SortArray(, size));
+			int intval = iX+1;
+			string str = to_string(intval);
 			vec->at(iX) = str;
-			cout << vec->size() << endl;
 		}
-		*/
+		std::sort(vec->begin(), vec->end(), compareLen);
+		
 }
 void Engine::AddLayer()
 {
@@ -128,12 +129,24 @@ void Engine::AddLayer()
 	intlayer.push_back(to_string(MapBlocks.size()));
 	sortstr(&intlayer);
 }
-void Engine::RemoveLayer(unsigned short layernum)
+void Engine::RemoveBlockLayer(unsigned int layernum)
+{
+	Engine::MapBlocks.erase(MapBlocks.begin() + layernum);
+	intlayer.erase(std::remove(intlayer.begin(), intlayer.end(), intlayer[layernum]), intlayer.end());
+	sortstr(&intlayer);
+}
+void Engine::RemoveLayer(unsigned int layernum)
 {
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
 	Engine::effectlayers.erase(std::remove(Engine::effectlayers.begin(), Engine::effectlayers.end(), Engine::effectlayers[layernum]), Engine::effectlayers.end());
 	Engine::layerrentity.erase(std::remove(Engine::layerrentity.begin(), Engine::layerrentity.end(), Engine::layerrentity[layernum]), Engine::layerrentity.end());
-	delete &MapBlocks[layernum];
+	/*if (&MapBlocks[layernum] != NULL)
+	{
+		if (&MapBlocks[layernum].objects != NULL)
+		{
+			delete &MapBlocks[layernum];
+		}
+	}*/
 	//remove layer at index
 	Engine::MapBlocks.erase(MapBlocks.begin() + layernum);
 	//
@@ -411,10 +424,23 @@ void Engine::DrawImguiTilesets()
 		if (ImGui::TreeNode("Layers"))
 		{
 			ImGui::ListBox("Layers list", &selectedlayer, intlayer);
-			if (ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible))
+			
+			if(ImGui::Button("Add layer", Vector2f(100, 20)))
 			{
-
+				AddLayer();
+				selectedlayer = MapBlocks.size() - 2;
 			}
+			if (ImGui::Button("Remove layer", Vector2f(100, 20)))
+			{
+				if (MapBlocks.size() != 0)
+				{
+					int prev = selectedlayer;
+					RemoveBlockLayer(selectedlayer);
+					//begins with 1,not 0, so will -2 instead -1
+					selectedlayer = prev - 1;
+				}
+			}
+			ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible);
 			ImGui::TreePop();
 		}
 		ImGui::EndChild();
