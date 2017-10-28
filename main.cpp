@@ -90,7 +90,7 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 /*Getting block pointer that position matching point*/
 inline Block* GetBlockAtPoint(Engine* engine, Vector2f point, int layer)
 {
-	for (auto it = engine->MapBlocks[layer].begin(); it != engine->MapBlocks[layer].end(); ++it)
+	for (auto it = engine->MapBlocks[layer].objects.begin(); it != engine->MapBlocks[layer].objects.end(); ++it)
 	{
 		auto val = *it._Ptr;
 		if (val->sprite.getPosition() == point && val != engine->blockprototype)

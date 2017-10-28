@@ -15,6 +15,8 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include<cstdlib>
+#include <stdio.h>
+#include "IwmoLayer.h"
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
@@ -110,7 +112,7 @@ public:
 	void RemoveEffect(iwmoEffect* effect);
 	void RemoveEffect(iwmoEffect* effect, unsigned short layernum);
 	void AddEffect(iwmoEffect* effect,unsigned short layernum);
-	vector<vector<Block*>> MapBlocks;
+	vector<IwmoLayer> MapBlocks;
 	Math m_math = Iwmo::IWMOMATH;
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
@@ -144,6 +146,7 @@ public:
 	PrototypeSettings blockSettings;
 private:
 	void UpdatePrototype();
+	vector<string> intlayer;
 	int curtype = 0;
 	int listbox_item_current = 0;
 	void DrawImguiTilesets();

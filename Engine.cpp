@@ -24,10 +24,11 @@ void Engine::ResetBlocks()
 {
 	//TODO vector2d iterator template
 
-	vector< vector<Block*> >::iterator row;
+	vector< IwmoLayer >::iterator row;
 	vector<Block*>::iterator col;
 	for (row = vector2d.begin(); row != vector2d.end(); row++) {
-		for (col = row->begin(); col != row->end(); col++) {
+		
+		for (col = row->objects.begin(); col != row->objects.end(); col++) {
 			// do stuff ...
 			auto p = *col;
 			if (p->Resetable)
@@ -62,10 +63,20 @@ void Engine::RemoveAll()
 			delete Engine::layerrentity.at(i).at(i1);
 		}
 	}
+	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
+	{
+		for (unsigned int i1 = 0; i1 < Engine::effectlayers.at(i).size(); i1++)
+		{
+			delete Engine::effectlayers.at(i).at(i1);
+		}
+	}
+	effectlayers.clear();
 	Engine::layerrentity.clear();
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
 	Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
+	Engine::effectlayers = vector<vector<iwmoEffect*>>(maxlayersize);
+	intlayer.clear();
 }
 Engine::Engine()
 {
@@ -79,23 +90,55 @@ void Engine::SetCam(View* campoint)
 Engine::~Engine()
 {
 }
+int Sort(const void * a, const void * b)
+{
+	if ((*(int *)a) < (*(int *)b))
+		return -1;
+	else
+		return ((*(int *)a) > (*(int *)b));
+}
+void sortstr(vector<string>* vec)
+{
+	//TODO
+	/*
+	int a[SIZE] = { 1, 5, 6, 2, 0 }; // массив, который нужно отсортировать
+	int i = 0; // просто счетчик
+							  insertSortASC(&vec, SIZE); //- по возрастанию
+		for (int iX = 0; iX < vec->size(); iX++)
+		{
+			//int diff = std::abs(stoi(vec->at(iX)) - 1); 
+			int intval = stoi(vec->at(iX));
+
+			string str = to_string(SortArray(, size));
+			vec->at(iX) = str;
+			cout << vec->size() << endl;
+		}
+		*/
+}
 void Engine::AddLayer()
 {
 	vector<Drawable*> tempvector;
 	Engine::layerr.push_back(tempvector);
 	vector<iwmoEntity*> tempvectorentity;
 	Engine::layerrentity.push_back(tempvectorentity);
-	vector<Block*> tempvectorblock;
-	Engine::MapBlocks.push_back(tempvectorblock);
+	IwmoLayer templayer;
+	Engine::MapBlocks.push_back(templayer);
 	vector<iwmoEffect*> tempvectoreffects;
 	Engine::effectlayers.push_back(tempvectoreffects);
+	intlayer.push_back(to_string(MapBlocks.size()));
+	sortstr(&intlayer);
 }
 void Engine::RemoveLayer(unsigned short layernum)
 {
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
 	Engine::effectlayers.erase(std::remove(Engine::effectlayers.begin(), Engine::effectlayers.end(), Engine::effectlayers[layernum]), Engine::effectlayers.end());
 	Engine::layerrentity.erase(std::remove(Engine::layerrentity.begin(), Engine::layerrentity.end(), Engine::layerrentity[layernum]), Engine::layerrentity.end());
-	Engine::MapBlocks.erase(std::remove(Engine::MapBlocks.begin(), Engine::MapBlocks.end(), Engine::MapBlocks[layernum]), Engine::MapBlocks.end());
+	delete &MapBlocks[layernum];
+	//remove layer at index
+	Engine::MapBlocks.erase(MapBlocks.begin() + layernum);
+	//
+	intlayer.erase(std::remove(intlayer.begin(), intlayer.end(), intlayer[layernum]), intlayer.end());
+	sortstr(&intlayer);
 }
 vector<vector<iwmoEntity*>>& Engine::GetEntities()
 {
@@ -170,11 +213,11 @@ void Engine::Removeentity(iwmoEntity* man)
 }
 void Engine::AddBlock(Block* b,int layernumber)
 {
-	MapBlocks[layernumber].push_back(b);
+	MapBlocks[layernumber].objects.push_back(b);
 }
 void Engine::RemoveBlock(Block* b, unsigned short layernumber)
 {
-	Engine::MapBlocks[layernumber].erase(std::remove(Engine::MapBlocks[layernumber].begin(), Engine::MapBlocks[layernumber].end(), b), Engine::MapBlocks[layernumber].end());
+	Engine::MapBlocks[layernumber].objects.erase(std::remove(Engine::MapBlocks[layernumber].objects.begin(), Engine::MapBlocks[layernumber].objects.end(), b), Engine::MapBlocks[layernumber].objects.end());
 
 
 	delete b;
@@ -183,7 +226,7 @@ void Engine::RemoveBlock(Block* b)
 {
 	for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 	{
-		Engine::MapBlocks[i].erase(std::remove(Engine::MapBlocks[i].begin(), Engine::MapBlocks[i].end(), b), Engine::MapBlocks[i].end());
+		Engine::MapBlocks[i].objects.erase(std::remove(Engine::MapBlocks[i].objects.begin(), Engine::MapBlocks[i].objects.end(), b), Engine::MapBlocks[i].objects.end());
 	}
 	delete b;
 }
@@ -363,6 +406,18 @@ void Engine::DrawImguiTilesets()
 			ImGui::PopStyleVar();
 			ImGui::EndChild();
 		}
+		///Layers editor
+		ImGui::BeginChild("Layers editor", Vector2f(350, 350), false);
+		if (ImGui::TreeNode("Layers"))
+		{
+			ImGui::ListBox("Layers list", &selectedlayer, intlayer);
+			if (ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible))
+			{
+
+			}
+			ImGui::TreePop();
+		}
+		ImGui::EndChild();
 	}
 }
 void Engine::ImguiMaker()
@@ -412,10 +467,13 @@ void Engine::Render()
 		
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
-			for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].size(); i1++)
+			if (MapBlocks[i].visible)
 			{
-				window.draw((Engine::MapBlocks.at(i)[i1]->sprite));
+				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
+				{
+					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
 
+				}
 			}
 		}
 		for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)

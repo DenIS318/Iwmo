@@ -30,6 +30,7 @@
     <ClCompile Include="IwmoConfig.cpp" />
     <ClCompile Include="iwmoEffect.cpp" />
     <ClCompile Include="IwmoEntity.cpp" />
+    <ClCompile Include="IwmoLayer.cpp" />
     <ClCompile Include="IwmoMath.cpp" />
     <ClCompile Include="kid.cpp" />
     <ClCompile Include="main.cpp" />
@@ -54,6 +55,7 @@
     <ClInclude Include="IwmoConfig.h" />
     <ClInclude Include="iwmoEffect.h" />
     <ClInclude Include="IwmoEntity.h" />
+    <ClInclude Include="IwmoLayer.h" />
     <ClInclude Include="IwmoMath.h" />
     <ClInclude Include="iwmoTypes.h" />
     <ClInclude Include="kid.h" />

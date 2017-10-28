@@ -20,11 +20,11 @@ void kid::Col()
 		m_p = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		auto curf = anim.animList[anim.currentAnim].currentFrame;
-		vector< vector<Block*> >::iterator row;
+		vector< IwmoLayer >::iterator row;
 		vector<Block*>::iterator col;
 		#define vector2d m_engine->MapBlocks
 		for (row = vector2d.begin(); row != vector2d.end(); row++) {
-			for (col = row->begin(); col != row->end(); col++) {
+			for (col = row->objects.begin(); col != row->objects.end(); col++) {
 				if (!m_p)
 				{
 					if (dir != None)
@@ -375,11 +375,11 @@ void kid::tick(float time)
 		auto bullet = *bull._Ptr;
 		if (bullet->finisheddistance < bullet->maxdistance)
 		{
-			vector< vector<Block*> >::iterator row;
+			vector< IwmoLayer >::iterator row;
 			vector<Block*>::iterator col;
 			#define vector2d m_engine->MapBlocks
 			for (row = vector2d.begin(); row != vector2d.end(); row++) {
-				for (col = row->begin(); col != row->end(); col++) {
+				for (col = row->objects.begin(); col != row->objects.end(); col++) {
 					auto bl2 = *col._Ptr;
 					if (bl2->blocktype == solid)
 					{
