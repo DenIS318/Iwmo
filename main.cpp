@@ -319,14 +319,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				{
 					if (event.key.code == Keyboard::Tab)
 					{
-						if (!engine->ImguiCollappsed)
-						{
-							ImGui::SetWindowCollapsed("Maker", true);
-						}
-						else
-						{
-  							ImGui::SetWindowCollapsed("Maker", false);
-						}
+						ImGui::SetWindowCollapsed("Maker", !engine->ImguiCollappsed);
 					}
 				}
 			}

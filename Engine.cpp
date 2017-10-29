@@ -474,14 +474,7 @@ void Engine::ImguiMaker()
 		//flags |= ImGuiWindowFlags_NoTitleBar;
 		
 		ImGui::Begin("Maker", &ShowImgui, flags);
-		if (ImGui::IsWindowCollapsed())
-		{
-			ImguiCollappsed = true;
-		}
-		else
-		{
-			ImguiCollappsed = false;
-		}
+		ImguiCollappsed = ImGui::IsWindowCollapsed();
 		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
 		Vector2f v = ImGui::GetWindowSize();
 		ImGui::SetWindowPos(Vector2f(WinSize.x - v.x - 50 , 0));
