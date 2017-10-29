@@ -47,9 +47,13 @@ void kid::Col()
 					
 					auto bl2 = *col._Ptr;
 					sf::Vector2f mtv;
-					
+					if (!bl2->fake)
+					{
 						if (m_engine->m_math.sat_test(kidrect, bl2->sprite.getGlobalBounds(), &mtv))
 						{
+
+
+
 							if (bl2->killable)
 							{
 								death();
@@ -59,7 +63,7 @@ void kid::Col()
 							if (bl2->blocktype == Iwmo::BlockType::solid)
 							{
 								kidentity->setPos(kidentity->GetPos() + mtv);
-								coutVector2(mtv);
+								//coutVector2(mtv);
 								if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
 								{
 									grounded = true;
@@ -69,22 +73,23 @@ void kid::Col()
 									jumpcount = 0;
 
 								}
-								else if(state != slide && mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
+								else if (state != slide && mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
 								{
 									state = fall;
 									grounded = false;
 									vel.y = 0;
 								}
 
+
+
+								if (bl2->blocktype == slidable)
+								{
+									jumpcount = 1;
+									m_p = true;
+									state = slide;
+								}
 							}
-							//coutVector2(mtv);
-							if (bl2->blocktype == slidable)
-							{
-								jumpcount = 1;
-								m_p = true;
-								state = slide;
-							}
-							
+
 						}
 						else
 							if (m_engine->m_math.onblock(bl2, kidentity->anim.getSprite()->getGlobalBounds()))
@@ -99,6 +104,7 @@ void kid::Col()
 									state = idle;
 								}
 							}
+					}
 						
 				}
 			}
@@ -356,7 +362,7 @@ void kid::tick(float time)
 {
 	int x = GetX();
 	int y = GetY();
-	float posx,posy;
+	float posx, posy;
 	/*
 	ORIGINAL KAIYAN FORMULA
 	X( "Player" ) - ( X( "Player" ) mod 800 ) + 400
@@ -369,70 +375,100 @@ void kid::tick(float time)
 	//coutVector2(vec);
 	m_camera->setCenter(vec);
 	//TODOFUCKING
-	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end();)
+#define vector2d m_engine->MapBlocks
+	int oldsize = Bulletlist.size();
+	for (int i = 0; i < oldsize; i++)
 	{
-
-		auto bullet = *bull._Ptr;
-		if (bullet->finisheddistance < bullet->maxdistance)
+		if (Bulletlist[i] != NULL)
 		{
-			vector< IwmoLayer >::iterator row;
-			vector<Block*>::iterator col;
-			#define vector2d m_engine->MapBlocks
-			for (row = vector2d.begin(); row != vector2d.end(); row++) {
-				for (col = row->objects.begin(); col != row->objects.end(); col++) {
-					auto bl2 = *col._Ptr;
-					if (bl2->blocktype == solid)
-					{
-						auto ptr = bullet->sprite();
-						if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
+			auto bullet = Bulletlist[i];
+			if (bullet->finisheddistance < bullet->maxdistance)
+			{
+				//если пуля не достигла предела пролетаемой дистанции
+				vector< IwmoLayer >::iterator row;
+				vector<Block*>::iterator col;
+
+				for (row = vector2d.begin(); row != vector2d.end(); row++) {
+					for (col = row->objects.begin(); col != row->objects.end(); col++) {
+						auto bl2 = *col._Ptr;
+						if (!bl2->fake)
 						{
-							delete bullet;
-							Bulletlist.erase(bull);
-							currentbullets--;
-							if (bull != Bulletlist.end())
+							if (bl2->blocktype == solid)
 							{
-								++bull;
-								continue;
-							}
-							else
-							{
-								break;
+								//если блок солидный
+								auto ptr = bullet->sprite();
+								if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
+								{
+									delete Bulletlist[i];
+									Bulletlist.erase(Bulletlist.begin() + i);
+									currentbullets--;
+									goto skipf;
+								}
 							}
 						}
 					}
 				}
-			}
-			if (bull != Bulletlist.end())
-			{
-				++bull;
-				
+
 			}
 			else
 			{
-				break;
+				delete Bulletlist[i];
+				Bulletlist.erase(Bulletlist.begin() + i);
+				currentbullets--;
 			}
-			#undef vector2d
-			
-		}
-		else
-		{
-			
-			delete bullet;
-			Bulletlist.erase(bull);
-			currentbullets--;
-			if (bull != Bulletlist.end())
+		skipf:
+			if (Bulletlist[i]  != NULL)
 			{
-				++bull;
-				continue;
+				Bulletlist[i]->tick(m_engine->GetWindow(), time);
 			}
-			else
-			{
-				break;
-			}
-			
 		}
-		bullet->tick(m_engine->GetWindow(), time);
 	}
+
+	/*for (auto bull = Bulletlist.begin(); bull != Bulletlist.end(); ++bull)
+	{
+		//BULLET COLLISION
+		auto bullet = *bull._Ptr;
+		if (bullet != nullptr)
+		{
+			if (bullet->finisheddistance < bullet->maxdistance)
+			{
+				//если пуля не достигла предела пролетаемой дистанции
+				vector< IwmoLayer >::iterator row;
+				vector<Block*>::iterator col;
+
+				for (row = vector2d.begin(); row != vector2d.end(); row++) {
+					for (col = row->objects.begin(); col != row->objects.end(); col++) {
+						auto bl2 = *col._Ptr;
+						if (!bl2->fake)
+						{
+							if (bl2->blocktype == solid)
+							{
+								//если блок солидный
+								auto ptr = bullet->sprite();
+								if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
+								{
+									delete bullet;
+									Bulletlist.erase(bull);
+									currentbullets--;
+									goto skipf;
+								}
+							}
+						}
+					}
+				}
+
+			}
+			else
+			{
+				delete bullet;
+				Bulletlist.erase(bull);
+				currentbullets--;
+			}
+			
+		
+		
+	}*/
+#undef vector2d
 //	jmpb:
 	//muting sounds
 	if (!Alive)

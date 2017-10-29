@@ -300,6 +300,9 @@ void Engine::UpdatePrototype()
 		blockprototype->Resetable = blockSettings.Resetable;
 		blockprototype->blocktype = blockSettings.blocktype;
 		blockprototype->sprite.setScale(blockSettings.ScaleX, blockSettings.ScaleY);
+		blockprototype->fake = blockSettings.fake;
+		blockprototype->SetTransparency(blockSettings.transparency);
+		selectedblock->setColor(blockprototype->sprite.getColor());
 		selectedblock->setScale(blockprototype->sprite.getScale());
 	}
 }
@@ -309,7 +312,7 @@ void Engine::DrawImguiTilesets()
 	{
 		if (ImGui::TreeNode("Tilesets"))
 		{
-			ImGui::BeginChild("make", Vector2f(60, 30), false);
+			ImGui::BeginChild("make", Vector2f(60, 20), false);
 			if (ImGui::Checkbox("Make", &make))
 			{
 				if (make)
@@ -324,7 +327,7 @@ void Engine::DrawImguiTilesets()
 				}
 			}
 			ImGui::EndChild();
-			ImGui::BeginChild("BlockList", Vector2f(300, 200), false);
+			ImGui::BeginChild("BlockList", Vector2f(350, 125), false);
 		
 		if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
 		{
@@ -353,6 +356,32 @@ void Engine::DrawImguiTilesets()
 				blockprototype = NULL;
 			}
 		}
+		///Layers editor
+		ImGui::BeginChild("Layers editor", Vector2f(350, 200), false);
+		if (ImGui::TreeNode("Layers"))
+		{
+			ImGui::ListBox("Layers list", &selectedlayer, intlayer);
+
+			if (ImGui::Button("Add layer", Vector2f(100, 20)))
+			{
+				AddLayer();
+				selectedlayer = MapBlocks.size() - 2;
+			}
+			if (ImGui::Button("Remove layer", Vector2f(100, 20)))
+			{
+				if (MapBlocks.size() != 0)
+				{
+					int prev = selectedlayer;
+					RemoveBlockLayer(selectedlayer);
+					//begins with 1,not 0, so will -2 instead -1
+					selectedlayer = prev - 1;
+				}
+			}
+			ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible);
+			ImGui::Checkbox("Flash invisible layers", &Flash);
+			ImGui::TreePop();
+		}
+		ImGui::EndChild();
 		///property editor
 		if (blockprototype != NULL)
 		{
@@ -370,7 +399,7 @@ void Engine::DrawImguiTilesets()
 			{
 				string labels[] =
 				{
-					"Type","Killable","Resetable","ScaleX","ScaleY"
+					"Type","Killable","Resetable","ScaleX","ScaleY","Fake","Transparency"
 				};
 				for (int i = 0; i < (size(labels)); i++)
 				{
@@ -403,6 +432,14 @@ void Engine::DrawImguiTilesets()
 						{
 							ImGui::InputFloat("Scale by Y factor", &blockSettings.ScaleY, 0.1f);
 						}
+						if (i == 5)
+						{
+							ImGui::Checkbox("Disable collision, killable etc...", &blockSettings.fake);
+						}
+						if (i == 6)
+						{
+							ImGui::SliderInt("##line", &blockSettings.transparency, 0, 255);
+						}
 						ImGui::PopItemWidth();
 						ImGui::NextColumn();
 					}
@@ -419,31 +456,7 @@ void Engine::DrawImguiTilesets()
 			ImGui::PopStyleVar();
 			ImGui::EndChild();
 		}
-		///Layers editor
-		ImGui::BeginChild("Layers editor", Vector2f(350, 350), false);
-		if (ImGui::TreeNode("Layers"))
-		{
-			ImGui::ListBox("Layers list", &selectedlayer, intlayer);
-			
-			if(ImGui::Button("Add layer", Vector2f(100, 20)))
-			{
-				AddLayer();
-				selectedlayer = MapBlocks.size() - 2;
-			}
-			if (ImGui::Button("Remove layer", Vector2f(100, 20)))
-			{
-				if (MapBlocks.size() != 0)
-				{
-					int prev = selectedlayer;
-					RemoveBlockLayer(selectedlayer);
-					//begins with 1,not 0, so will -2 instead -1
-					selectedlayer = prev - 1;
-				}
-			}
-			ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible);
-			ImGui::TreePop();
-		}
-		ImGui::EndChild();
+		
 	}
 }
 void Engine::ImguiMaker()
@@ -459,7 +472,16 @@ void Engine::ImguiMaker()
 		//ImGui::ShowUserGuide();
 		//ImGui::ShowTestWindow(&ShowImgui);
 		//flags |= ImGuiWindowFlags_NoTitleBar;
+		
 		ImGui::Begin("Maker", &ShowImgui, flags);
+		if (ImGui::IsWindowCollapsed())
+		{
+			ImguiCollappsed = true;
+		}
+		else
+		{
+			ImguiCollappsed = false;
+		}
 		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
 		Vector2f v = ImGui::GetWindowSize();
 		ImGui::SetWindowPos(Vector2f(WinSize.x - v.x - 50 , 0));
@@ -499,6 +521,14 @@ void Engine::Render()
 				{
 					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
 
+				}
+			}
+			else if (Flash && ClientIsMaker)
+			{
+				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
+				{
+					
+					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite),&shader);
 				}
 			}
 		}
@@ -585,6 +615,16 @@ void Engine::init(int Width, int Height, string title, short fm)
 	blocktypesType.push_back(solid);
 	blocktypesType.push_back(decoration);
 	blocktypesType.push_back(slidable);
+	if (!shader.loadFromFile("resources/blur.frag", sf::Shader::Fragment))
+	{
+		cout << "SHADER NOT LOADED" << endl;
+		// error...
+	}
+	else
+	{
+		shader.setUniform("texture", sf::Shader::CurrentTexture);
+		shader.setUniform("blur_radius",0.5f);
+	}
 	blocktypesType.push_back(unknownblock);
 	ImGui::SFML::Init(window);
 

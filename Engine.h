@@ -144,12 +144,17 @@ public:
 		bool Resetable;
 		float ScaleX=1.0f, ScaleY=1.0f;
 		BlockType blocktype = solid;
+		bool fake = false;
+		int transparency = 255;
 	};
 	PrototypeSettings blockSettings;
+	bool ImguiCollappsed = true;
+	
 private:
 	void UpdatePrototype();
 	vector<string> intlayer;
 	int curtype = 0;
+	bool Flash = true;
 	int listbox_item_current = 0;
 	void DrawImguiTilesets();
 	vector<string> listboxvector;
@@ -163,4 +168,5 @@ private:
 	sf::Clock clock;
 	sf::Time time;
 	RenderWindow window;
+	Shader shader;
 };

@@ -21,13 +21,17 @@ namespace Iwmo {
 		sf::FloatRect GetGlobalRect();
 		~Block();
 		Sprite sprite;
+		void SetTransparency(Uint8 transparency);
 		BlockType blocktype = unknownblock;
 		bool killable = false;
 		bool animated = false;
 		bool Resetable = false;
 		bool flipped = false;
 		bool trap = false;
+		bool fake = false;
+		string TexturePath;
 	private:
+		int transparency = 255;
 		void AddToManager(string texturename);
 	};
 	

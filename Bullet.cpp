@@ -2,14 +2,12 @@
 
 void Bullet::move()
 {
-	//DANGER!!!! GREAT MATH!!!!!!!!!!!!!!!!!!!!!!
-	float bulletspeedratio = bulletspeed / 1000;
-	finisheddistance += bulletspeedratio;
-	auto x = cos(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
-	auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
-	bulletpos += Vector2f(x, y);
-	
-	//Iwmo::coutVector2(bulletpos);
+		//DANGER!!!! GREAT MATH!!!!!!!!!!!!!!!!!!!!!!
+		float bulletspeedratio = bulletspeed / 1000;
+		finisheddistance += bulletspeedratio;
+		auto x = cos(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
+		auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
+		bulletpos += Vector2f(x, y);
 }
 void Bullet::tick(RenderWindow* win,float time)
 {
@@ -33,6 +31,10 @@ Bullet::Bullet(Vector2i mscale, const Texture* bullettextute,Vector2i pos, strin
 Sprite* Bullet::sprite()
 {
 	return anim.getSprite();
+}
+Sprite Bullet::spritecopy()
+{
+	return anim.animList["shoot"].sprite;
 }
 Bullet::Bullet(Vector2i mscale, Texture* bullettextute, Vector2i pos,string bulletxml)
 {

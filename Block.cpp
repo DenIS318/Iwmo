@@ -2,6 +2,12 @@
 
 
 namespace Iwmo {
+	void Block::SetTransparency(Uint8 t)
+	{
+		Color c = sprite.getColor();
+		sprite.setColor(sf::Color(c.r, c.g, c.b, t));
+		transparency = t;
+	}
 	void Block::SetPos(Vector2f pos)
 	{
 		sprite.setPosition(pos);
@@ -25,6 +31,7 @@ namespace Iwmo {
 	}
 	Block::Block(string str, BlockType bltype)
 	{
+		TexturePath = str;
 		AddToManager(str);
 		sprite.setTexture(*TextureManager::getTexture(str));
 		auto size = TextureManager::getTexture(str)->getSize();

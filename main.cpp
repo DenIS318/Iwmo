@@ -132,57 +132,87 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 		{
 		case Event::MouseMoved:
 		{
-			
+
 			if (gamestarted)
 			{
 				if (engine->GetWindow()->hasFocus())
 				{
-					if (engine->ShowImgui)
+					if (engine->ClientIsMaker)
 					{
+						if (engine->ShowImgui)
+						{
 
-						Vector2f cursorpos = Vector2f(event.mouseMove.x, event.mouseMove.y);
-						Vector2f winsize = engine->imguisize;
-						Vector2f winpos = engine->imguipos;
-						FloatRect ImGuiRect(winpos, winsize);
-						if (!ImGuiRect.contains(cursorpos))
-						{
-							engine->ImGuifocus = false;
-						}
-						else
-						{
-							engine->ImGuifocus = true;
-							if (engine->lastemplacedblockpos != Vector2f(-666, -666))
+							Vector2f cursorpos = Vector2f(event.mouseMove.x, event.mouseMove.y);
+							Vector2f winsize = engine->imguisize;
+							Vector2f winpos = engine->imguipos;
+							FloatRect ImGuiRect(winpos, winsize);
+							if (!ImGuiRect.contains(cursorpos))
 							{
-								engine->lastemplacedblockpos = Vector2f(-666, -666);
-							}
-						}
-					}
-
-					if (engine->selectedblock != NULL)
-					{
-
-						if (!engine->ImGuifocus)
-						{
-
-							Vector2i pos(event.mouseMove.x, event.mouseMove.y);
-							auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
-							if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-							{
-								int x = newpos.x;
-								int y = newpos.y;
-								newpos.x = (x / engine->GridSize.x) * engine->GridSize.x;
-								newpos.y = (y / engine->GridSize.y) * engine->GridSize.y;
+								engine->ImGuifocus = false;
 							}
 							else
 							{
-								auto b = engine->selectedblock->getGlobalBounds();
-								auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-								newpos -= Vector2f(sizedivide2);
+								engine->ImGuifocus = true;
+								if (engine->lastemplacedblockpos != Vector2f(-666, -666))
+								{
+									engine->lastemplacedblockpos = Vector2f(-666, -666);
+								}
 							}
-							engine->selectedblock->setPosition(newpos);
+						}
+
+						if (engine->selectedblock != NULL)
+						{
+
+							if (!engine->ImGuifocus)
+							{
+
+								Vector2i pos(event.mouseMove.x, event.mouseMove.y);
+								auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
+								if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+								{
+									int x = newpos.x;
+									int y = newpos.y;
+									newpos.x = (x / engine->GridSize.x) * engine->GridSize.x;
+									newpos.y = (y / engine->GridSize.y) * engine->GridSize.y;
+								}
+								else
+								{
+									auto b = engine->selectedblock->getGlobalBounds();
+									auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+									newpos -= Vector2f(sizedivide2);
+								}
+								engine->selectedblock->setPosition(newpos);
+							}
+						}
+						if (Keyboard::isKeyPressed(Keyboard::LShift) && Mouse::isButtonPressed(sf::Mouse::Button::Left))
+						{
+							if (engine->blockprototype != NULL)
+							{
+								if (!engine->ImGuifocus)
+								{
+									auto newpos = engine->selectedblock->getPosition();
+									auto b = engine->selectedblock->getGlobalBounds();
+									auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+									newpos += Vector2f(sizedivide2);
+									engine->blockprototype->sprite.setPosition(newpos);
+									emplaceBlock(engine, newpos);
+								}
+							}
 						}
 					}
-					if (Keyboard::isKeyPressed(Keyboard::LShift) && Mouse::isButtonPressed(sf::Mouse::Button::Left))
+				}
+			}
+		}
+		break;
+		case sf::Event::Closed:
+			window->close();
+			break;
+		case sf::Event::MouseButtonPressed:
+			if (engine->ClientIsMaker)
+			{
+				if (event.mouseButton.button == Mouse::Button::Left)
+				{
+					if (gamestarted)
 					{
 						if (engine->blockprototype != NULL)
 						{
@@ -196,112 +226,79 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 								emplaceBlock(engine, newpos);
 							}
 						}
+
 					}
 				}
 			}
-		}
-		break;
-		case sf::Event::Closed:
-			window->close();
-			break;
-		case sf::Event::MouseButtonPressed:
-			if (event.mouseButton.button == Mouse::Button::Left)
+
+			if (!gamestarted)
 			{
-				if (gamestarted)
+				if (event.mouseButton.button == sf::Mouse::Left)
 				{
-					if (engine->blockprototype != NULL)
+					sf::Vector2i position = sf::Mouse::getPosition(*window);
+					if (kidrect.contains(position))
 					{
-						if (!engine->ImGuifocus)
+						if (ipbox.getState() != myState::Enabled)
 						{
-							auto newpos = engine->selectedblock->getPosition();
-							auto b = engine->selectedblock->getGlobalBounds();
-							auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-							newpos += Vector2f(sizedivide2);
-							engine->blockprototype->sprite.setPosition(newpos);
-							emplaceBlock(engine, newpos);
+							enablebox();
+						}
+
+					}
+					else if (makerrect.contains(position))
+					{
+
+						if (ipbox.getState() != myState::Enabled)
+						{
+							enablebox();
+						}
+
+
+
+					}
+					else if (serverrect.contains(position))
+					{
+						if (!serverstarted)
+						{
+							serverstarted = true;
+							thread thr(&beginbind, IpAddress::getLocalAddress(), window);
+							thr.detach();
+						}
+						else {
+							cout << "Server already started!" << endl;
 						}
 					}
+					else if (startrect.contains(position))
+					{
+						if (ipbox.getState() == Enabled)
+						{
+							try {
+								char temp[20];
 
+
+								strcpy_s(temp, ip.c_str());
+								inet_addr(temp);
+								stoi(temp);
+
+								thread thr = thread(&beginconnect, true, temp, window, engine);
+
+								thr.detach();
+								while (!ready) {             // wait until main() sets ready...
+									std::this_thread::yield();
+								}
+								startgame(engine, window);
+
+							}
+							catch (exception e)
+							{
+								cout << e.what() << endl;
+							}
+						}
+					}
 				}
 			}
-			
-				if (!gamestarted)
-				{
-					if (event.mouseButton.button == sf::Mouse::Left)
-					{
-						sf::Vector2i position = sf::Mouse::getPosition(*window);
-						if (kidrect.contains(position))
-						{
-							if (ipbox.getState() != myState::Enabled)
-							{
-								enablebox();
-							}
-
-						}
-						else if (makerrect.contains(position))
-						{
-
-							if (ipbox.getState() != myState::Enabled)
-							{
-								enablebox();
-							}
-
-
-
-						}
-						else if (serverrect.contains(position))
-						{
-							if (!serverstarted)
-							{
-								serverstarted = true;
-								thread thr(&beginbind, IpAddress::getLocalAddress(), window);
-								thr.detach();
-							}
-							else {
-								cout << "Server already started!" << endl;
-							}
-						}
-						else if (startrect.contains(position))
-						{
-							if (ipbox.getState() == Enabled)
-							{
-								try {
-									char temp[20];
-
-
-									strcpy_s(temp, ip.c_str());
-									inet_addr(temp);
-									stoi(temp);
-
-									thread thr = thread(&beginconnect, true, temp, window, engine);
-
-									thr.detach();
-									while (!ready) {             // wait until main() sets ready...
-										std::this_thread::yield();
-									}
-									startgame(engine, window);
-
-								}
-								catch (exception e)
-								{
-									cout << e.what() << endl;
-								}
-							}
-						}
-					}
-				}
 			break;
 		case sf::Event::KeyPressed:
 
-			/*if (debug) {
-				if (event.key.code == sf::Keyboard::Z)
-				{
-					sf::Vector2i position = sf::Mouse::getPosition(*window);
-					cout << "x = " << position.x << endl << "y = " << position.y << endl;
-
-				}
-
-			}*/
 			if (!gamestarted)
 			{
 				if (event.key.code == sf::Keyboard::BackSpace)
@@ -315,7 +312,25 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 					}
 
 				}
-				break;
+			}
+			else
+			{
+				if (engine->ClientIsMaker)
+				{
+					if (event.key.code == Keyboard::Tab)
+					{
+						if (!engine->ImguiCollappsed)
+						{
+							ImGui::SetWindowCollapsed("Maker", true);
+						}
+						else
+						{
+  							ImGui::SetWindowCollapsed("Maker", false);
+						}
+					}
+				}
+			}
+			break;
 		case Event::TextEntered:
 			if (ipbox.getState() == Enabled)
 			{
@@ -330,10 +345,10 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				}
 			}
 			break;
-			}
 		default:
 			break;
 		}
+	
 	}
 }
 inline void continuepool(RenderWindow* window, Engine* engine)
@@ -382,6 +397,11 @@ int main()
 	start.setPosition(startrect.left, startrect.top);
 	//
 	ipbox.setPosition(startrect.left - 60, startrect.top - 50);
+	//
+	kidrect = (IntRect)kidbut.getGlobalBounds();
+	serverrect = (IntRect)server.getGlobalBounds();
+	makerrect = (IntRect)makerbut.getGlobalBounds();
+	startrect = (IntRect)start.getGlobalBounds();
 	//
 	iptext.setCharacterSize(12);
 	iptext.setFont(font);

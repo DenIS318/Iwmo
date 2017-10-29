@@ -17,6 +17,7 @@ public:
 	~Bullet();
 	Vector2i scale;
 	Sprite* sprite();
+	Sprite spritecopy();
 	void deletebullet();
 	AnimationManager anim;
 	bool HasAnim = true;
