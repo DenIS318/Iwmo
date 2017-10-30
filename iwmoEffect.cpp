@@ -25,6 +25,7 @@ void coutTwof(float val1, float val2)
 }
 void iwmoEffect::tick(float t)
 {
+	anim.tick(t);
 		auto curanim = anim.animList[anim.currentAnim];
 		if (!curanim.isPlaying && !curanim.loop && DestroyAfterFinish && Started)
 		{

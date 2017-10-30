@@ -217,6 +217,7 @@ void Engine::RemoveEffect(iwmoEffect* ef)
 		effectlayers[i].erase(std::remove(effectlayers[i].begin(), effectlayers[i].end(), ef), effectlayers[i].end());
 	}
 	delete ef;
+	ef = NULL;
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {
@@ -597,15 +598,16 @@ void Engine::Render()
 		{
 			if (effectlayers.at(myi)[myi1] != NULL)
 			{
-				try {
-					effectlayers.at(myi).at(myi1)->updatetime(m__time);
-					effectlayers.at(myi).at(myi1)->anim.tick(m__time);
-					effectlayers.at(myi).at(myi1)->tick(m__time);
-					effectlayers.at(myi).at(myi1)->draw(&window);
-				}
-				catch (out_of_range e)
+				auto val = effectlayers.at(myi)[myi1];
+				auto check = (iwmoEntity*)val;
+				if (check != NULL)
 				{
-					continue;
+					if (val->visible)
+					{
+						val->updatetime(m__time);
+						val->tick(m__time);
+						val->draw(&window);
+					}
 				}
 			}
 		}
@@ -642,10 +644,7 @@ void Engine::FlipBlock(Block* lf)
 	auto b = lf->sprite.getLocalBounds();
 	if (lf->flipped)
 	{
-		coutFloatRect(lf->sprite.getLocalBounds());
-		cout << "unflipped" << endl;
 		lf->sprite.setTextureRect(sf::IntRect(b.left, b.top, b.width, b.height));
-		coutFloatRect(lf->sprite.getLocalBounds());
 	}
 	else
 	{		

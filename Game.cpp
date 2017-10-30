@@ -339,7 +339,6 @@ GameHandler::~GameHandler()
 }
 
 void GameHandler::m_hookEvent(CSource* pSource) {
-	cout << "Hooked! Called from GameHandler!" << endl;
 	__hook(&CSource::OnEvent, pSource, &GameHandler::OnEvent, this);
 	__hook(&CSource::OnCustomEvent, pSource, &GameHandler::OnCustomEvent, this);
 }
