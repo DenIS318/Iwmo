@@ -268,16 +268,13 @@ void Game::INITMAP()
 			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
 		}
 	}
-	Block* l = new Block(liana, sf::Vector2f(200, 3500), Iwmo::BlockType::slidable);
-	Block* lf = new Block(liana, sf::Vector2f(300, 3500), Iwmo::BlockType::slidable);
-	auto b = lf->sprite.getLocalBounds();
-	//IntRect fliprect(b.left+b.width,b.top,-b.width,b.height);
-	lf->sprite.setOrigin( (lf->sprite.getLocalBounds().width+2)*2, 0);
-	lf->sprite.setScale(-1.f, 1.f);
-	lf->flipped = true;
+	auto pos1 = Vector2f(200, 3500);
+	auto pos2 = Vector2f(300, 3500);
+	Block* l = new Block(liana, pos1, Iwmo::BlockType::slidable);
+	Block* lf = new Block(liana, pos2+Vector2f(18,0), Iwmo::BlockType::slidable);
+	m_engine->FlipBlock(lf);
 	m_engine->AddBlock(l,tiles2l);
-	auto pos1 = Vector2f(l->sprite.getPosition());
-	auto pos2 = Vector2f(lf->sprite.getPosition());
+	
 	m_engine->AddBlock(new Block(castle2,pos1,BlockType::solid), tilesl);
 	m_engine->AddBlock(new Block(castle2, pos2, BlockType::solid), tilesl);
 	m_engine->AddBlock(lf, tiles2l);

@@ -11,7 +11,7 @@ namespace Iwmo {
 	class Block
 	{
 	public:
-		
+		Uint8 GetTransparency();
 		Block(string str, BlockType blocktype);
 		Block(Texture* texture,int x,int y,BlockType blocktype);
 		Block(Texture* texture, sf::Vector2<int>  position, BlockType blocktype);

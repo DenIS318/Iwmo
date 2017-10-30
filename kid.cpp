@@ -11,114 +11,204 @@ kid::kid()
 kid::~kid()
 {
 }
+void kid::AddWalls()
+{
+	vector< IwmoLayer >::iterator row;
+	vector<Block*>::iterator col;
+	for (row = m_engine->MapBlocks.begin(); row != m_engine->MapBlocks.end(); row++) {
+		for (col = row->objects.begin(); col != row->objects.end(); col++) {
+				auto bl2 = *col._Ptr;
+				if (dir != None)
+				{
+					if (bl2->blocktype == solid || bl2->blocktype == slidable)
+					{
+						//fix wall collision
+						auto newpos = kidentity->GetPos();
+						int x = newpos.x;
+						int y = newpos.y;
+						auto wid = kidentity->anim.getSprite()->getLocalBounds().width;
+						auto hei = kidentity->anim.getSprite()->getLocalBounds().height;
+						newpos.x = (x / wid) * wid;
+						newpos.y = (y / hei) * hei;
+						FloatRect rect(newpos.x - (wid / 2), newpos.y - hei, wid, hei);
+						if (bl2->GetGlobalRect().intersects(rect))
+						{
+							if (bl2->blocktype == solid)
+							{
 
+								tmpvc.push_back(bl2);
+							}
+							else
+							{
+								bool b = false;
+								if (sf::Keyboard::isKeyPressed(Keyboard::Left) && bl2->flipped)
+								{
+									b = true;
+								}
+								else if (sf::Keyboard::isKeyPressed(Keyboard::Right) && !bl2->flipped)
+								{
+									b = true;
+								}
+								if (b)
+								{
+									jumpcount = 1;
+									state = slide;
+									m_ps = true;
+								}
+							}
+						}
+					}
+				}
+		}
+	}
+	
+}
 void kid::Col()
 {
 	if (Alive)
 	{
 		updaterect();
+		m_engine->debugger.AddRectangle(kidrect, sf::Color::Yellow);
 		m_p = false;
+		m_ps = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		auto curf = anim.animList[anim.currentAnim].currentFrame;
 		vector< IwmoLayer >::iterator row;
 		vector<Block*>::iterator col;
-		#define vector2d m_engine->MapBlocks
-		for (row = vector2d.begin(); row != vector2d.end(); row++) {
-			for (col = row->objects.begin(); col != row->objects.end(); col++) {
-				if (!m_p)
-				{
-					if (dir != None)
+		AddWalls();
+		
+#define vector2d m_engine->MapBlocks
+			for (row = vector2d.begin(); row != vector2d.end(); row++) {
+				for (col = row->objects.begin(); col != row->objects.end(); col++) {
+					if (!m_p)
 					{
-						if (dir == WalkLeft)
-						{
-							kidentity->m_move(-SpeedX, 0);
-						}
-						else if (dir == WalkRight)
-						{
-							kidentity->m_move(SpeedX, 0);
-						}
-						if (kidentity->state != walk && kidentity->state != fall &&state != slide && kidentity->state != jump && grounded)
+						auto bl2 = *col._Ptr;
+
+						sf::Vector2f mtv;
+						if (!bl2->fake)
 						{
 
-							kidentity->state = walk;
-						}
-						dir = None;
-					}
-					
-					auto bl2 = *col._Ptr;
-					sf::Vector2f mtv;
-					if (!bl2->fake)
-					{
-						if (m_engine->m_math.sat_test(kidrect, bl2->sprite.getGlobalBounds(), &mtv))
-						{
-
-
-
-							if (bl2->killable)
+							if (m_engine->m_math.sat_test(kidrect, bl2->sprite.getGlobalBounds(), &mtv))
 							{
-								death();
-								m_p = true;
-								return;
+								if (bl2->killable)
+								{
+									death();
+									m_p = true;
+									return;
+								}
+								if (bl2->blocktype == Iwmo::BlockType::solid)
+								{
+									kidentity->setPos(kidentity->GetPos() + mtv);
+									if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+									{
+										grounded = true;
+										m_p = true;
+										vel.y = 0;
+										lshiftcounter = 0;
+										jumpcount = 0;
+
+									}
+									else if (state != slide &&  mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
+									{
+										state = fall;
+										m_p = true;
+										grounded = false;
+										vel.y = 0;
+									}
+								}
+
 							}
-							if (bl2->blocktype == Iwmo::BlockType::solid)
-							{
-								kidentity->setPos(kidentity->GetPos() + mtv);
-								//coutVector2(mtv);
-								if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
+							else
+								if (m_engine->m_math.onblock(bl2, kidrect))
 								{
 									grounded = true;
 									m_p = true;
 									vel.y = 0;
 									lshiftcounter = 0;
 									jumpcount = 0;
-
+									if (state != walk && state != idle)
+									{
+										state = idle;
+									}
 								}
-								else if (state != slide && mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
-								{
-									state = fall;
-									grounded = false;
-									vel.y = 0;
-								}
-
-
-
-								if (bl2->blocktype == slidable)
-								{
-									jumpcount = 1;
-									m_p = true;
-									state = slide;
-								}
-							}
-
 						}
-						else
-							if (m_engine->m_math.onblock(bl2, kidentity->anim.getSprite()->getGlobalBounds()))
-							{
-								grounded = true;
-								m_p = true;
-								vel.y = 0;
-								lshiftcounter = 0;
-								jumpcount = 0;
-								if (state != walk && state != idle)
-								{
-									state = idle;
-								}
-							}
-					}
 						
+					
 				}
 			}
 		}
 		if (!m_p)
 		{
 			grounded = false;
-			if (state == slide)
+			if (state == slide && !m_ps)
 			{
 				if (state != jump && state != fall)
 				{
 					state = fall;
 				}
 			}
+		}
+		if (!tmpvc.empty())
+		{
+			//если справа или слева есть стены
+			///DEBUG
+			if (m_engine->debugger.Enabled)
+			{
+				for (auto it = tmpvc.begin(); it != tmpvc.end(); ++it)
+				{
+					
+					auto bl2 = *it._Ptr;
+					if (dir == WalkLeft && m_engine->m_math.hasBlockLeft(bl2, kidrect))
+					{
+
+						m_engine->debugger.AddRectangle(bl2->GetGlobalRect(), Color::Red);
+						FloatRect brect = bl2->GetGlobalRect();
+						brect.width = brect.width + 0.1;
+						m_engine->debugger.AddRectangle(brect, Color::Green);
+					}
+					else if (dir == WalkRight && m_engine->m_math.hasBlockRight(bl2, kidrect))
+					{
+
+						m_engine->debugger.AddRectangle(bl2->GetGlobalRect(), Color::Blue);
+						FloatRect brect = bl2->GetGlobalRect();
+						brect.left = brect.left - 0.1;
+						m_engine->debugger.AddRectangle(brect, Color::Green);
+					}
+					if (dir == WalkLeft)
+					{
+						cout << "dir == WALKLEFT" << endl;
+					}
+					else if (dir == WalkRight)
+					{
+						cout << "dir == WALKRight" << endl;
+					}
+					else
+					{
+						cout << "dir == NONE" << endl;
+					}
+					
+				}
+			}
+			///ENDDEBUG
+			tmpvc.clear();
+		}
+		else
+		{
+			//если слева и справа нет стен
+			if (dir == WalkLeft)
+			{
+				kidentity->m_move(-SpeedX, 0);
+			}
+			else if (dir == WalkRight)
+			{
+				kidentity->m_move(SpeedX, 0);
+			}
+			if (kidentity->state != walk && kidentity->state != fall &&state != slide && kidentity->state != jump && grounded)
+			{
+
+				kidentity->state = walk;
+			}
+			dir = None;
 		}
 		if (JumpPassed)
 		{
@@ -358,6 +448,32 @@ void kid::CheckState()
 		//cout << anim.currentAnim << endl;
 	}
 }
+void kid::CheckBulletCols(Bullet* bullet,int i)
+{
+	vector< IwmoLayer >::iterator row;
+	vector<Block*>::iterator col;
+
+	for (row = m_engine->MapBlocks.begin(); row != m_engine->MapBlocks.end(); row++) {
+		for (col = row->objects.begin(); col != row->objects.end(); col++) {
+			auto bl2 = *col._Ptr;
+			if (!bl2->fake)
+			{
+				if (bl2->blocktype == solid)
+				{
+					//если блок солидный
+					auto ptr = bullet->sprite();
+					if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
+					{
+						m_engine->RemoveBullet(Bulletlist[i]);
+						Bulletlist.erase(Bulletlist.begin() + i);
+						currentbullets--;
+						return;
+					}
+				}
+			}
+		}
+	}
+}
 void kid::tick(float time)
 {
 	int x = GetX();
@@ -375,7 +491,6 @@ void kid::tick(float time)
 	//coutVector2(vec);
 	m_camera->setCenter(vec);
 	//TODOFUCKING
-#define vector2d m_engine->MapBlocks
 	int oldsize = Bulletlist.size();
 	for (int i = 0; i < oldsize; i++)
 	{
@@ -385,41 +500,15 @@ void kid::tick(float time)
 			if (bullet->finisheddistance < bullet->maxdistance)
 			{
 				//если пуля не достигла предела пролетаемой дистанции
-				vector< IwmoLayer >::iterator row;
-				vector<Block*>::iterator col;
-
-				for (row = vector2d.begin(); row != vector2d.end(); row++) {
-					for (col = row->objects.begin(); col != row->objects.end(); col++) {
-						auto bl2 = *col._Ptr;
-						if (!bl2->fake)
-						{
-							if (bl2->blocktype == solid)
-							{
-								//если блок солидный
-								auto ptr = bullet->sprite();
-								if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
-								{
-									delete Bulletlist[i];
-									Bulletlist.erase(Bulletlist.begin() + i);
-									currentbullets--;
-									goto skipf;
-								}
-							}
-						}
-					}
-				}
+				CheckBulletCols(bullet,i);
 
 			}
 			else
 			{
-				delete Bulletlist[i];
+				//если пуля достигла предела дистанции
+				m_engine->RemoveBullet(Bulletlist[i]);
 				Bulletlist.erase(Bulletlist.begin() + i);
 				currentbullets--;
-			}
-		skipf:
-			if (Bulletlist[i]  != NULL)
-			{
-				Bulletlist[i]->tick(m_engine->GetWindow(), time);
 			}
 		}
 	}
@@ -468,7 +557,6 @@ void kid::tick(float time)
 		
 		
 	}*/
-#undef vector2d
 //	jmpb:
 	//muting sounds
 	if (!Alive)
@@ -519,8 +607,8 @@ void kid::updaterect()
 void kid::deleteentity()
 {
 	for (auto bull = Bulletlist.begin(); bull != Bulletlist.end(); ++bull)
-	{
-		delete *bull;
+	{;
+		m_engine->RemoveBullet(*bull._Ptr);
 	}
 	Bulletlist.clear();
 	kid::~kid();
@@ -678,6 +766,7 @@ void kid::shoot()
 				bul->sprite()->setRotation(180);
 			}
 			Bulletlist.push_back(bul);
+			m_engine->AddBullet(bul);
 			KidShootEvent e;
 			e.eventtype = Types::EventTypes::KidShootEvent;
 			e.whichEntity = this;

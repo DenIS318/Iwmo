@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui-SFML.cpp" />
     <ClCompile Include="IwmoLayer.cpp" />
+    <ClCompile Include="Debug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource1.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="iwmoTypes.h" />
     <ClInclude Include="IwmoLayer.h" />
+    <ClInclude Include="Debug.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="zlibstat.lib" />

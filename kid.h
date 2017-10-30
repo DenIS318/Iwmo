@@ -46,9 +46,13 @@ public:
 	void tick(float time);
 	sf::Vector2i bulletscale = sf::Vector2i(1,1);
 	void updaterect();
+	
 private:
 	FloatRect kidrect;
 	View* m_camera;
+	vector<Block*> tmpvc;
+	void AddWalls();
+	void CheckBulletCols(Bullet* bullet,int i);
 	//sf::Vector2f LastPos;
 	int lshiftcounter = 0;
 	void ProcessKeyboard(Event event);
@@ -56,6 +60,7 @@ private:
 	void Col();
 	void CheckState();
 	bool m_p = false;
+	bool m_ps = false;
 	Texture* m_deathsheet;
 	Texture* m_texture;
 	iwmoEffect* effect = static_cast<iwmoEffect*>(new iwmoEffect);

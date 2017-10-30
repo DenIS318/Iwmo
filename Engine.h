@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "IwmoLayer.h"
 #include <functional>
+#include "Debug.h"
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
@@ -138,6 +139,9 @@ public:
 	Vector2f lastemplacedblockpos = Vector2f(-666, -666);
 	vector<string> blocktypesStr;
 	vector<BlockType> blocktypesType;
+	vector<Bullet*> bulletlist;
+	void AddBullet(Bullet* bullet);
+	void RemoveBullet(Bullet* bullet);
 	struct PrototypeSettings
 	{
 		bool Killable;
@@ -149,7 +153,9 @@ public:
 	};
 	PrototypeSettings blockSettings;
 	bool ImguiCollappsed = true;
-	
+	Debug debugger;
+	Block* GetBlockAtPoint(Vector2f point, int layer);
+	void FlipBlock(Block* lf);
 private:
 	void UpdatePrototype();
 	vector<string> intlayer;

@@ -33,20 +33,21 @@ namespace Iwmo
 	}
 	bool Iwmo::Math::hasBlockRight(Iwmo::Block* b, FloatRect entityrect)
 	{
-
-		entityrect.width =+ 0.1;
 		FloatRect brect = b->GetGlobalRect();
+		brect.left = brect.left - 0.1;
 		if (brect.intersects(entityrect))
 		{
 			return true;
 		}
 		return false;
 	}
+	
 	bool Iwmo::Math::hasBlockLeft(Iwmo::Block* b, FloatRect entityrect)
 	{
 
-		entityrect.left =- 0.1;
+		
 		FloatRect brect = b->GetGlobalRect();
+		brect.width = brect.width + 0.1;
 		if (brect.intersects(entityrect))
 		{
 			return true;

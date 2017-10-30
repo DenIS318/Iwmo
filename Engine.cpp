@@ -77,15 +77,21 @@ void Engine::RemoveAll()
 			delete Engine::MapBlocks.at(i).objects.at(i1);
 		}
 	}
+	for (unsigned int i = 0; i < Engine::bulletlist.size(); i++)
+	{
+		delete bulletlist.at(i);
+	}
 	effectlayers.clear();
+	MapBlocks.clear();
+	intlayer.clear();
+	bulletlist.clear();
 	Engine::layerrentity.clear();
 	Engine::layerr.clear();
-	MapBlocks.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
 	Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 	Engine::effectlayers = vector<vector<iwmoEffect*>>(maxlayersize);
 	MapBlocks = vector<IwmoLayer>(maxlayersize);
-	intlayer.clear();
+	
 }
 Engine::Engine()
 {
@@ -135,8 +141,15 @@ void Engine::RemoveBlockLayer(unsigned int layernum)
 	intlayer.erase(std::remove(intlayer.begin(), intlayer.end(), intlayer[layernum]), intlayer.end());
 	sortstr(&intlayer);
 }
+
+void Engine::RemoveBullet(Bullet* bullet)
+{
+	delete bullet;
+	bulletlist.erase(std::remove(bulletlist.begin(), bulletlist.end(), bullet), bulletlist.end());
+}
 void Engine::RemoveLayer(unsigned int layernum)
 {
+	//vectors are not pointers, this stores pointer, we dont need to delete layers
 	Engine::layerr.erase(std::remove(Engine::layerr.begin(), Engine::layerr.end(), Engine::layerr[layernum]), Engine::layerr.end());
 	Engine::effectlayers.erase(std::remove(Engine::effectlayers.begin(), Engine::effectlayers.end(), Engine::effectlayers[layernum]), Engine::effectlayers.end());
 	Engine::layerrentity.erase(std::remove(Engine::layerrentity.begin(), Engine::layerrentity.end(), Engine::layerrentity[layernum]), Engine::layerrentity.end());
@@ -485,6 +498,10 @@ void Engine::ImguiMaker()
 		ImGui::End();
 	}
 }
+void Engine::AddBullet(Bullet* bul)
+{
+	bulletlist.push_back(bul);
+}
 void Engine::Render()
 {
 
@@ -512,7 +529,10 @@ void Engine::Render()
 			{
 				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
 				{
-					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
+					if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
+					{
+						window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
+					}
 
 				}
 			}
@@ -520,16 +540,23 @@ void Engine::Render()
 			{
 				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
 				{
-					
-					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite),&shader);
+					if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
+					{
+						window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite), &shader);
+					}
 				}
 			}
+		}
+		for (unsigned int myi = 0; myi < Engine::bulletlist.size(); myi++)
+		{
+			Engine::bulletlist.at(myi)->tick(&window,m__time);
 		}
 		for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
 		{
 			for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
 			{
 				{
+				
 					Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
 					Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 					Engine::layerrentity.at(i).at(i1)->tick(m__time);
@@ -584,7 +611,7 @@ void Engine::Render()
 			ImguiMaker();
 		}
 	}
-
+	debugger.DebugDraw(&window);
 	///
 	ImGui::SFML::Render(window);
 	//cout << ImGui::GetIO().Framerate << endl;
@@ -594,13 +621,39 @@ RenderWindow* Engine::GetWindow()
 {
 	return &window;
 }
-
+void Engine::FlipBlock(Block* lf)
+{
+	auto b = lf->sprite.getLocalBounds();
+	if (lf->flipped)
+	{
+		coutFloatRect(lf->sprite.getLocalBounds());
+		cout << "unflipped" << endl;
+		lf->sprite.setTextureRect(sf::IntRect(b.left, b.top, b.width, b.height));
+		coutFloatRect(lf->sprite.getLocalBounds());
+	}
+	else
+	{		
+		lf->sprite.setTextureRect(sf::IntRect(b.width, b.top, -b.width, b.height));
+	}
+	lf->flipped = !lf->flipped;
+}
+/*Getting block pointer that position matching point*/
+Block* Engine::GetBlockAtPoint(Vector2f point, int layer)
+{
+	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (val->sprite.getPosition() == point && val != blockprototype)
+		{
+			return val;
+		}
+	}
+	return NULL;
+}
 void Engine::init(int Width, int Height, string title, short fm)
 {
-
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
-	window.setSize(sf::Vector2u(Width, Height));
 	blocktypesStr.push_back("solid");
 	blocktypesStr.push_back("decoration");
 	blocktypesStr.push_back("slidable");
@@ -620,6 +673,4 @@ void Engine::init(int Width, int Height, string title, short fm)
 	}
 	blocktypesType.push_back(unknownblock);
 	ImGui::SFML::Init(window);
-
-	//window.setVerticalSyncEnabled(true);
 }

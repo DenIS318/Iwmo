@@ -8,6 +8,10 @@ namespace Iwmo {
 		sprite.setColor(sf::Color(c.r, c.g, c.b, t));
 		transparency = t;
 	}
+	Uint8 Block::GetTransparency()
+	{
+		return transparency;
+	}
 	void Block::SetPos(Vector2f pos)
 	{
 		sprite.setPosition(pos);

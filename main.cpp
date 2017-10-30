@@ -87,23 +87,11 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 
 	}
 }
-/*Getting block pointer that position matching point*/
-inline Block* GetBlockAtPoint(Engine* engine, Vector2f point, int layer)
-{
-	for (auto it = engine->MapBlocks[layer].objects.begin(); it != engine->MapBlocks[layer].objects.end(); ++it)
-	{
-		auto val = *it._Ptr;
-		if (val->sprite.getPosition() == point && val != engine->blockprototype)
-		{
-			return val;
-		}
-	}
-	return NULL;
-}
+
 inline void emplaceBlock(Engine* engine,Vector2f point,int selectedlayer)
 {
 	//get block at this point with selected layer
-	auto B = GetBlockAtPoint(engine, point, selectedlayer);
+	auto B = engine->GetBlockAtPoint(point, selectedlayer);
 	if (B == NULL)
 	{
 		B = new Block(*engine->blockprototype);
