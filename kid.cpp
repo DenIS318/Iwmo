@@ -103,6 +103,7 @@ void kid::Col()
 									{
 										grounded = true;
 										m_p = true;
+										m_ps = false;
 										vel.y = 0;
 										lshiftcounter = 0;
 										jumpcount = 0;
@@ -123,6 +124,7 @@ void kid::Col()
 								{
 									grounded = true;
 									m_p = true;
+									m_ps = false;
 									vel.y = 0;
 									lshiftcounter = 0;
 									jumpcount = 0;

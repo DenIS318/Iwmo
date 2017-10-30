@@ -90,6 +90,10 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 
 inline void emplaceBlock(Engine* engine,Vector2f point,int selectedlayer)
 {
+	if (selectedlayer < 0)
+	{
+		selectedlayer = 0;
+	}
 	//get block at this point with selected layer
 	auto B = engine->GetBlockAtPoint(point, selectedlayer);
 	if (B == NULL)

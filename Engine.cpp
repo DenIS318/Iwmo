@@ -384,10 +384,23 @@ void Engine::DrawImguiTilesets()
 			{
 				if (MapBlocks.size() != 0)
 				{
-					int prev = selectedlayer;
+					//int prev = 0;
+					if (selectedlayer < 0)
+					{
+						selectedlayer = 0;
+						//prev = 2;
+					}
+					/*if (prev != 0 )
+					{
+						prev = selectedlayer;
+					}*/
+					
 					RemoveBlockLayer(selectedlayer);
 					//begins with 1,not 0, so will -2 instead -1
-					selectedlayer = prev - 1;
+					if (selectedlayer != 0)
+					{
+						selectedlayer = selectedlayer - 1;
+					}
 				}
 			}
 			ImGui::Checkbox("Layer are visible", &MapBlocks[selectedlayer].visible);
@@ -577,20 +590,23 @@ void Engine::Render()
 			window.draw(*(Engine::layerr.at(myi).at(myi1)));
 		}
 	}
-	gg:
+	
 	for (unsigned int myi = 0; myi < effectlayers.size(); myi++)
 	{
 		for (unsigned int myi1 = 0; myi1 < effectlayers.at(myi).size(); myi1++)
 		{
-			try {
-				effectlayers.at(myi).at(myi1)->updatetime(m__time);
-				effectlayers.at(myi).at(myi1)->anim.tick(m__time);
-				effectlayers.at(myi).at(myi1)->tick(m__time);
-				effectlayers.at(myi).at(myi1)->draw(&window);
-			}
-			catch (out_of_range e)
+			if (effectlayers.at(myi)[myi1] != NULL)
 			{
-				goto gg;
+				try {
+					effectlayers.at(myi).at(myi1)->updatetime(m__time);
+					effectlayers.at(myi).at(myi1)->anim.tick(m__time);
+					effectlayers.at(myi).at(myi1)->tick(m__time);
+					effectlayers.at(myi).at(myi1)->draw(&window);
+				}
+				catch (out_of_range e)
+				{
+					continue;
+				}
 			}
 		}
 	}
