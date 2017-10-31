@@ -33,11 +33,20 @@ void kid::AddWalls()
 						FloatRect rect(newpos.x - (wid / 2), newpos.y - hei, wid, hei);
 						if (bl2->GetGlobalRect().intersects(rect))
 						{
-							if (bl2->blocktype == solid)
-							{
-
-								tmpvc.push_back(bl2);
-							}
+								if (bl2->blocktype == solid)
+								{
+									if (JumpThruPassed)
+									{
+										if (!bl2->jumpthru)
+										{
+											tmpvc.push_back(bl2);
+										}
+									}
+									else
+									{
+										tmpvc.push_back(bl2);
+									}
+								}
 							else
 							{
 								bool b = false;
@@ -68,7 +77,10 @@ void kid::Col()
 	if (Alive)
 	{
 		updaterect();
-		m_engine->debugger.AddRectangle(kidrect, sf::Color::Yellow);
+		if (m_engine->debugger.Enabled)
+		{
+			m_engine->debugger.AddRectangle(kidrect, sf::Color::Yellow);
+		}
 		m_p = false;
 		m_ps = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
@@ -98,16 +110,48 @@ void kid::Col()
 								}
 								if (bl2->blocktype == Iwmo::BlockType::solid)
 								{
-									kidentity->setPos(kidentity->GetPos() + mtv);
+									if (JumpThruPassed)
+									{
+										if (!bl2->jumpthru)
+										{
+											kidentity->setPos(kidentity->GetPos() + mtv);
+										}
+									}
+									else
+									{
+										kidentity->setPos(kidentity->GetPos() + mtv);
+									}
 									if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
 									{
-										grounded = true;
+										
+										
 										m_p = true;
 										m_ps = false;
-										vel.y = 0;
-										lshiftcounter = 0;
-										jumpcount = 0;
-
+										if (JumpThruPassed)
+										{
+											if (!bl2->jumpthru)
+											{
+												grounded = true;
+												vel.y = 0;
+												lshiftcounter = 0;
+												jumpcount = 0;
+												if (state != walk && state != idle)
+												{
+													state = idle;
+												}
+											}
+										}
+										else
+										{
+											grounded = true;
+											vel.y = 0;
+											lshiftcounter = 0;
+											jumpcount = 0;
+											if (state != walk && state != idle)
+											{
+												state = idle;
+											}
+										}
 									}
 									else if (state != slide &&  mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
 									{
@@ -122,26 +166,44 @@ void kid::Col()
 							else
 								if (m_engine->m_math.onblock(bl2, kidrect))
 								{
-									grounded = true;
+									
+									
 									m_p = true;
 									m_ps = false;
-									vel.y = 0;
-									lshiftcounter = 0;
-									jumpcount = 0;
-									if (state != walk && state != idle)
+									if (JumpThruPassed)
 									{
-										state = idle;
+										if (!bl2->jumpthru)
+										{
+											grounded = true;
+											vel.y = 0;
+											lshiftcounter = 0;
+											jumpcount = 0;
+											if (state != walk && state != idle)
+											{
+												state = idle;
+											}
+										}
+									}
+									else
+									{
+										grounded = true;
+										vel.y = 0;
+										lshiftcounter = 0;
+										jumpcount = 0;
+										if (state != walk && state != idle)
+										{
+											state = idle;
+										}
 									}
 								}
 						}
-						
-					
 				}
 			}
 		}
 		if (!m_p)
 		{
 			grounded = false;
+			JumpThruPassed = false;
 			if (state == slide && !m_ps)
 			{
 				if (state != jump && state != fall)
@@ -175,18 +237,6 @@ void kid::Col()
 						FloatRect brect = bl2->GetGlobalRect();
 						brect.left = brect.left - 0.1;
 						m_engine->debugger.AddRectangle(brect, Color::Green);
-					}
-					if (dir == WalkLeft)
-					{
-						cout << "dir == WALKLEFT" << endl;
-					}
-					else if (dir == WalkRight)
-					{
-						cout << "dir == WALKRight" << endl;
-					}
-					else
-					{
-						cout << "dir == NONE" << endl;
 					}
 					
 				}
@@ -801,6 +851,10 @@ void kid::ProcessKeyboard(Event event)
 			if (event.key.code == Keyboard::Q)
 			{
 				death();
+			}
+			if (event.key.code == Keyboard::Down)
+			{
+				JumpThruPassed = true;
 			}
 		}
 	}

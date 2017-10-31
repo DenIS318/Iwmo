@@ -45,5 +45,9 @@ namespace Iwmo {
 		Blocktype, see Block::BlockType
 		*/
 		BlockType blocktype;
+		/*
+		Block folder, likes resources/blocks/,resources/decorations/...
+		*/
+		string folder;
 	};
 }

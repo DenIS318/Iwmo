@@ -131,6 +131,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				{
 					if (engine->ClientIsMaker)
 					{
+						engine->UpdateMouseRect();
 						if (engine->ShowImgui)
 						{
 
@@ -152,12 +153,11 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							}
 						}
 
-						if (engine->selectedblock != NULL)
+						if (!engine->ImGuifocus)
 						{
-
-							if (!engine->ImGuifocus)
+							
+							if (engine->selectedblock != NULL)
 							{
-
 								Vector2i pos(event.mouseMove.x, event.mouseMove.y);
 								auto newpos = engine->GetWindow()->mapPixelToCoords(pos);
 								if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
@@ -167,27 +167,50 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 									newpos.x = (x / engine->GridSize.x) * engine->GridSize.x;
 									newpos.y = (y / engine->GridSize.y) * engine->GridSize.y;
 								}
-								else
-								{
+								//TODO
 									auto b = engine->selectedblock->getGlobalBounds();
-									auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-									newpos -= Vector2f(sizedivide2);
-								}
+									auto sizedivide2 = Vector2i(b.width * 0.5, b.height * 0.5);
+									newpos = newpos - Vector2f(sizedivide2) + Vector2f(engine->GridSize / 2);
+								
 								engine->selectedblock->setPosition(newpos);
 							}
+							
 						}
-						if (Keyboard::isKeyPressed(Keyboard::LShift) && Mouse::isButtonPressed(sf::Mouse::Button::Left))
+						
+						if (Keyboard::isKeyPressed(Keyboard::LShift) )
 						{
-							if (engine->blockprototype != NULL)
+							if (Mouse::isButtonPressed(sf::Mouse::Button::Left))
+							{
+								if (engine->blockprototype != NULL)
+								{
+									if (!engine->ImGuifocus)
+									{
+										auto newpos = engine->selectedblock->getPosition();
+										if (!engine->editingblock)
+										{
+											auto b = engine->selectedblock->getGlobalBounds();
+											auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+											newpos += Vector2f(sizedivide2);
+										}
+										engine->blockprototype->sprite.setPosition(newpos);
+										emplaceBlock(engine, newpos);
+										engine->editingblock = false;
+									}
+								}
+							}
+							else if (Mouse::isButtonPressed(sf::Mouse::Button::Right))
 							{
 								if (!engine->ImGuifocus)
 								{
-									auto newpos = engine->selectedblock->getPosition();
-									auto b = engine->selectedblock->getGlobalBounds();
-									auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-									newpos += Vector2f(sizedivide2);
-									engine->blockprototype->sprite.setPosition(newpos);
-									emplaceBlock(engine, newpos);
+									auto blvec = engine->GetBlocksAtRect(engine->mouseboundsshow, engine->selectedlayer);
+									if (!blvec.empty())
+									{
+										for (auto it = blvec.begin(); it != blvec.end(); ++it)
+										{
+											auto val = *it._Ptr;
+											engine->RemoveBlock(val, engine->selectedlayer);
+										}
+									}
 								}
 							}
 						}
@@ -206,18 +229,56 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				{
 					if (gamestarted)
 					{
+						if(engine->blockprototype == NULL)
+						{
+							
+							auto blvec = engine->GetBlocksAtRect(engine->mouseboundsshow, engine->selectedlayer);
+							if (!blvec.empty())
+							{
+								auto mpos = blvec.size() - 1;
+								auto bl = blvec[mpos];
+								engine->blockprototype = bl;
+								engine->selectedblock = new Sprite(engine->blockprototype->sprite);
+								engine->editingblock = true;
+								engine->BlockListSelectBlock(engine->blockprototype);
+							}
+							
+						}
 						if (engine->blockprototype != NULL)
 						{
 							if (!engine->ImGuifocus)
 							{
 								auto newpos = engine->selectedblock->getPosition();
-								auto b = engine->selectedblock->getGlobalBounds();
-								auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-								newpos += Vector2f(sizedivide2);
+								if (!engine->editingblock)
+								{
+									auto b = engine->selectedblock->getGlobalBounds();
+									auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+									newpos += Vector2f(sizedivide2);
+								}
 								engine->blockprototype->sprite.setPosition(newpos);
 								emplaceBlock(engine, newpos);
+								engine->editingblock = false;
 							}
 						}
+
+					}
+				}
+				else if (event.mouseButton.button == Mouse::Button::Right)
+				{
+					if (gamestarted)
+					{
+							if (!engine->ImGuifocus)
+							{
+								auto blvec = engine->GetBlocksAtRect(engine->mouseboundsshow, engine->selectedlayer);
+								if (!blvec.empty())
+								{
+									for (auto it = blvec.begin(); it != blvec.end(); ++it)
+									{
+										auto val = *it._Ptr;
+										engine->RemoveBlock(val, engine->selectedlayer);
+									}
+								}
+							}
 
 					}
 				}

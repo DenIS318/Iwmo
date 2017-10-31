@@ -23,8 +23,11 @@ namespace Iwmo
 	bool Iwmo::Math::onblock(Iwmo::Block* b, FloatRect entityrect)
 	{
 		
-		entityrect.top +=  0.1;
+		
 		FloatRect brect = b->GetGlobalRect();
+		auto val = 0.1;
+		brect.height = brect.height + val;
+		brect.top = brect.top - val;
 		if (brect.intersects(entityrect))
 		{
 			return true;

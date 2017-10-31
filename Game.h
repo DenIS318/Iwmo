@@ -69,14 +69,11 @@ private:
 	animated
 	*/
 	void InitIwmoBlocks(string filter);
-	void AddIwmoBlock(string name, BlockType blocktype);
+	void AddIwmoBlock(string name, BlockType blocktype,string path);
 	void LoadSheets();
+	const string respath = "resources/";
 	TiXmlDocument kidXML;
-//	TiXmlDocument kidDeathXML;
 	TiXmlDocument LevelXML;
-	//Texture* kidSheet = new Texture;
-	//Texture* kidDeathSheet = new Texture;
-
 	 vector<IwmoBlock> IwmoBlocks;
 };
 [event_receiver(native)]

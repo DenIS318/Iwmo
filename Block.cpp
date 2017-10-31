@@ -16,32 +16,40 @@ namespace Iwmo {
 	{
 		sprite.setPosition(pos);
 	}
-	void Block::AddToManager(string texturename)
+	void Block::AddToManager(string texturename,string folder)
 	{
-		TextureManager::loadTexture(texturename,"resources/blocks/"+texturename);
+		TextureManager::loadTexture(texturename,folder+texturename);
 	}
 	Block Block::Reset()
 	{
-		Texture* t = const_cast<Texture*>(sprite.getTexture());
+		Texture* t = TextureManager::getTexture(blockname);
 		float mx = sprite.getPosition().x;
 		float my = sprite.getPosition().y;
 		//mx = 0;
 		//my = 0;
-		return Block(t, mx, my,blocktype);
+		Block b(t, mx, my, blocktype);
+		b.blockname = blockname;
+		return b;
 	}
 	FloatRect Block::GetGlobalRect()
 	{
 		return sprite.getGlobalBounds();
 	}
-	Block::Block(string str, BlockType bltype)
+	Block::Block(string str, string folder,BlockType bltype)
 	{
-		TexturePath = str;
-		AddToManager(str);
+		
+		if (folder.find("/") == string::npos)
+		{
+			folder = "resources/" + folder + "/";
+		}
+		AddToManager(str,folder);
 		sprite.setTexture(*TextureManager::getTexture(str));
 		auto size = TextureManager::getTexture(str)->getSize();
 		sprite.setOrigin(size.x / 2, size.y / 2);
+		blockname = (str);
 		blocktype = bltype;
 	}
+	
 	Block::Block( Texture* texture,int x,int y,BlockType bltype)
 	{
 		Vector2<int> vecpos(x, y);
@@ -50,6 +58,7 @@ namespace Iwmo {
 		SetPos(Vector2f(vecpos));
 		blocktype = bltype;
 	}
+	
 	Block::Block( Texture* texture,Vector2<int> position, BlockType bltype)
 	{
 		
@@ -57,6 +66,7 @@ namespace Iwmo {
 		SetPos(Vector2f(position));
 		blocktype = bltype;
 	}
+	
 	Block::Block(Texture* texture, Vector2f position, BlockType bltype)
 	{
 		

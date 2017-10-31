@@ -1,7 +1,4 @@
 #include "Game.h"
-#include <future>
-#include <tuple>
-const string m_res = "resources/blocks/";
 
 GameHandler* eventhandler;
 Game* instanceEH ;
@@ -11,13 +8,12 @@ vector<IwmoBlock>* Game::GetBlockList()
 	return &IwmoBlocks;
 }
 
-
-void Game::AddIwmoBlock(string name,BlockType type)
+void Game::AddIwmoBlock(string name,BlockType type,string mpath)
 {
 	/*
-	name,texture,type
+	name,texture,type,subfolder
 	*/
-	Texture* texture = TextureManager::loadTexture(name, m_res+name);
+	Texture* texture = TextureManager::loadTexture(name, mpath+name);
 	if (texture == NULL)
 	{
 		return;
@@ -26,12 +22,8 @@ void Game::AddIwmoBlock(string name,BlockType type)
 	blockmap.blockname = name;
 	blockmap.textureptr = texture;
 	blockmap.blocktype = type;
+	blockmap.folder = mpath;
 	IwmoBlocks.push_back(blockmap);
-	/*if (name == "liana.png")
-	{
-		auto textureflip = *texture;
-		textureflip.set
-	}*/
 }
 
 Block Game::CreateBlockByName(string name)
@@ -40,7 +32,8 @@ Block Game::CreateBlockByName(string name)
 	{
 		if (it->blockname == name)
 		{
-			return Block(it->textureptr,0,0,it->blocktype);
+			Block b(it->blockname, it->folder, it->blocktype);
+			return b;
 		}
 	}
 	cout << "Block '" << name << "'" << " not found!" << endl;
@@ -86,37 +79,43 @@ void Game::InitIwmoBlocks(string filter)
 {
 	BlockType bltype = BlockType::unknownblock;
 	path p;
-	string path = "resources/";
+	
 	string subpath;
 	bool trap = false;
+	bool success = false;
 	if (filter == "solids")
 	{
 		// avoid repeated path construction below
-		subpath = path + "blocks/";
+		subpath = respath + "blocks/";
 		bltype = BlockType::solid;
 		p = subpath;
+		success = true;
 	}
-	else if (filter == "traps")
+	if (!success && filter == "traps")
 	{
 		// avoid repeated path construction below
-		subpath = path + "traps/";
+		subpath = respath + "traps/";
 		bltype = BlockType::solid;
 		p = subpath;
+		success = true;
 	}
-	else if (filter == "decorations")
+	if (!success && filter == "decorations")
 	{
 		// avoid repeated path construction below
-		subpath = path + "traps/";
+		subpath = respath + "decorations/";
 		bltype = BlockType::decoration;
 		p = subpath;
+		success = true;
 	}
-	else if (filter == "animated")
+	if (!success && filter == "animated")
 	{
 		// avoid repeated path construction below
-		subpath = path + "animated/";
+		subpath = respath + "animated/";
 		p = subpath;
+		success = true;
+		
 	}
-	else
+	if (!success)
 	{
 		cout << "Invalid filter '" << filter << "', blocks not initialized" << endl;
 		return;
@@ -140,26 +139,13 @@ void Game::InitIwmoBlocks(string filter)
 		{
 
 			string bname;
-			//auto btexture = TextureManager::loadTexture(bname, m_res);
-		/*	if (!btexture.loadFromFile(map_iter->first))
-			{
-				cout << map_iter->first << " not loaded!" << endl;
-			}*/
 			bname = map_iter->second;
-			AddIwmoBlock(bname, bltype);
+			AddIwmoBlock(bname, bltype,subpath);
 		}
 	}
 
 
 }
-
-/*void Game::EventHandling(CSource* sourc)
-{
-	m_ls = sourc;
-	instanceEH = dynamic_cast<Game*>(eventhandler);
-	instanceEH->m_hookEvent(m_ls);
-	__raise sourc->OnEvent(sf::Event());
-}*/
 void Game::m_hookEvent(CSource* pSource)
 {
 	if (debug)
@@ -257,27 +243,36 @@ void Game::INITMAP()
 		if (i == 0)
 		{
 			//vertical wall
-			sf::Vector2f offset(castle2->getSize().x*i, (16));
-			m_engine->AddBlock(new Block(castle2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
+			sf::Vector2f offset(castle2->getSize().x*i, (32));
+			Block* b = new Block("castle2.png", "resources/blocks/", Iwmo::BlockType::solid);
+			b->SetPos((sf::Vector2f(0, 3600) + offset));
+			m_engine->AddBlock(b, tilesl);
 
 		}
 		else
 		{
 			//horizontal wall
-			sf::Vector2f offset(castlewall2->getSize().x*i, (16));
-			m_engine->AddBlock(new Block(castlewall2, (sf::Vector2f(0, 3600) + offset), Iwmo::BlockType::solid), tilesl);
+			sf::Vector2f offset(castlewall2->getSize().x*i, (32));
+			Block* b = new Block("castlewall2.png", "resources/blocks/", Iwmo::BlockType::solid);
+			b->SetPos((sf::Vector2f(0, 3600) + offset));
+			m_engine->AddBlock(b, tilesl);
 		}
 	}
-	auto pos1 = Vector2f(200, 3500);
+	/*auto pos1 = Vector2f(200, 3500);
 	auto pos2 = Vector2f(300, 3500);
-	Block* l = new Block(liana, pos1, Iwmo::BlockType::slidable);
-	Block* lf = new Block(liana, pos2+Vector2f(18,0), Iwmo::BlockType::slidable);
+	Block* l = new Block("liana.png","resources/blocks/", Iwmo::BlockType::slidable);
+	l->SetPos(pos1);
+	Block* lf = new Block("liana.png", "resources/blocks/", Iwmo::BlockType::slidable);
+	lf->SetPos(pos2 + Vector2f(18, 0));
 	m_engine->FlipBlock(lf);
 	m_engine->AddBlock(l,tiles2l);
-	
-	m_engine->AddBlock(new Block(castle2,pos1,BlockType::solid), tilesl);
-	m_engine->AddBlock(new Block(castle2, pos2, BlockType::solid), tilesl);
-	m_engine->AddBlock(lf, tiles2l);
+	Block* bb = new Block("castle2.png", "resources/blocks/", BlockType::solid);
+	bb->SetPos(pos1);
+	Block* bb2 = new Block("castle2.png", "resources/blocks/", BlockType::solid);
+	bb2->SetPos(pos2);
+	m_engine->AddBlock(bb, tilesl);
+	m_engine->AddBlock(bb2, tilesl);
+	m_engine->AddBlock(lf, tiles2l);*/
 		
 		
 	

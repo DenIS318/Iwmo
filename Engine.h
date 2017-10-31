@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable : 4996)
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <thread>  
@@ -19,6 +20,11 @@
 #include "IwmoLayer.h"
 #include <functional>
 #include "Debug.h"
+#ifdef _MSC_VER 
+//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
@@ -148,14 +154,24 @@ public:
 		bool Resetable;
 		float ScaleX=1.0f, ScaleY=1.0f;
 		BlockType blocktype = solid;
-		bool fake = false;
+		bool fake;
 		int transparency = 255;
+		bool jumpthru;
 	};
 	PrototypeSettings blockSettings;
 	bool ImguiCollappsed = true;
 	Debug debugger;
 	Block* GetBlockAtPoint(Vector2f point, int layer);
 	void FlipBlock(Block* lf);
+	RectangleShape mouseboundsshow;
+	bool showbounds = true;
+	/*at one layer*/
+	vector<Block*> GetBlocksAtRect(RectangleShape rect,int layer);
+	/*at all layers(slower)*/
+	vector<Block*> GetBlocksAtRect(RectangleShape rect);
+	void UpdateMouseRect();
+	bool editingblock;
+	void BlockListSelectBlock(Block* b);
 private:
 	void UpdatePrototype();
 	vector<string> intlayer;

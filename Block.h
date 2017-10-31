@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable : 4996)
 #include <SFML\Graphics.hpp>
 #include <iostream>
 #include "TextureManager.h"
@@ -12,9 +13,12 @@ namespace Iwmo {
 	{
 	public:
 		Uint8 GetTransparency();
-		Block(string str, BlockType blocktype);
-		Block(Texture* texture,int x,int y,BlockType blocktype);
-		Block(Texture* texture, sf::Vector2<int>  position, BlockType blocktype);
+		Block(string str, string folder,BlockType blocktype);
+		[[deprecated("use string constructor, or set blockname after creation")]]
+		 Block(Texture* texture,int x,int y,BlockType blocktype);
+		 [[deprecated("use string constructor, or set blockname after creation")]]
+		 Block(Texture* texture, sf::Vector2<int>  position, BlockType blocktype);
+		 [[deprecated("use string constructor, or set blockname after creation")]]
 		Block(Texture* texture, sf::Vector2f  position, BlockType blocktype);
 		Block Reset();
 		void SetPos(sf::Vector2f pos);
@@ -29,10 +33,11 @@ namespace Iwmo {
 		bool flipped = false;
 		bool trap = false;
 		bool fake = false;
-		string TexturePath;
+		bool jumpthru = false;
+		string blockname;
 	private:
 		int transparency = 255;
-		void AddToManager(string texturename);
+		void AddToManager(string texturename, string folder);
 	};
 	
 }

@@ -251,11 +251,11 @@ void Engine::RemoveBlock(Block* b, unsigned short layernumber)
 }
 void Engine::RemoveBlock(Block* b)
 {
-	for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
-	{
-		Engine::MapBlocks[i].objects.erase(std::remove(Engine::MapBlocks[i].objects.begin(), Engine::MapBlocks[i].objects.end(), b), Engine::MapBlocks[i].objects.end());
-	}
-	delete b;
+for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
+{
+	Engine::MapBlocks[i].objects.erase(std::remove(Engine::MapBlocks[i].objects.begin(), Engine::MapBlocks[i].objects.end(), b), Engine::MapBlocks[i].objects.end());
+}
+delete b;
 }
 unsigned int Engine::GetFrameRate()
 {
@@ -296,8 +296,19 @@ std::string remove_extension(const std::string& filename) {
 	if (lastdot == std::string::npos) return filename;
 	return filename.substr(0, lastdot);
 }
+bool compareNoCase(const string& s1, const string& s2) {
+	return strcasecmp(s1.c_str(), s2.c_str()) <= 0;
+}
+bool CompareBlockNames(IwmoBlock elem1, IwmoBlock elem2)
+{
+	return compareNoCase(elem1.blockname, elem2.blockname);
+}
 void Engine::UpdateBlockList(vector<IwmoBlock>* newlist)
 {
+
+	//sorting
+	std::sort(newlist->begin(), newlist->end(), CompareBlockNames);
+	listboxvector.clear();
 	//get name without extension
 	for (auto it = newlist->begin(); it != newlist->end(); ++it)
 	{
@@ -316,8 +327,43 @@ void Engine::UpdatePrototype()
 		blockprototype->sprite.setScale(blockSettings.ScaleX, blockSettings.ScaleY);
 		blockprototype->fake = blockSettings.fake;
 		blockprototype->SetTransparency(blockSettings.transparency);
+		blockprototype->jumpthru = blockSettings.jumpthru;
 		selectedblock->setColor(blockprototype->sprite.getColor());
 		selectedblock->setScale(blockprototype->sprite.getScale());
+	}
+}
+void Engine::UpdateMouseRect()
+{
+	auto mousepos = Mouse::getPosition(window);
+	auto newpos = window.mapPixelToCoords(mousepos);
+	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+	{
+		int x = newpos.x;
+		int y = newpos.y;
+		newpos.x = (x / GridSize.x) * GridSize.x;
+		newpos.y = (y / GridSize.y) * GridSize.y;
+	}
+	else
+	{
+		auto b = mouseboundsshow.getGlobalBounds();
+		auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
+		newpos -= Vector2f(sizedivide2);
+	}
+	mouseboundsshow.setPosition(newpos);
+	mouseboundsshow.setSize(Vector2f(GridSize));
+}
+void Engine::BlockListSelectBlock(Block* b)
+{
+	for (auto it = listboxvector.begin(); it != listboxvector.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		
+			if (val == remove_extension(b->blockname))
+			{
+				listbox_item_current = it - listboxvector.begin();
+				return;
+			}
+			
 	}
 }
 void Engine::DrawImguiTilesets()
@@ -326,7 +372,7 @@ void Engine::DrawImguiTilesets()
 	{
 		if (ImGui::TreeNode("Tilesets"))
 		{
-			ImGui::BeginChild("make", Vector2f(60, 20), false);
+			ImGui::BeginChild("make", Vector2f(230, 100), false);
 			if (ImGui::Checkbox("Make", &make))
 			{
 				if (make)
@@ -337,8 +383,25 @@ void Engine::DrawImguiTilesets()
 					//let allow to create his prototype
 					selectedblock = new Sprite();
 					selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
-					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, type);
+					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
 				}
+			}
+			ImGui::Checkbox("Show mouse bounds", &showbounds);
+			if (ImGui::InputInt("Grid size X", &GridSize.x))
+			{
+				if (GridSize.x < 1)
+				{
+					GridSize.x = 1;
+				}
+				UpdateMouseRect();
+			}
+			if(ImGui::InputInt("Grid size Y", &GridSize.y))
+			{
+				if (GridSize.y < 1)
+				{
+					GridSize.y = 1;
+				}
+				UpdateMouseRect();
 			}
 			ImGui::EndChild();
 			ImGui::BeginChild("BlockList", Vector2f(350, 125), false);
@@ -347,12 +410,13 @@ void Engine::DrawImguiTilesets()
 		{
 			if (make)
 			{
-				BlockType type = solid;
+				
+				BlockType type = blocklistptr->at(listbox_item_current).blocktype;
 				//block selected
 				//let allow to create his prototype
 				selectedblock = new Sprite();
 				selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
-				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, type);
+				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname,blocklistptr->at(listbox_item_current).folder, type);
 				
 			}
 			
@@ -426,7 +490,7 @@ void Engine::DrawImguiTilesets()
 			{
 				string labels[] =
 				{
-					"Type","Killable","Resetable","ScaleX","ScaleY","Fake","Transparency"
+					"Type","Killable","Resetable","ScaleX","ScaleY","Fake","Jump-thru","Transparency"
 				};
 				for (int i = 0; i < (size(labels)); i++)
 				{
@@ -464,6 +528,10 @@ void Engine::DrawImguiTilesets()
 							ImGui::Checkbox("Disable collision, killable etc...", &blockSettings.fake);
 						}
 						if (i == 6)
+						{
+							ImGui::Checkbox("Allow kid to jump through", &blockSettings.jumpthru);
+						}
+						if (i == 7)
 						{
 							ImGui::SliderInt("##line", &blockSettings.transparency, 0, 255);
 						}
@@ -515,6 +583,45 @@ void Engine::ImguiMaker()
 void Engine::AddBullet(Bullet* bul)
 {
 	bulletlist.push_back(bul);
+}
+//at layer
+vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect,int layer)
+{
+	auto newsize = rect.getSize();
+	//its need for fix intersects 9 blocks at one rect
+	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
+	auto valdivided = Vector2f(val.x / 2, val.y / 2);
+	newsize = newsize - val;
+	auto newpos = rect.getPosition();
+	rect.setSize(newsize);
+	rect.setPosition(newpos + valdivided);
+	vector<Block*> vec;
+	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (rect.getGlobalBounds().intersects(val->GetGlobalRect())&& val != blockprototype)
+		{
+			vec.push_back(val);
+		}
+	}
+	return vec;
+}
+//at all layers
+vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
+{
+	vector<Block*> vec;
+	for (int layer = 0; layer < MapBlocks.size(); layer++)
+	{
+		for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (rect.getGlobalBounds().intersects(val->GetGlobalRect()) && val != blockprototype)
+			{
+				vec.push_back(val);
+			}
+		}
+	}
+	return vec;
 }
 void Engine::Render()
 {
@@ -629,6 +736,11 @@ void Engine::Render()
 			ImguiMaker();
 		}
 	}
+	if (showbounds)
+	{
+		window.draw(mouseboundsshow);
+		
+	}
 	debugger.DebugDraw(&window);
 	///
 	ImGui::SFML::Render(window);
@@ -687,5 +799,8 @@ void Engine::init(int Width, int Height, string title, short fm)
 		shader.setUniform("blur_radius",0.5f);
 	}
 	blocktypesType.push_back(unknownblock);
+	mouseboundsshow.setFillColor(Color::Transparent);
+	mouseboundsshow.setOutlineColor(Color::Red);
+	mouseboundsshow.setOutlineThickness(1);
 	ImGui::SFML::Init(window);
 }

@@ -61,6 +61,7 @@ private:
 	void CheckState();
 	bool m_p = false;
 	bool m_ps = false;
+	bool JumpThruPassed = false;
 	Texture* m_deathsheet;
 	Texture* m_texture;
 	iwmoEffect* effect = static_cast<iwmoEffect*>(new iwmoEffect);
