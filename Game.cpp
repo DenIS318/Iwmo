@@ -237,13 +237,12 @@ void Game::INITMAP()
 	
 	Texture* castle2 = GetBlockTextureByName("castle2.png");
 	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
-	Texture* liana = GetBlockTextureByName("liana.png");
 	for (int i = 0; i < 25; i++)
 	{
 		if (i == 0)
 		{
 			//vertical wall
-			sf::Vector2f offset(castle2->getSize().x*i, (32));
+			sf::Vector2f offset(castle2->getSize().x*i+16, (32));
 			Block* b = new Block("castle2.png", "resources/blocks/", Iwmo::BlockType::solid);
 			b->SetPos((sf::Vector2f(0, 3600) + offset));
 			m_engine->AddBlock(b, tilesl);
@@ -252,30 +251,12 @@ void Game::INITMAP()
 		else
 		{
 			//horizontal wall
-			sf::Vector2f offset(castlewall2->getSize().x*i, (32));
+			sf::Vector2f offset(castlewall2->getSize().x*i + 16, (32));
 			Block* b = new Block("castlewall2.png", "resources/blocks/", Iwmo::BlockType::solid);
 			b->SetPos((sf::Vector2f(0, 3600) + offset));
 			m_engine->AddBlock(b, tilesl);
 		}
 	}
-	/*auto pos1 = Vector2f(200, 3500);
-	auto pos2 = Vector2f(300, 3500);
-	Block* l = new Block("liana.png","resources/blocks/", Iwmo::BlockType::slidable);
-	l->SetPos(pos1);
-	Block* lf = new Block("liana.png", "resources/blocks/", Iwmo::BlockType::slidable);
-	lf->SetPos(pos2 + Vector2f(18, 0));
-	m_engine->FlipBlock(lf);
-	m_engine->AddBlock(l,tiles2l);
-	Block* bb = new Block("castle2.png", "resources/blocks/", BlockType::solid);
-	bb->SetPos(pos1);
-	Block* bb2 = new Block("castle2.png", "resources/blocks/", BlockType::solid);
-	bb2->SetPos(pos2);
-	m_engine->AddBlock(bb, tilesl);
-	m_engine->AddBlock(bb2, tilesl);
-	m_engine->AddBlock(lf, tiles2l);*/
-		
-		
-	
 }
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {

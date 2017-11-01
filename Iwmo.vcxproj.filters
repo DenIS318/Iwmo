@@ -28,7 +28,6 @@
     <ClCompile Include="Debug.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource1.h" />
     <ClInclude Include="IwmoConfig.h" />
     <ClInclude Include="MyListener.h" />
     <ClInclude Include="mytextbox.h" />
@@ -52,8 +51,15 @@
     <ClInclude Include="iwmoTypes.h" />
     <ClInclude Include="IwmoLayer.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="zlibstat.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Iwmo.rc" />
   </ItemGroup>
 </Project>

@@ -65,7 +65,7 @@
     <ClInclude Include="mytextbox.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="resource1.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="tinyxml\tinystr.h" />
@@ -73,6 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="zlibstat.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Iwmo.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -133,7 +133,6 @@ public:
 	bool ShowTilesets = false;
 	void UpdateBlockList(vector<IwmoBlock>*);
 	bool ClientIsMaker = true;
-	Sprite* selectedblock;
 	Block* blockprototype;
 	int selectedlayer = 0;
 	Vector2u WinSize = Vector2u(Width, Height);
@@ -156,7 +155,7 @@ public:
 		BlockType blocktype = solid;
 		bool fake;
 		int transparency = 255;
-		bool jumpthru;
+		bool jumpthru;;
 	};
 	PrototypeSettings blockSettings;
 	bool ImguiCollappsed = true;
@@ -170,7 +169,6 @@ public:
 	/*at all layers(slower)*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect);
 	void UpdateMouseRect();
-	bool editingblock;
 	void BlockListSelectBlock(Block* b);
 private:
 	void UpdatePrototype();

@@ -328,8 +328,6 @@ void Engine::UpdatePrototype()
 		blockprototype->fake = blockSettings.fake;
 		blockprototype->SetTransparency(blockSettings.transparency);
 		blockprototype->jumpthru = blockSettings.jumpthru;
-		selectedblock->setColor(blockprototype->sprite.getColor());
-		selectedblock->setScale(blockprototype->sprite.getScale());
 	}
 }
 void Engine::UpdateMouseRect()
@@ -340,15 +338,11 @@ void Engine::UpdateMouseRect()
 	{
 		int x = newpos.x;
 		int y = newpos.y;
-		newpos.x = (x / GridSize.x) * GridSize.x;
-		newpos.y = (y / GridSize.y) * GridSize.y;
-	}
-	else
-	{
-		auto b = mouseboundsshow.getGlobalBounds();
-		auto sizedivide2 = Vector2i(b.width / 2, b.height / 2);
-		newpos -= Vector2f(sizedivide2);
-	}
+		newpos.x = (x / (GridSize.x)) * (GridSize.x);
+		newpos.y = (y / (GridSize.y)) * (GridSize.y);
+		newpos += Vector2f(GridSize.x / 2, GridSize.y / 2);
+	}	
+		
 	mouseboundsshow.setPosition(newpos);
 	mouseboundsshow.setSize(Vector2f(GridSize));
 }
@@ -378,12 +372,19 @@ void Engine::DrawImguiTilesets()
 				if (make)
 				{
 					//duplicate
-					BlockType type = solid;
+					if (blockprototype != NULL)
+					{
+						delete blockprototype;
+						if (blockprototype != NULL)
+						{
+							blockprototype = NULL;
+						}
+					}
+					BlockType type = blocklistptr->at(listbox_item_current).blocktype;
 					//block selected
 					//let allow to create his prototype
-					selectedblock = new Sprite();
-					selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
 					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
+					
 				}
 			}
 			ImGui::Checkbox("Show mouse bounds", &showbounds);
@@ -410,13 +411,20 @@ void Engine::DrawImguiTilesets()
 		{
 			if (make)
 			{
-				
+				if (blockprototype != NULL)
+				{
+					delete blockprototype;
+					if (blockprototype != NULL)
+					{
+						blockprototype = NULL;
+					}
+				}
 				BlockType type = blocklistptr->at(listbox_item_current).blocktype;
 				//block selected
 				//let allow to create his prototype
-				selectedblock = new Sprite();
-				selectedblock->setTexture(*blocklistptr->at(listbox_item_current).textureptr);
+				blockSettings = PrototypeSettings();
 				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname,blocklistptr->at(listbox_item_current).folder, type);
+				
 				
 			}
 			
@@ -426,13 +434,32 @@ void Engine::DrawImguiTilesets()
 		}
 		if(!make)
 		{
-			delete selectedblock;
-			delete blockprototype;
-			if (selectedblock != NULL)
+			bool finded;
+			for (int i = 0; i < MapBlocks.size(); i++)
 			{
-				selectedblock = NULL;
-				blockprototype = NULL;
+				auto v = MapBlocks[i].objects;
+				if (std::find(v.begin(), v.end(), blockprototype) != v.end()) {
+					//contains
+					blockSettings = PrototypeSettings();
+					blockprototype = NULL;
+					finded = true;
+					break;
+				}
+				
 			}
+			if (!finded)
+			{
+				//not contains
+				blockSettings = PrototypeSettings();
+				delete blockprototype;
+				if (blockprototype != NULL)
+				{
+					blockprototype = NULL;
+				}
+			}
+			
+			
+			
 		}
 		///Layers editor
 		ImGui::BeginChild("Layers editor", Vector2f(350, 200), false);
@@ -563,16 +590,12 @@ void Engine::ImguiMaker()
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_AlwaysAutoResize
 			;
-
-		//ImGui::ShowUserGuide();
-		//ImGui::ShowTestWindow(&ShowImgui);
-		//flags |= ImGuiWindowFlags_NoTitleBar;
-		
 		ImGui::Begin("Maker", &ShowImgui, flags);
 		ImguiCollappsed = ImGui::IsWindowCollapsed();
 		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
 		Vector2f v = ImGui::GetWindowSize();
-		ImGui::SetWindowPos(Vector2f(WinSize.x - v.x - 50 , 0));
+		auto ppos = window.getSize();
+		ImGui::SetWindowPos(Vector2f(ppos.x - v.x - 50 , 0));
 		ImGui::Text("Welcome, again!");
 		DrawImguiTilesets();
 		imguisize = ImGui::GetWindowSize();
@@ -609,6 +632,14 @@ vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect,int layer)
 //at all layers
 vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
 {
+	auto newsize = rect.getSize();
+	//its need for fix intersects 9 blocks at one rect
+	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
+	auto valdivided = Vector2f(val.x / 2, val.y / 2);
+	newsize = newsize - val;
+	auto newpos = rect.getPosition();
+	rect.setSize(newsize);
+	rect.setPosition(newpos + valdivided);
 	vector<Block*> vec;
 	for (int layer = 0; layer < MapBlocks.size(); layer++)
 	{
@@ -720,9 +751,9 @@ void Engine::Render()
 		}
 	}
 	UpdatePrototype();
-	if (selectedblock != NULL)
+	if (blockprototype != NULL)
 	{
-		window.draw(*selectedblock);
+		window.draw(blockprototype->sprite);
 	}
 	///
 	if (gamestarted)
@@ -802,5 +833,6 @@ void Engine::init(int Width, int Height, string title, short fm)
 	mouseboundsshow.setFillColor(Color::Transparent);
 	mouseboundsshow.setOutlineColor(Color::Red);
 	mouseboundsshow.setOutlineThickness(1);
+	mouseboundsshow.setOrigin(GridSize.x / 2, GridSize.y / 2);
 	ImGui::SFML::Init(window);
 }
