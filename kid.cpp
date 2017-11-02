@@ -35,11 +35,13 @@ void kid::AddWalls()
 						{
 								if (bl2->blocktype == solid)
 								{
-									if (JumpThruPassed)
+									if (JumpThruPassed || JumpThruJumped)
 									{
 										if (!bl2->jumpthru)
 										{
+
 											tmpvc.push_back(bl2);
+
 										}
 									}
 									else
@@ -88,7 +90,6 @@ void kid::Col()
 		vector< IwmoLayer >::iterator row;
 		vector<Block*>::iterator col;
 		AddWalls();
-		
 #define vector2d m_engine->MapBlocks
 			for (row = vector2d.begin(); row != vector2d.end(); row++) {
 				for (col = row->objects.begin(); col != row->objects.end(); col++) {
@@ -110,7 +111,7 @@ void kid::Col()
 								}
 								if (bl2->blocktype == Iwmo::BlockType::solid)
 								{
-									if (JumpThruPassed)
+									if (JumpThruPassed || JumpThruJumped)
 									{
 										if (!bl2->jumpthru)
 										{
@@ -123,13 +124,12 @@ void kid::Col()
 									}
 									if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
 									{
-										
-										
+										//if collides with down bound of block
 										m_p = true;
 										m_ps = false;
-										if (JumpThruPassed)
+										if (!bl2->jumpthru)
 										{
-											if (!bl2->jumpthru)
+											//if (state != jump)
 											{
 												grounded = true;
 												vel.y = 0;
@@ -141,24 +141,19 @@ void kid::Col()
 												}
 											}
 										}
-										else
-										{
-											grounded = true;
-											vel.y = 0;
-											lshiftcounter = 0;
-											jumpcount = 0;
-											if (state != walk && state != idle)
-											{
-												state = idle;
-											}
-										}
 									}
 									else if (state != slide &&  mtv.y > bl2->sprite.getTexture()->getSize().y / (-2))
 									{
-										state = fall;
-										m_p = true;
-										grounded = false;
-										vel.y = 0;
+										//mm its a up bounds,yeah?
+										
+											if (!bl2->jumpthru)
+											{
+												state = fall;
+												m_p = true;
+												grounded = false;
+												vel.y = 0;
+											}
+										
 									}
 								}
 
@@ -170,7 +165,7 @@ void kid::Col()
 									
 									m_p = true;
 									m_ps = false;
-									if (JumpThruPassed)
+									if (JumpThruPassed  || JumpThruJumped)
 									{
 										if (!bl2->jumpthru)
 										{
@@ -183,6 +178,19 @@ void kid::Col()
 												state = idle;
 											}
 										}
+										else
+										{
+											if (JumpThruJumped)
+											{
+												grounded = true;
+												state = idle;
+												JumpThruPassed = false;
+												JumpThruJumped = false;
+												kidentity->setPos(kidentity->GetPos() + mtv);
+											}
+										}
+										
+
 									}
 									else
 									{
@@ -203,7 +211,10 @@ void kid::Col()
 		if (!m_p)
 		{
 			grounded = false;
-			JumpThruPassed = false;
+			if (state == fall) {
+				JumpThruPassed = false;
+				//JumpThruJumped = false;
+			}
 			if (state == slide && !m_ps)
 			{
 				if (state != jump && state != fall)
@@ -264,6 +275,7 @@ void kid::Col()
 		}
 		if (JumpPassed)
 		{
+			JumpThruJumped = true;
 			JumpPassed = false;
 			if (jumpcount <= 1)
 			{
@@ -329,7 +341,8 @@ void kid::Col()
 		{
 			if (grounded)
 			{
-
+				JumpThruPassed = false;
+				JumpThruJumped = false;
 				if (kidentity->state != walk && kidentity->state != idle) {
 					kidentity->state = idle;
 
@@ -855,6 +868,8 @@ void kid::ProcessKeyboard(Event event)
 			if (event.key.code == Keyboard::Down)
 			{
 				JumpThruPassed = true;
+				grounded = false;
+				state = fall;
 			}
 		}
 	}
