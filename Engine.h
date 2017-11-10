@@ -19,7 +19,10 @@
 #include <stdio.h>
 #include "IwmoLayer.h"
 #include <functional>
+#include <atlstr.h>
 #include "Debug.h"
+#include <fstream>
+#include <SFML/OpenGL.hpp>
 #ifdef _MSC_VER 
 //not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
 #define strncasecmp _strnicmp
@@ -134,6 +137,8 @@ public:
 	void UpdateBlockList(vector<IwmoBlock>*);
 	bool ClientIsMaker = true;
 	Block* blockprototype;
+	Text* textprototype;
+	sf::Font font;
 	int selectedlayer = 0;
 	Vector2u WinSize = Vector2u(Width, Height);
 	Vector2i GridSize = Vector2i(32, 32);
@@ -146,18 +151,10 @@ public:
 	vector<BlockType> blocktypesType;
 	vector<Bullet*> bulletlist;
 	void AddBullet(Bullet* bullet);
+	void AddText(Text* text);
+	void RemoveText(Text* text);
 	void RemoveBullet(Bullet* bullet);
-	struct PrototypeSettings
-	{
-		bool Killable;
-		bool Resetable;
-		float ScaleX=1.0f, ScaleY=1.0f;
-		BlockType blocktype = solid;
-		bool fake;
-		int transparency = 255;
-		bool jumpthru;;
-	};
-	PrototypeSettings blockSettings;
+	BlockSettings blockSettings;
 	bool ImguiCollappsed = true;
 	Debug debugger;
 	Block* GetBlockAtPoint(Vector2f point, int layer);
@@ -170,7 +167,20 @@ public:
 	vector<Block*> GetBlocksAtRect(RectangleShape rect);
 	void UpdateMouseRect();
 	void BlockListSelectBlock(Block* b);
+	vector<string> listboxvectorFilters;
+	vector<Text*> GetTextAtRect(RectangleShape rect);
 private:
+	void FilterVector(string filter);
+	vector<string> FilteredElements;
+	int FilteredCurrent;
+	int listboxFiltersCurrent;
+	bool ShowFilters = false;
+	char textbuffer[5000];
+	ImFont* defaultfont;
+	ImFontConfig font_config;
+	INT textcharsize = 14;
+	Vector2f textscale = Vector2f(1, 1);
+	float textcolor[4] = {0,0,0,1};
 	void UpdatePrototype();
 	vector<string> intlayer;
 	int curtype = 0;
@@ -185,6 +195,7 @@ private:
 	vector<vector<Drawable*>> layerr = vector<vector<Drawable*>>(maxlayersize);
 	vector<vector<iwmoEntity*>> layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 	vector<vector<iwmoEffect*>> effectlayers;
+	vector<Text*> textlist;
 	sf::Clock clock;
 	sf::Time time;
 	RenderWindow window;

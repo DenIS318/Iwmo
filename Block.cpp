@@ -2,11 +2,32 @@
 
 
 namespace Iwmo {
+	Block::Block()
+	{
+
+	}
+	BlockSettings Block::GetSettings()
+	{
+		return thisSettings;
+	}
 	void Block::SetTransparency(Uint8 t)
 	{
 		Color c = sprite.getColor();
 		sprite.setColor(sf::Color(c.r, c.g, c.b, t));
 		transparency = t;
+	}
+	void Block::UpdateSettings(BlockSettings newSettings)
+	{
+		thisSettings = newSettings;
+		///
+		killable = thisSettings.Killable;
+		Resetable = thisSettings.Resetable;
+		blocktype = thisSettings.blocktype;
+		sprite.setScale(thisSettings.ScaleX, thisSettings.ScaleY);
+		fake = thisSettings.fake;
+		SetTransparency(thisSettings.transparency);
+		jumpthru = thisSettings.jumpthru;
+		///
 	}
 	Uint8 Block::GetTransparency()
 	{

@@ -9,6 +9,8 @@
 #include "Engine.h"
 #include "Block.h"
 #include <boost/filesystem.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/any.hpp>
 using namespace boost::filesystem;
 using namespace std;
@@ -59,6 +61,8 @@ public:
 	
 	 sf::Texture* kidDeathSheet = new Texture;
 	 sf::Texture* kidSheet = new Texture;
+	 //TODO FILTERS
+	 vector<string> Filters = { "solids","decorations","traps","animated","background" };
 private:
 	void LS();
 	/*
@@ -67,7 +71,9 @@ private:
 	decorations
 	traps
 	animated
+	background
 	*/
+	
 	void InitIwmoBlocks(string filter);
 	void AddIwmoBlock(string name, BlockType blocktype,string path);
 	void LoadSheets();

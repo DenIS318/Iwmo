@@ -56,6 +56,10 @@ bool Engine::LoadSound(string name,string buffername)
 }
 void Engine::RemoveAll()
 {
+	for (unsigned int i = 0; i < textlist.size(); i++)
+	{
+		delete textlist[i];
+	}
 	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
 	{
 		for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
@@ -85,6 +89,7 @@ void Engine::RemoveAll()
 	MapBlocks.clear();
 	intlayer.clear();
 	bulletlist.clear();
+	textlist.clear();
 	Engine::layerrentity.clear();
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
@@ -122,6 +127,15 @@ void sortstr(vector<string>* vec)
 		std::sort(vec->begin(), vec->end(), compareLen);
 		
 }
+void Engine::RemoveText(Text* text)
+{
+	delete text;
+	textlist.erase(std::remove(textlist.begin(),textlist.end(), text),textlist.end());
+}
+void Engine::AddText(Text* text)
+{
+	textlist.push_back(text);
+}
 void Engine::AddLayer()
 {
 	vector<Drawable*> tempvector;
@@ -147,6 +161,7 @@ void Engine::RemoveBullet(Bullet* bullet)
 	delete bullet;
 	bulletlist.erase(std::remove(bulletlist.begin(), bulletlist.end(), bullet), bulletlist.end());
 }
+
 void Engine::RemoveLayer(unsigned int layernum)
 {
 	//vectors are not pointers, this stores pointer, we dont need to delete layers
@@ -321,13 +336,7 @@ void Engine::UpdatePrototype()
 {
 	if (blockprototype != NULL)
 	{
-		blockprototype->killable = blockSettings.Killable;
-		blockprototype->Resetable = blockSettings.Resetable;
-		blockprototype->blocktype = blockSettings.blocktype;
-		blockprototype->sprite.setScale(blockSettings.ScaleX, blockSettings.ScaleY);
-		blockprototype->fake = blockSettings.fake;
-		blockprototype->SetTransparency(blockSettings.transparency);
-		blockprototype->jumpthru = blockSettings.jumpthru;
+		blockprototype->UpdateSettings(blockSettings);
 	}
 }
 void Engine::UpdateMouseRect()
@@ -360,12 +369,41 @@ void Engine::BlockListSelectBlock(Block* b)
 			
 	}
 }
+struct is_valid
+{
+	is_valid(const std::string& a_wanted) : wanted(a_wanted) {}
+	std::string wanted;
+	bool operator()(const std::string& str)
+	{
+		return str.compare(wanted) == 0;
+	}
+};
+static std::wstring charToWString(const char* text)
+{
+	const size_t size = std::strlen(text);
+	std::wstring wstr;
+	if (size > 0) {
+		wstr.resize(size);
+		std::mbstowcs(&wstr[0], text, size);
+	}
+	return wstr;
+}
+void Engine::FilterVector(string filter)
+{
+	FilteredElements = vector<string>(0);
+	auto it = std::copy_if(listboxvector.begin(), listboxvector.end(), std::back_inserter(FilteredElements), is_valid(filter));
+	//TODO FILTER
+	ShowFilters = true;
+
+}
 void Engine::DrawImguiTilesets()
 {
 	if (ShowTilesets)
 	{
 		if (ImGui::TreeNode("Tilesets"))
 		{
+			
+			ShowFilters = !ImGui::IsWindowCollapsed();
 			ImGui::BeginChild("make", Vector2f(230, 100), false);
 			if (ImGui::Checkbox("Make", &make))
 			{
@@ -406,29 +444,27 @@ void Engine::DrawImguiTilesets()
 			}
 			ImGui::EndChild();
 			ImGui::BeginChild("BlockList", Vector2f(350, 125), false);
-		
-		if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
-		{
-			if (make)
-			{
-				if (blockprototype != NULL)
+				if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
 				{
-					delete blockprototype;
-					if (blockprototype != NULL)
+					if (make)
 					{
-						blockprototype = NULL;
+						if (blockprototype != NULL)
+						{
+							delete blockprototype;
+							if (blockprototype != NULL)
+							{
+								blockprototype = NULL;
+							}
+						}
+						BlockType type = blocklistptr->at(listbox_item_current).blocktype;
+						//block selected
+						//let allow to create his prototype
+						blockSettings = BlockSettings();
+						blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
 					}
+
 				}
-				BlockType type = blocklistptr->at(listbox_item_current).blocktype;
-				//block selected
-				//let allow to create his prototype
-				blockSettings = PrototypeSettings();
-				blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname,blocklistptr->at(listbox_item_current).folder, type);
-				
-				
-			}
 			
-		}
 		ImGui::EndChild();
 		ImGui::TreePop();
 		}
@@ -440,7 +476,7 @@ void Engine::DrawImguiTilesets()
 				auto v = MapBlocks[i].objects;
 				if (std::find(v.begin(), v.end(), blockprototype) != v.end()) {
 					//contains
-					blockSettings = PrototypeSettings();
+					blockSettings = BlockSettings();
 					blockprototype = NULL;
 					finded = true;
 					break;
@@ -450,7 +486,7 @@ void Engine::DrawImguiTilesets()
 			if (!finded)
 			{
 				//not contains
-				blockSettings = PrototypeSettings();
+				blockSettings = BlockSettings();
 				delete blockprototype;
 				if (blockprototype != NULL)
 				{
@@ -462,7 +498,7 @@ void Engine::DrawImguiTilesets()
 			
 		}
 		///Layers editor
-		ImGui::BeginChild("Layers editor", Vector2f(350, 200), false);
+		//ImGui::BeginChild("Layers editor", Vector2f(350, 200), false);
 		if (ImGui::TreeNode("Layers"))
 		{
 			ImGui::ListBox("Layers list", &selectedlayer, intlayer);
@@ -499,10 +535,65 @@ void Engine::DrawImguiTilesets()
 			ImGui::Checkbox("Flash invisible layers", &Flash);
 			ImGui::TreePop();
 		}
-		ImGui::EndChild();
+		//ImGui::EndChild();
+		///TEXT EDITOR
+		//ImGui::BeginChild("Text editor", Vector2f(350, 200), false);
+		
+		if (ImGui::TreeNode("Text"))
+		{
+			ImGui::PushFont(defaultfont);
+			ImGui::InputTextMultiline("##source", textbuffer, IMGUI_ARRAYSIZE(textbuffer), Vector2f(-1.0f, ImGui::GetTextLineHeight() * 8), ImGuiInputTextFlags_AllowTabInput);
+			ImGui::PopFont();
+			ImGui::InputInt("Text character size", &textcharsize);
+			ImGui::InputFloat("Text scale X", &textscale.x);
+			ImGui::InputFloat("Text scale Y", &textscale.y);
+			///
+			//we dont want null,yeah?
+			if (textscale.x <= 0)
+			{
+				textscale.x = 1;
+			}
+			if (textscale.y <= 0)
+			{
+				textscale.y = 1;
+			}
+			if (textcharsize <= 0)
+			{
+				textcharsize = 1;
+			}
+			///
+			ImGui::ColorEdit4("Color", textcolor, ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_RGB | ImGuiColorEditFlags_NoOptions);
+			if (ImGui::Button("Pick text"))
+			{
+				blockprototype = NULL;
+				if (textprototype != NULL)
+				{
+					delete textprototype;
+				}
+				
+				String txt(textbuffer); // note String(SFML STRING), not an std string
+				textprototype = new Text();
+				textprototype->setString(txt);
+				textprototype->setFont(font);
+				textprototype->setCharacterSize(textcharsize);
+				textprototype->setOrigin(textprototype->getLocalBounds().width / 2, textprototype->getLocalBounds().height / 2);
+				textprototype->setPosition(mouseboundsshow.getPosition());
+				Color color;
+				color.r = (textcolor[0] * 255.f);
+				color.g = (textcolor[1] * 255.f);
+				color.b = (textcolor[2] * 255.f);
+				color.a = (textcolor[3] * 255.f);
+				textprototype->setFillColor(color);
+				textprototype->setScale(textscale);
+			}
+			
+			ImGui::TreePop();
+		}
+		//ImGui::EndChild();
 		///property editor
 		if (blockprototype != NULL)
 		{
+			blockSettings.layer = selectedlayer;
 			ImGui::BeginChild("propeditor", Vector2f(600, 300), false);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 			ImGui::Columns(2);
@@ -654,6 +745,27 @@ vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
 	}
 	return vec;
 }
+vector<Text*> Engine::GetTextAtRect(RectangleShape rect)
+{
+	auto newsize = rect.getSize();
+	//its need for fix intersects 9 blocks at one rect
+	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
+	auto valdivided = Vector2f(val.x / 2, val.y / 2);
+	newsize = newsize - val;
+	auto newpos = rect.getPosition();
+	rect.setSize(newsize);
+	rect.setPosition(newpos + valdivided);
+	vector<Text*> vec;
+		for (auto it = textlist.begin(); it != textlist.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (rect.getGlobalBounds().intersects(val->getGlobalBounds()) && val != textprototype)
+			{
+				vec.push_back(val);
+			}
+		}
+	return vec;
+}
 void Engine::Render()
 {
 
@@ -674,7 +786,6 @@ void Engine::Render()
 	if (gamestarted)
 	{
 
-		
 		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 		{
 			if (MapBlocks[i].visible)
@@ -755,6 +866,14 @@ void Engine::Render()
 	{
 		window.draw(blockprototype->sprite);
 	}
+	for (int i = 0; i < textlist.size(); i++)
+	{
+		window.draw(*textlist.at(i));
+	}
+	if (textprototype != NULL)
+	{
+		window.draw(*textprototype);
+	}
 	///
 	if (gamestarted)
 	{
@@ -808,10 +927,28 @@ Block* Engine::GetBlockAtPoint(Vector2f point, int layer)
 	}
 	return NULL;
 }
+GLuint loadTexture(unsigned char *pixels, int w, int h, int components)
+{
+	GLuint textureID;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexImage2D(GL_TEXTURE_2D, 0, components, w, h, 0, (components == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	return textureID;
+}
 void Engine::init(int Width, int Height, string title, short fm)
 {
 	window.create(VideoMode(Width, Height), title);
 	window.setFramerateLimit(fm);
+	if (!font.loadFromFile("resources/Arial.ttf"))
+	{
+		cout << "Font not loaded" << endl;
+	}
 	blocktypesStr.push_back("solid");
 	blocktypesStr.push_back("decoration");
 	blocktypesStr.push_back("slidable");
@@ -835,4 +972,18 @@ void Engine::init(int Width, int Height, string title, short fm)
 	mouseboundsshow.setOutlineThickness(1);
 	mouseboundsshow.setOrigin(GridSize.x / 2, GridSize.y / 2);
 	ImGui::SFML::Init(window);
+	font_config.OversampleH = 1; //or 2 is the same
+	font_config.OversampleV = 1;
+	font_config.PixelSnapH = 1;
+
+	static const ImWchar ranges[] =
+	{
+		0x0020, 0x00FF, // Basic Latin + Latin Supplement
+		0x0400, 0x044F, // Cyrillic
+		0,
+	};
+	ImGuiIO& io = ImGui::GetIO();
+	defaultfont = io.Fonts->AddFontFromFileTTF("resources/Arial.ttf", 14,&font_config,ranges);
+	io.FontDefault = io.Fonts->AddFontDefault();
+	ImGui::SFML::UpdateFontTexture();
 }

@@ -79,7 +79,6 @@ void Game::InitIwmoBlocks(string filter)
 {
 	BlockType bltype = BlockType::unknownblock;
 	path p;
-	
 	string subpath;
 	bool trap = false;
 	bool success = false;
@@ -114,6 +113,15 @@ void Game::InitIwmoBlocks(string filter)
 		p = subpath;
 		success = true;
 		
+	}
+	if (!success && filter == "background")
+	{
+		// avoid repeated path construction below
+		subpath = respath + "background";
+		bltype = BlockType::decoration;
+		p = subpath;
+		success = true;
+
 	}
 	if (!success)
 	{
@@ -234,29 +242,52 @@ void Game::LoadSheets()
 //TODO
 void Game::INITMAP()
 {
+	//std::ofstream filestream("resources/maps/Default");
 	
-	Texture* castle2 = GetBlockTextureByName("castle2.png");
-	Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
-	for (int i = 0; i < 25; i++)
+	std::ifstream ifs("resources/maps/default.im");
+	if (ifs.good())
 	{
-		if (i == 0)
-		{
-			//vertical wall
-			sf::Vector2f offset(castle2->getSize().x*i+16, (32));
-			Block* b = new Block("castle2.png", "resources/blocks/", Iwmo::BlockType::solid);
-			b->SetPos((sf::Vector2f(0, 3600) + offset));
-			m_engine->AddBlock(b, tilesl);
+		BlockSettings settings;
+		Vector2f ppos;
+		/*
+		boost::archive::binary_iarchive ia(ifs);
+		ia >> settings;
+		ia >> ppos;
+		*/
+		Block newblock;
+		newblock.read(&ifs);
+		//TODO
+		cout << "loaded block " << newblock.blockname << endl;
+		m_engine->AddBlock(&newblock, newblock.GetSettings().layer);
 
-		}
-		else
+	}
+	else
+	{
+		///bad archive
+		Texture* castle2 = GetBlockTextureByName("castle2.png");
+		Texture* castlewall2 = GetBlockTextureByName("castlewall2.png");
+		for (int i = 0; i < 25; i++)
 		{
-			//horizontal wall
-			sf::Vector2f offset(castlewall2->getSize().x*i + 16, (32));
-			Block* b = new Block("castlewall2.png", "resources/blocks/", Iwmo::BlockType::solid);
-			b->SetPos((sf::Vector2f(0, 3600) + offset));
-			m_engine->AddBlock(b, tilesl);
+			if (i == 0)
+			{
+				//vertical wall
+				sf::Vector2f offset(castle2->getSize().x*i + 16, (32));
+				Block* b = new Block("castle2.png", "resources/blocks/", Iwmo::BlockType::solid);
+				b->SetPos((sf::Vector2f(0, 3600) + offset));
+				m_engine->AddBlock(b, tilesl);
+
+			}
+			else
+			{
+				//horizontal wall
+				sf::Vector2f offset(castlewall2->getSize().x*i + 16, (32));
+				Block* b = new Block("castlewall2.png", "resources/blocks/", Iwmo::BlockType::solid);
+				b->SetPos((sf::Vector2f(0, 3600) + offset));
+				m_engine->AddBlock(b, tilesl);
+			}
 		}
 	}
+	
 }
 Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
@@ -277,6 +308,7 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	InitIwmoBlocks("traps");
 	InitIwmoBlocks("decorations");
 	InitIwmoBlocks("animated");
+	InitIwmoBlocks("background");
 	m_engine->UpdateBlockList(&IwmoBlocks);
 	//
 	//load sprites sheets

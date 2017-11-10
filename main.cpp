@@ -34,7 +34,6 @@ bool gamestarted = false;
 bool allow = false;
 bool serverstarted = false;
 bool isclient = true;
-sf::Font font;
 sf::TcpSocket socket;
 sf::SocketSelector selector;
 bool connected = false;
@@ -59,6 +58,7 @@ void startgame(Engine* engine, RenderWindow* window)
 {
 	game = new Game(engine, window, source);
 	gamestarted = true;
+	engine->listboxvectorFilters = game->Filters;
 
 }
 inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
@@ -159,6 +159,10 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 								
 								engine->blockprototype->sprite.setPosition(engine->mouseboundsshow.getPosition());
 							}
+							if (engine->textprototype != NULL)
+							{
+								engine->textprototype->setPosition(engine->mouseboundsshow.getPosition());
+							}
 							
 						}
 						
@@ -229,12 +233,16 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							
 							
 						}
-						if (engine->blockprototype != NULL)
+						if (!engine->ImGuifocus)
 						{
-							if (!engine->ImGuifocus)
+							if (engine->blockprototype != NULL)
 							{
 								
 								emplaceBlock(engine, engine->blockprototype->sprite.getPosition(), engine->selectedlayer);
+							}
+							if (engine->textprototype != NULL)
+							{
+								engine->AddText(new Text(*engine->textprototype));
 							}
 						}
 
@@ -248,13 +256,13 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							{
 								if (engine->make)
 								{
-									auto blvec = engine->GetBlocksAtRect(engine->mouseboundsshow, engine->selectedlayer);
+									auto blvec = engine->GetTextAtRect(engine->mouseboundsshow);
 									if (!blvec.empty())
 									{
 										for (auto it = blvec.begin(); it != blvec.end(); ++it)
 										{
 											auto val = *it._Ptr;
-											engine->RemoveBlock(val, engine->selectedlayer);
+											engine->RemoveText(val);
 										}
 									}
 								}
@@ -390,6 +398,12 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 					auto value = rotation + event.mouseWheelScroll.delta * 15;
 					engine->blockprototype->sprite.setRotation(value);
 				}
+				if (engine->textprototype != NULL)
+				{
+					auto rotation = engine->textprototype->getRotation();
+					auto value = rotation + event.mouseWheelScroll.delta * 15;
+					engine->textprototype->setRotation(value);
+				}
 			}
 			break;
 		default:
@@ -411,8 +425,6 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 //MAIN
 int main()
 {
-
-	font.loadFromFile("resources/Arial.otf");
 	static Engine engine;
 	engine.init(Width, Height, WindowName, framerate);
 	Texture text;
@@ -451,7 +463,7 @@ int main()
 	startrect = (IntRect)start.getGlobalBounds();
 	//
 	iptext.setCharacterSize(12);
-	iptext.setFont(font);
+	iptext.setFont(engine.font);
 	iptext.setFillColor(Color::Black);
 	iptext.setPosition(ipbox.getPosition().x + 5, ipbox.getPosition().y + 2);
 	//

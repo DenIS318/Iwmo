@@ -681,29 +681,44 @@ void kid::deleteentity()
 }
 void kid::control()
 {
-	if (Alive)
+	if (m_engine->ImGuifocus)
 	{
-		if (sf::Keyboard::isKeyPressed(Keyboard::Left))
+		AllowControl2 = false;
+	}
+	else
+	{
+		AllowControl2 = true;
+	}
+	if (AllowControl&& AllowControl2)
+	{
+		if (Alive)
 		{
-			if (!anim.isFlip())
+			if (sf::Keyboard::isKeyPressed(Keyboard::Left))
 			{
-				anim.flip(true);
+				if (!anim.isFlip())
+				{
+					anim.flip(true);
+				}
+			}
+			if (sf::Keyboard::isKeyPressed(Keyboard::Right))
+			{
+				if (anim.isFlip())
+				{
+					anim.flip(false);
+				}
 			}
 		}
-		if (sf::Keyboard::isKeyPressed(Keyboard::Right))
-		{
-			if (anim.isFlip())
-			{
-				anim.flip(false);
-			}
-		}
-		Col();
+	}
+
+	Col();
+	if (AllowControl && AllowControl2)
+	{
 		if (m_engine->GetWindow()->hasFocus())
 		{
-			
+
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
-				
+
 				if (state != slide)
 				{
 					dir = WalkLeft;
@@ -727,9 +742,9 @@ void kid::control()
 				{
 					dir = WalkRight;
 				}
-				
 
-				
+
+
 			}
 			if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
 			{
@@ -777,8 +792,9 @@ void kid::control()
 				}
 			}
 		}
-		CheckState();
 	}
+		CheckState();
+	
 	
 }
 void kid::shoot()
@@ -842,34 +858,37 @@ void kid::shoot()
 }
 void kid::ProcessKeyboard(Event event)
 {
-	if (event.type == Event::KeyPressed)
-	{
-		if (event.key.code == sf::Keyboard::R)
-		{
-			Restart();
-		}
-	}
-	if (Alive)
+	if (AllowControl && AllowControl2)
 	{
 		if (event.type == Event::KeyPressed)
 		{
-			if (event.key.code == Keyboard::LShift)
+			if (event.key.code == sf::Keyboard::R)
 			{
-				JumpPassed = true;
+				Restart();
 			}
-			if (event.key.code == Keyboard::Z)
+		}
+		if (Alive)
+		{
+			if (event.type == Event::KeyPressed)
 			{
-				shoot();
-			}
-			if (event.key.code == Keyboard::Q)
-			{
-				death();
-			}
-			if (event.key.code == Keyboard::Down)
-			{
-				JumpThruPassed = true;
-				grounded = false;
-				state = fall;
+				if (event.key.code == Keyboard::LShift)
+				{
+					JumpPassed = true;
+				}
+				if (event.key.code == Keyboard::Z)
+				{
+					shoot();
+				}
+				if (event.key.code == Keyboard::Q)
+				{
+					death();
+				}
+				if (event.key.code == Keyboard::Down)
+				{
+					JumpThruPassed = true;
+					grounded = false;
+					state = fall;
+				}
 			}
 		}
 	}

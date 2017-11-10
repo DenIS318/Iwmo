@@ -46,7 +46,9 @@ public:
 	void tick(float time);
 	sf::Vector2i bulletscale = sf::Vector2i(1,1);
 	void updaterect();
-	
+	bool AllowControl = true;
+	//for imgui focus in maker
+	bool AllowControl2 = true;
 private:
 	FloatRect kidrect;
 	View* m_camera;
