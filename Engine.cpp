@@ -102,10 +102,19 @@ Engine::Engine()
 {
 	
 }
-void Engine::SetCam(View* campoint)
+void Engine::AddMusic(Music* music)
 {
-	CamPointer = campoint;
-	CameraSetted = true;
+	allmusic.push_back(music);
+}
+void Engine::RemoveMusic(Music* music)
+{
+	delete music;
+	allmusic.erase(std::remove(allmusic.begin(), allmusic.end(), music), allmusic.end());
+}
+void Engine::PlayMusic(Music* music)
+{
+	CurrentMusic = music;
+	music->play();
 }
 Engine::~Engine()
 {
@@ -354,6 +363,16 @@ void Engine::UpdateMouseRect()
 		
 	mouseboundsshow.setPosition(newpos);
 	mouseboundsshow.setSize(Vector2f(GridSize));
+	int x = mouseboundsshow.getPosition().x;
+	int y = mouseboundsshow.getPosition().y;
+	float posx, posy;
+	posx = x - (x % 800) + 400;
+	posy = y - (y % 608) + 304;
+	Vector2f vec(posx, posy);
+	vec = vec - Vector2f(Width / 2, Height / 2);
+	//vec.y = vec.y + 2;
+	bounds.setPosition(vec);
+	minimap.setCenter(vec);
 }
 void Engine::BlockListSelectBlock(Block* b)
 {
@@ -378,6 +397,10 @@ struct is_valid
 		return str.compare(wanted) == 0;
 	}
 };
+template<typename Base, typename T>
+inline bool instanceof(const T *ptr) {
+	return dynamic_cast<const Base*>(ptr) != nullptr;
+}
 static std::wstring charToWString(const char* text)
 {
 	const size_t size = std::strlen(text);
@@ -395,6 +418,10 @@ void Engine::FilterVector(string filter)
 	//TODO FILTER
 	ShowFilters = true;
 
+}
+View* Engine::GetCam()
+{
+	return CamPointer;
 }
 void Engine::DrawImguiTilesets()
 {
@@ -589,6 +616,69 @@ void Engine::DrawImguiTilesets()
 			
 			ImGui::TreePop();
 		}
+		if (ImGui::TreeNode("Camera"))
+		{
+			ImGui::Checkbox("Show minimap", &ShowMinimap);
+			if (ShowMinimap)
+			{
+				ImGui::InputFloat("Minimap Size X", &MinimapSize.x, 10.F, 100.0F);
+				ImGui::InputFloat("Minimap Size Y", &MinimapSize.y, 10.F, 100.0F);
+				if (MinimapSize.x <= 0)
+				{
+					MinimapSize.x = 1;
+				}
+				if (MinimapSize.y <= 0)
+				{
+					MinimapSize.y = 1;
+				}
+				ImGui::InputFloat("Minimap viewport Size X", &MinimapViewportSize.x, 0.05F, 0.1F);
+				ImGui::InputFloat("Minimap viewport Size Y", &MinimapViewportSize.y, 0.05F, 0.1F);
+				if (MinimapViewportSize.x > 0.50)
+				{
+					MinimapViewportSize.x = 0.50;
+				}
+				if (MinimapViewportSize.y > 0.50)
+				{
+					MinimapViewportSize.y = 0.50;
+				}
+				if (ImGui::Button("Reset minimap", Vector2f(100, 20)))
+				{
+					MinimapSize = Vector2f(Width * 3, Height * 3);
+					MinimapViewportSize = Vector2f(0.25, 0.25);
+				}
+			}
+			ImGui::Checkbox("Show screen bounds", &ShowScreenBounds);
+			if (ImGui::Checkbox("Free camera", &FreeCamera))
+			{
+				for (auto it = layerrentity.begin(); it != layerrentity.end(); ++it)
+				{
+					auto firstval = *it._Ptr;
+					for (auto it2 = firstval.begin(); it2 != firstval.end(); ++it2)
+					{
+						auto val = *it2._Ptr;
+						
+						val->ScreenCamera = !FreeCamera;
+						
+					}
+				}
+				
+			}
+			if (FreeCamera)
+			{
+				ImGui::InputFloat("Scrolling speed X axis", &Scrollingratio.x, 1.0F, 10.0F);
+				ImGui::InputFloat("Scrolling speed Y axis", &Scrollingratio.y, 1.0F, 10.0F);
+				if (Scrollingratio.x <= 0)
+				{
+					Scrollingratio.x = 1;
+				}
+				if (Scrollingratio.y <= 0)
+				{
+					Scrollingratio.y = 1;
+				}
+				
+			}
+			ImGui::TreePop();
+		}
 		//ImGui::EndChild();
 		///property editor
 		if (blockprototype != NULL)
@@ -675,24 +765,23 @@ void Engine::DrawImguiTilesets()
 void Engine::ImguiMaker()
 {
 	//main tooltip
-	if (ShowImgui)
-	{
-		ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_AlwaysAutoResize
-			;
-		ImGui::Begin("Maker", &ShowImgui, flags);
+	ImGuiWindowFlags flags = 
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_AlwaysAutoResize;
+		ImguiOpen = true;
+		ImGui::Begin("Maker", &ImguiOpen, flags);
 		ImguiCollappsed = ImGui::IsWindowCollapsed();
 		ImGui::SetWindowSize("Maker", Vector2f(300, 300));
 		Vector2f v = ImGui::GetWindowSize();
 		auto ppos = window.getSize();
-		ImGui::SetWindowPos(Vector2f(ppos.x - v.x - 50 , 0));
+		ImGui::SetWindowPos(Vector2f(ppos.x- v.x-10 , 10));
 		ImGui::Text("Welcome, again!");
+		ImGui::Checkbox("Keep mouse inside window", &KeepMouse);
 		DrawImguiTilesets();
 		imguisize = ImGui::GetWindowSize();
 		imguipos = ImGui::GetWindowPos();
 		ImGui::End();
-	}
 }
 void Engine::AddBullet(Bullet* bul)
 {
@@ -766,81 +855,64 @@ vector<Text*> Engine::GetTextAtRect(RectangleShape rect)
 		}
 	return vec;
 }
-void Engine::Render()
+void Engine::DrawMap(float m__time,bool Minimap)
 {
-
-
-
-	float m__time = clock.getElapsedTime().asMicroseconds();
-
-	m__time = m__time / 500; 
-
-	if (m__time > 40) { m__time = 40; }
-	window.clear();
-	if (CameraSetted)
+	for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
 	{
-		window.setView(*CamPointer);
+		if (MapBlocks[i].visible)
+		{
+			for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
+			{
+				if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
+				{
+					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
+				}
+
+			}
+		}
+		else if (Flash && ClientIsMaker)
+		{
+			for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
+			{
+				if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
+				{
+					window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite), &shader);
+				}
+			}
+		}
 	}
-	ImGui::SFML::Update(window, clock.restart());
-
-	if (gamestarted)
+	for (int i = 0; i < textlist.size(); i++)
 	{
-
-		for (unsigned int i = 0; i < Engine::MapBlocks.size(); i++)
+		window.draw(*textlist.at(i));
+	}
+	for (unsigned int myi = 0; myi < Engine::bulletlist.size(); myi++)
+	{
+		if (!Minimap)
 		{
-			if (MapBlocks[i].visible)
-			{
-				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
-				{
-					if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
-					{
-						window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite));
-					}
-
-				}
-			}
-			else if (Flash && ClientIsMaker)
-			{
-				for (unsigned int i1 = 0; i1 < Engine::MapBlocks[i].objects.size(); i1++)
-				{
-					if ((Engine::MapBlocks.at(i).objects[i1]->GetTransparency() != 0))
-					{
-						window.draw((Engine::MapBlocks.at(i).objects[i1]->sprite), &shader);
-					}
-				}
-			}
+			Engine::bulletlist.at(myi)->tick();
 		}
-		for (unsigned int myi = 0; myi < Engine::bulletlist.size(); myi++)
+		Engine::bulletlist.at(myi)->Draw(&window, m__time);
+	}
+	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+	{
+		for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
 		{
-			Engine::bulletlist.at(myi)->tick(&window,m__time);
-		}
-		for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
-		{
-			for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
 			{
+				if (!Minimap)
 				{
-				
 					Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
 					Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
 					Engine::layerrentity.at(i).at(i1)->tick(m__time);
 					Engine::layerrentity.at(i).at(i1)->control();
-					if (Engine::layerrentity.at(i).at(i1)->visible)
-					{
-						Engine::layerrentity.at(i).at(i1)->draw(&window);
-					}
 				}
-
+				if (Engine::layerrentity.at(i).at(i1)->visible)
+				{
+					Engine::layerrentity.at(i).at(i1)->draw(&window);
+				}
 			}
+
 		}
 	}
-	for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
-	{
-		for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
-		{
-			window.draw(*(Engine::layerr.at(myi).at(myi1)));
-		}
-	}
-	
 	for (unsigned int myi = 0; myi < effectlayers.size(); myi++)
 	{
 		for (unsigned int myi1 = 0; myi1 < effectlayers.at(myi).size(); myi1++)
@@ -851,24 +923,64 @@ void Engine::Render()
 				auto check = (iwmoEntity*)val;
 				if (check != NULL)
 				{
-					if (val->visible)
+					if (!Minimap)
 					{
 						val->updatetime(m__time);
 						val->tick(m__time);
+					}
+					if (val->visible)
+					{
+						
 						val->draw(&window);
 					}
 				}
 			}
 		}
 	}
+}
+void Engine::SetCamFromGame(View* ptr)
+{
+	CamPointer = ptr;
+	ptr->setViewport(FloatRect(0, 0, 1, 1));
+}
+void Engine::Render()
+{
+	float m__time = clock.getElapsedTime().asMicroseconds();
+	m__time = m__time / 500; 
+	if (m__time > 40) { m__time = 40; }
+	window.clear();
+	ImGui::SFML::Update(window, clock.restart());
+	if (gamestarted)
+	{
+		UpdateMouseRect();	
+	}
+	if (ClientIsMaker && ShowMinimap && gamestarted)
+	{
+		minimap.setSize(MinimapSize);
+		minimap.setViewport(FloatRect(Vector2f(0, 0), MinimapViewportSize));
+		window.setView(minimap);
+		DrawMap(m__time, true);
+	}
+	if (CamPointer != NULL)
+	{
+		window.setView(*CamPointer);
+		DrawMap(m__time,false);
+	}
+	for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
+	{
+		for (unsigned int myi1 = 0; myi1 < Engine::layerr.at(myi).size(); myi1++)
+		{
+			window.draw(*(Engine::layerr.at(myi).at(myi1)));
+		}
+	}
 	UpdatePrototype();
+	if (ShowScreenBounds && gamestarted)
+	{
+		window.draw(bounds);
+	}
 	if (blockprototype != NULL)
 	{
 		window.draw(blockprototype->sprite);
-	}
-	for (int i = 0; i < textlist.size(); i++)
-	{
-		window.draw(*textlist.at(i));
 	}
 	if (textprototype != NULL)
 	{
@@ -879,10 +991,6 @@ void Engine::Render()
 	{
 		if (ClientIsMaker)
 		{
-			if (!ShowImgui)
-			{
-				ShowImgui = true;
-			}
 			ImguiMaker();
 		}
 	}
@@ -986,4 +1094,8 @@ void Engine::init(int Width, int Height, string title, short fm)
 	defaultfont = io.Fonts->AddFontFromFileTTF("resources/Arial.ttf", 14,&font_config,ranges);
 	io.FontDefault = io.Fonts->AddFontDefault();
 	ImGui::SFML::UpdateFontTexture();
+	bounds.setOutlineColor(Color::Red);
+	bounds.setOutlineThickness(-1);
+	bounds.setSize(Vector2f(Width,Height));
+	bounds.setFillColor(Color::Transparent);
 }

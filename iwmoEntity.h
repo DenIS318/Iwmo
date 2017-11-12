@@ -45,9 +45,10 @@ public:
 	virtual void deleteentity();
 	virtual void tick(float time);
 	float time=0.0;
-	void GetEventSource(CSource* sourc);
 	CSource* m_souc;
 	bool visible = true;
+	//For kid
+	bool ScreenCamera = true;
 	virtual void shoot(Texture* bullettexture, Vector2i pos);
 private:
 	float x = 0;

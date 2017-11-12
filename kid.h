@@ -49,6 +49,7 @@ public:
 	bool AllowControl = true;
 	//for imgui focus in maker
 	bool AllowControl2 = true;
+	//will camera changes on screens change?
 private:
 	FloatRect kidrect;
 	View* m_camera;

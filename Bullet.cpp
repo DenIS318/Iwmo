@@ -9,9 +9,12 @@ void Bullet::move()
 		auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
 		bulletpos += Vector2f(x, y);
 }
-void Bullet::tick(RenderWindow* win,float time)
+void Bullet::tick()
 {
 	move();
+}
+void Bullet::Draw(RenderWindow* win,float time)
+{
 	anim.tick(time);
 	anim.draw(win,bulletpos.x,bulletpos.y);
 }

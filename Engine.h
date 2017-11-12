@@ -38,10 +38,12 @@ class Engine
 public:
 	//CONSTRUCT
 	Engine();
-	void SetCam(View*);
 	void AddBlock(Block* b, int layernumber);
 	void ResetBlock(Block* b);
 	void ResetBlocks();
+	void AddMusic(Music* music);
+	void RemoveMusic(Music* music);
+	void PlayMusic(Music* music);
 	vector<Sprite*> maptiles;
 	///PROTOTYPES
 	/*
@@ -121,6 +123,7 @@ public:
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
+	View* GetCam();
 	void RemoveEffect(iwmoEffect* effect);
 	void RemoveEffect(iwmoEffect* effect, unsigned short layernum);
 	void AddEffect(iwmoEffect* effect,unsigned short layernum);
@@ -132,18 +135,22 @@ public:
 	vector<vector<iwmoEffect*>>* getEffectLayers();
 	vector<Sound*> allsounds;
 	vector<Music*> allmusic;
-	bool ShowImgui = false;
 	bool ShowTilesets = false;
+	void SetCamFromGame(View* ptr);
 	void UpdateBlockList(vector<IwmoBlock>*);
 	bool ClientIsMaker = true;
 	Block* blockprototype;
 	Text* textprototype;
+	bool FreeCamera;
 	sf::Font font;
 	int selectedlayer = 0;
 	Vector2u WinSize = Vector2u(Width, Height);
 	Vector2i GridSize = Vector2i(32, 32);
 	bool make = true;
+	Music* CurrentMusic = NULL;
 	bool ImGuifocus = false;
+	RectangleShape bounds;
+	bool ShowScreenBounds=true;
 	Vector2f imguipos = Vector2f(0, 0);
 	Vector2f imguisize = Vector2f(0,0);
 	Vector2f lastemplacedblockpos = Vector2f(-666, -666);
@@ -155,6 +162,8 @@ public:
 	void RemoveText(Text* text);
 	void RemoveBullet(Bullet* bullet);
 	BlockSettings blockSettings;
+	bool KeepMouse = false;
+	Vector2f Scrollingratio = Vector2f(5, 5);
 	bool ImguiCollappsed = true;
 	Debug debugger;
 	Block* GetBlockAtPoint(Vector2f point, int layer);
@@ -169,7 +178,12 @@ public:
 	void BlockListSelectBlock(Block* b);
 	vector<string> listboxvectorFilters;
 	vector<Text*> GetTextAtRect(RectangleShape rect);
+	View minimap;
+	bool ShowMinimap=true;
+	Vector2f MinimapSize = Vector2f(Width * 3, Height * 3);
+	Vector2f MinimapViewportSize = Vector2f(0.25, 0.25);
 private:
+	void DrawMap(float time,bool Minimap);
 	void FilterVector(string filter);
 	vector<string> FilteredElements;
 	int FilteredCurrent;
@@ -200,4 +214,5 @@ private:
 	sf::Time time;
 	RenderWindow window;
 	Shader shader;
+	bool ImguiOpen = true;
 };

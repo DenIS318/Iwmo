@@ -11,7 +11,8 @@ class Bullet
 {
 public:
 	void move();
-	void tick(RenderWindow* wind,float time);
+	void tick();
+	void Draw(RenderWindow* wind,float time);
 	Bullet(Vector2i scale, Texture* bullettextute, Vector2i pos, string bulletxml = "resources/bullet.xml");
 	Bullet(Vector2i scale,const Texture* bullettextute, Vector2i pos, string bulletxml = "resources/bullet.xml");
 	~Bullet();

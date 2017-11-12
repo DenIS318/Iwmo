@@ -175,8 +175,8 @@ View* Game::GetCam()
 }
 void Game::LS()
 {
-	m_engine->AddSoundBuffer("castleentrance");
-	m_engine->LoadSound("castleentrance.ogg", "castleentrance");
+	/*m_engine->AddSoundBuffer("castleentrance");
+	m_engine->LoadSound("castleentrance.ogg", "castleentrance");*/
 	m_engine->AddSoundBuffer("kidjump");
 	m_engine->LoadSound("jump1.ogg", "kidjump");
 	m_engine->AddSoundBuffer("kiddoublejump");
@@ -200,16 +200,20 @@ void Game::StartGame(Engine* engine, CSource* source)
 	mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss, kidDeathSheet, &camera);
 	m_engine->Addentity(&mykid, 0);
 	mykid.setPos(Iwmo::KidSpawn);
+	sf::View standard = camera;
+	unsigned int size = 150;
+	auto minimap = View(camera);
+	engine->minimap = minimap;
 	m_engine->gamestarted = true;
 	
 
-	if (!castleent.openFromFile("resources/sounds/castleentrance.ogg"))
+	if (!castleent.openFromFile("resources/music/castleentrance.ogg"))
 	{
 		cout << "castle entrance not loaded!" << endl;
 	}
-	m_engine->allmusic.push_back(&castleent);
+	m_engine->AddMusic(&castleent);
 	castleent.setLoop(true);
-	castleent.play();
+	m_engine->PlayMusic(&castleent);
 	if (debug)
 	{
 
@@ -318,8 +322,7 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	//camera
 	camera.setCenter(CAM_CENTER);
 	camera.setSize(CAM_SIZE);
-	window->setView(camera);
-	engine->SetCam(&camera);
+	engine->SetCamFromGame(&camera);
 	engine->GetWindow()->setKeyRepeatEnabled(false);
 	INITMAP();
 	
@@ -403,14 +406,14 @@ void GameHandler::OnEvent(Event eventt)
 		{
 			if (event.key.code == Keyboard::M)
 			{
-				if (!m_engine->make)
-				{
-					m_engine->make = true;
-				}
-				else
-				{
-					m_engine->make = false;
-				}
+				m_engine->make = !m_engine->make;
+			}
+		}
+		if (event.type == Event::KeyPressed)
+		{
+			if (event.key.code == Keyboard::T)
+			{
+				m_engine->ShowMinimap = !m_engine->ShowMinimap;
 			}
 		}
 		

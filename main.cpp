@@ -129,15 +129,12 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				{
 					if (engine->ClientIsMaker)
 					{
-						engine->UpdateMouseRect();
-						if (engine->ShowImgui)
-						{
-
-							Vector2f cursorpos = Vector2f(event.mouseMove.x, event.mouseMove.y);
-							Vector2f winsize = engine->imguisize;
-							Vector2f winpos = engine->imguipos;
-							FloatRect ImGuiRect(winpos, winsize);
-							if (!ImGuiRect.contains(cursorpos))
+						Vector2i cursorpos = Mouse::getPosition(*engine->GetWindow());
+						Vector2f winsize = engine->imguisize;
+						Vector2f winpos = engine->imguipos;
+						FloatRect ImGuiRect(winpos, winsize);
+						
+							if (!ImGuiRect.contains(Vector2f(cursorpos)))
 							{
 								engine->ImGuifocus = false;
 							}
@@ -149,8 +146,6 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 									engine->lastemplacedblockpos = Vector2f(-666, -666);
 								}
 							}
-						}
-
 						if (!engine->ImGuifocus)
 						{
 							
@@ -339,7 +334,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			}
 			break;
 		case sf::Event::KeyPressed:
-
+			
 			if (!gamestarted)
 			{
 				if (event.key.code == sf::Keyboard::BackSpace)
@@ -358,6 +353,20 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			{
 				if (engine->ClientIsMaker)
 				{
+					
+					if (event.key.code == Keyboard::Delete)
+					{
+						if (engine->blockprototype != NULL)
+						{
+							delete engine->blockprototype;
+							engine->blockprototype = NULL;
+						}
+						if (engine->textprototype != NULL)
+						{
+							delete engine->textprototype;
+							engine->textprototype = NULL;
+						}
+					}
 					if (event.key.code == Keyboard::Tab)
 					{
 						ImGui::SetWindowCollapsed("Maker", !engine->ImguiCollappsed);
@@ -392,17 +401,20 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 		case Event::MouseWheelScrolled:
 			if (gamestarted)
 			{
-				if (engine->blockprototype != NULL)
+				if (!engine->ImGuifocus)
 				{
-					auto rotation = engine->blockprototype->sprite.getRotation();
-					auto value = rotation + event.mouseWheelScroll.delta * 15;
-					engine->blockprototype->sprite.setRotation(value);
-				}
-				if (engine->textprototype != NULL)
-				{
-					auto rotation = engine->textprototype->getRotation();
-					auto value = rotation + event.mouseWheelScroll.delta * 15;
-					engine->textprototype->setRotation(value);
+					if (engine->blockprototype != NULL)
+					{
+						auto rotation = engine->blockprototype->sprite.getRotation();
+						auto value = rotation + event.mouseWheelScroll.delta * 15;
+						engine->blockprototype->sprite.setRotation(value);
+					}
+					if (engine->textprototype != NULL)
+					{
+						auto rotation = engine->textprototype->getRotation();
+						auto value = rotation + event.mouseWheelScroll.delta * 15;
+						engine->textprototype->setRotation(value);
+					}
 				}
 			}
 			break;
@@ -421,6 +433,10 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 		ImGui::SFML::ProcessEvent(event);
 		checkevent(event, window, engine);
 	}
+}
+float angleBetween(const Vector2f &v1, const Vector2f &v2)
+{
+	return  atan2(v2.y, v2.x) - atan2(v1.y, v1.x);
 }
 //MAIN
 int main()
@@ -488,7 +504,93 @@ int main()
 	//
 	while (window->isOpen())
 	{
+		if (gamestarted)
+		{
+			auto cam = engine.GetCam();
+			if (cam != NULL)
+			{
+				
+				if (engine.FreeCamera && engine.ClientIsMaker && window->hasFocus())
+				{
+					Vector2f offset;
+					if (Keyboard::isKeyPressed(Keyboard::W))
+					{
+						offset = offset + Vector2f(0, -engine.Scrollingratio.y);
+					}
+					if (Keyboard::isKeyPressed(Keyboard::A))
+					{
+						offset = offset + Vector2f(-engine.Scrollingratio.x, 0);
+					}
+					if (Keyboard::isKeyPressed(Keyboard::S))
+					{
+						offset = offset + Vector2f(0, engine.Scrollingratio.y);
+					}
+					if (Keyboard::isKeyPressed(Keyboard::D))
+					{
+						offset = offset + Vector2f(engine.Scrollingratio.x, 0);
+					}
+					cam->setCenter(cam->getCenter() + offset);
+				}
+				if (cam->getCenter().x < Width / 2)
+				{
+					cam->setCenter(Vector2f(Width / 2, cam->getCenter().y));
+				}
+				if (cam->getCenter().y < Height / 2)
+				{
+					cam->setCenter(Vector2f(cam->getCenter().x, Height / 2));
+				}
+			}
+		}
+		if (engine.KeepMouse && gamestarted && engine.ClientIsMaker )
+		{
+			auto w = engine.GetWindow();
+			int maxX = w->getSize().x;
+			int maxY = w->getSize().y;
 
+			int mX = sf::Mouse::getPosition(*w).x;
+			int mY = sf::Mouse::getPosition(*w).y;
+
+			if (mX < 0 || mY < 0 || mX > maxX || mY > maxY)
+			{
+				if (mX < 0)
+					mX = 0;
+				else if (mX > maxX)
+					mX = maxX;
+
+				if (mY < 0)
+					mY = 0;
+				else if (mY > maxY)
+					mY = maxY;
+
+				sf::Mouse::setPosition(sf::Vector2i(mX, mY), *w);
+			}
+		}
+		if (engine.FreeCamera && gamestarted && engine.ClientIsMaker)
+		{
+			Vector2i cursorpos = Mouse::getPosition(*engine.GetWindow());
+			auto newpos = engine.GetWindow()->mapPixelToCoords(Vector2i(cursorpos));
+			auto cam = engine.GetCam();
+			Vector2f offset(20, 20);
+			Vector2f insidesize = cam->getSize() - offset;
+
+			FloatRect inside(cam->getCenter() - Vector2f(Width / 2, Height / 2) + Vector2f(offset.x / 2, offset.y / 2), insidesize);
+			if (!inside.contains(newpos))
+			{
+				
+				Vector2f insideOrigin(inside.left + inside.width / 2, inside.top + inside.height / 2);
+				/*float angleRadians = atan2(insideOrigin.y - cursorpos.y, insideOrigin.x - cursorpos.x);
+				auto angle = angleRadians * 180 / IWMOPHIE;*/
+				auto angle = angleBetween(insideOrigin, Vector2f(cursorpos));
+				/*
+				auto x = cos(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
+				auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
+				*/
+				cout << angle << endl;
+				auto x = cos(angle) * engine.Scrollingratio.x;
+				auto y = sin(angle) * engine.Scrollingratio.y;
+				cam->move(Vector2f(x, y));
+			}
+		}
 		continuepool(window, &engine);
 		engine.Render();
 	}

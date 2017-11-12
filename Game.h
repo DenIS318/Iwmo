@@ -42,7 +42,7 @@ public:
 	View* GetCam();
 	Game* getGame();
 	void INITMAP();
-	const sf::Vector2f CAM_SIZE = sf::Vector2f(800, 600);
+	const sf::Vector2f CAM_SIZE = sf::Vector2f(Width,Height);
 	const sf::Vector2f CAM_CENTER = sf::Vector2f(CAM_SIZE.x/2, 3200-(CAM_SIZE.y/2));
 	RenderWindow* window;
 	RenderWindow* Getwindow();

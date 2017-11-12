@@ -541,21 +541,23 @@ void kid::CheckBulletCols(Bullet* bullet,int i)
 }
 void kid::tick(float time)
 {
-	int x = GetX();
-	int y = GetY();
-	float posx, posy;
-	/*
-	ORIGINAL KAIYAN FORMULA
-	X( "Player" ) - ( X( "Player" ) mod 800 ) + 400
-	Y( "Player" ) - ( Y( "Player" ) mod 608 ) + 304
-	MOD = %
-	*/
-	posx = x - (x % 800) + 400;
-	posy = y - (y % 608) + 304;
-	Vector2f vec(posx, posy);
-	//coutVector2(vec);
-	m_camera->setCenter(vec);
-	//TODOFUCKING
+	if (ScreenCamera)
+	{
+		int x = GetX();
+		int y = GetY();
+		float posx, posy;
+		/*
+		ORIGINAL KAIYAN FORMULA
+		X( "Player" ) - ( X( "Player" ) mod 800 ) + 400
+		Y( "Player" ) - ( Y( "Player" ) mod 608 ) + 304
+		MOD = %
+		*/
+		posx = x - (x % 800) + 400;
+		posy = y - (y % 608) + 304;
+		Vector2f vec(posx, posy);
+		//coutVector2(vec);
+		m_camera->setCenter(vec);
+	}
 	int oldsize = Bulletlist.size();
 	for (int i = 0; i < oldsize; i++)
 	{
@@ -577,58 +579,11 @@ void kid::tick(float time)
 			}
 		}
 	}
-
-	/*for (auto bull = Bulletlist.begin(); bull != Bulletlist.end(); ++bull)
-	{
-		//BULLET COLLISION
-		auto bullet = *bull._Ptr;
-		if (bullet != nullptr)
-		{
-			if (bullet->finisheddistance < bullet->maxdistance)
-			{
-				//если пуля не достигла предела пролетаемой дистанции
-				vector< IwmoLayer >::iterator row;
-				vector<Block*>::iterator col;
-
-				for (row = vector2d.begin(); row != vector2d.end(); row++) {
-					for (col = row->objects.begin(); col != row->objects.end(); col++) {
-						auto bl2 = *col._Ptr;
-						if (!bl2->fake)
-						{
-							if (bl2->blocktype == solid)
-							{
-								//если блок солидный
-								auto ptr = bullet->sprite();
-								if (bl2->GetGlobalRect().intersects(ptr->getGlobalBounds()))
-								{
-									delete bullet;
-									Bulletlist.erase(bull);
-									currentbullets--;
-									goto skipf;
-								}
-							}
-						}
-					}
-				}
-
-			}
-			else
-			{
-				delete bullet;
-				Bulletlist.erase(bull);
-				currentbullets--;
-			}
-			
-		
-		
-	}*/
-//	jmpb:
 	//muting sounds
 	if (!Alive)
 	{
 		if (volCounter != 0)
 		{
-			//cout << volCounter << endl;
 			volCounter -= 2.5;
 			for (auto it = m_engine->allsounds.begin(); it != m_engine->allsounds.end(); ++it)
 			{
@@ -648,10 +603,7 @@ void kid::tick(float time)
 					sound->setVolume(volCounter);
 				}
 			}
-			
-			
 		}
-		
 	}
 }
 void kid::updaterect()
