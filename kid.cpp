@@ -52,11 +52,11 @@ void kid::AddWalls()
 							else
 							{
 								bool b = false;
-								if (sf::Keyboard::isKeyPressed(Keyboard::Left) && bl2->flipped)
+								if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && bl2->flipped)
 								{
 									b = true;
 								}
-								else if (sf::Keyboard::isKeyPressed(Keyboard::Right) && !bl2->flipped)
+								else if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !bl2->flipped)
 								{
 									b = true;
 								}
@@ -161,11 +161,11 @@ void kid::Col()
 							else
 								if (m_engine->m_math.onblock(bl2, kidrect))
 								{
-									
-									
+									if(bl2->blocktype == Iwmo::BlockType::solid)
+									{
 									m_p = true;
 									m_ps = false;
-									if (JumpThruPassed  || JumpThruJumped)
+									if (JumpThruPassed || JumpThruJumped)
 									{
 										if (!bl2->jumpthru)
 										{
@@ -189,7 +189,7 @@ void kid::Col()
 												kidentity->setPos(kidentity->GetPos() + mtv);
 											}
 										}
-										
+
 
 									}
 									else
@@ -203,7 +203,10 @@ void kid::Col()
 											state = idle;
 										}
 									}
+
+									}
 								}
+								
 						}
 				}
 			}
@@ -350,9 +353,9 @@ void kid::Col()
 				}
 				if (kidentity->state != jump && kidentity->state != fall)
 				{
-					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Right) &&
-						!sf::Keyboard::isKeyPressed(sf::Keyboard::Left) &&
-						!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+					if (!sf::Keyboard::isKeyPressed(HotkeyMoveRight) &&
+						!sf::Keyboard::isKeyPressed(HotkeyMoveLeft) &&
+						!sf::Keyboard::isKeyPressed(HotkeyJump))
 					{
 						if (kidentity->state != idle)
 						{
@@ -645,14 +648,14 @@ void kid::control()
 	{
 		if (Alive)
 		{
-			if (sf::Keyboard::isKeyPressed(Keyboard::Left))
+			if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
 			{
 				if (!anim.isFlip())
 				{
 					anim.flip(true);
 				}
 			}
-			if (sf::Keyboard::isKeyPressed(Keyboard::Right))
+			if (sf::Keyboard::isKeyPressed(HotkeyMoveRight))
 			{
 				if (anim.isFlip())
 				{
@@ -668,7 +671,7 @@ void kid::control()
 		if (m_engine->GetWindow()->hasFocus())
 		{
 
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+			if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && !sf::Keyboard::isKeyPressed(HotkeyMoveRight))
 			{
 
 				if (state != slide)
@@ -684,7 +687,7 @@ void kid::control()
 
 
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+			if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
 			{
 				if (state != slide)
 				{
@@ -698,7 +701,7 @@ void kid::control()
 
 
 			}
-			if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+			if (!sf::Keyboard::isKeyPressed(HotkeyJump))
 			{
 				if (!grounded)
 				{
@@ -762,28 +765,29 @@ void kid::shoot()
 			auto b = kidentity->anim.getSprite()->getGlobalBounds();
 			sf::Vector2i bulpoint;
 			bool flipped;
+			static Vector2f SnapToGun(8, 1.5);
 			if (!kidentity->anim.isFlip())
 			{
-				bulpoint = sf::Vector2i(b.left + b.width, b.top + (b.height / 2));
+				bulpoint = sf::Vector2i(b.left + b.width - SnapToGun.x, b.top + (b.height / 2) + SnapToGun.y);
 				flipped = false;
 			}
 			else
 			{
-				bulpoint = sf::Vector2i(b.left, b.top + (b.height / 2));
+				bulpoint = sf::Vector2i(b.left + SnapToGun.x, b.top + (b.height / 2) + SnapToGun.y);
 				flipped = true;
 			}
 			if (state == slide)
 			{
-				if (flipped)
-				{
-					bulpoint = sf::Vector2i(b.left + b.width, b.top + (b.height / 2));
-					flipped = false;
-					goto jmp2;
-				}
 				if (!flipped)
 				{
-					bulpoint = sf::Vector2i(b.left, b.top + (b.height / 2));
-					flipped = true;
+					bulpoint = sf::Vector2i(b.left + b.width - SnapToGun.x, b.top + (b.height / 2) + SnapToGun.y);
+					flipped = !flipped;
+					goto jmp2;
+				}
+				if (flipped)
+				{
+					bulpoint = sf::Vector2i(b.left + SnapToGun.x, b.top + (b.height / 2) + SnapToGun.y);
+					flipped = !flipped;
 					goto jmp2;
 				}
 			
@@ -814,7 +818,7 @@ void kid::ProcessKeyboard(Event event)
 	{
 		if (event.type == Event::KeyPressed)
 		{
-			if (event.key.code == sf::Keyboard::R)
+			if (event.key.code == HotkeyRestart)
 			{
 				Restart();
 			}
@@ -823,23 +827,27 @@ void kid::ProcessKeyboard(Event event)
 		{
 			if (event.type == Event::KeyPressed)
 			{
-				if (event.key.code == Keyboard::LShift)
+				if (event.key.code == HotkeyJump)
 				{
 					JumpPassed = true;
 				}
-				if (event.key.code == Keyboard::Z)
+				if (event.key.code == HotkeyShoot)
 				{
 					shoot();
 				}
-				if (event.key.code == Keyboard::Q)
+				if (event.key.code == HotkeyDeath)
 				{
 					death();
 				}
-				if (event.key.code == Keyboard::Down)
+				if (event.key.code == HotkeyJumpThru)
 				{
 					JumpThruPassed = true;
 					grounded = false;
 					state = fall;
+				}
+				if (event.key.code == HotkeyTeleport)
+				{
+					setPos(m_engine->mouseboundsshow.getPosition());
 				}
 			}
 		}

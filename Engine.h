@@ -23,6 +23,7 @@
 #include "Debug.h"
 #include <fstream>
 #include <SFML/OpenGL.hpp>
+#include <boost/any.hpp>
 #ifdef _MSC_VER 
 //not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
 #define strncasecmp _strnicmp
@@ -40,6 +41,7 @@ public:
 	Engine();
 	void AddBlock(Block* b, int layernumber);
 	void ResetBlock(Block* b);
+	boost::any ClientKid();
 	void ResetBlocks();
 	void AddMusic(Music* music);
 	void RemoveMusic(Music* music);
@@ -172,6 +174,10 @@ public:
 	bool showbounds = true;
 	/*at one layer*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect,int layer);
+	/*at one layer*/
+	vector<Block*> GetBlocksAtRectNoFix(RectangleShape rect, int layer);
+	/*at all layers(slower)*/
+	vector<Block*> GetBlocksAtRectNoFix(RectangleShape rect);
 	/*at all layers(slower)*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect);
 	void UpdateMouseRect();

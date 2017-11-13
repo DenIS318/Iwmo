@@ -201,12 +201,11 @@ void Game::StartGame(Engine* engine, CSource* source)
 	m_engine->Addentity(&mykid, 0);
 	mykid.setPos(Iwmo::KidSpawn);
 	sf::View standard = camera;
-	unsigned int size = 150;
 	auto minimap = View(camera);
 	engine->minimap = minimap;
+	auto nullval = m_engine->ClientKid();
+	nullval = &mykid;
 	m_engine->gamestarted = true;
-	
-
 	if (!castleent.openFromFile("resources/music/castleentrance.ogg"))
 	{
 		cout << "castle entrance not loaded!" << endl;
@@ -277,7 +276,11 @@ void Game::INITMAP()
 				//vertical wall
 				sf::Vector2f offset(castle2->getSize().x*i + 16, (32));
 				Block* b = new Block("castle2.png", "resources/blocks/", Iwmo::BlockType::solid);
+				
 				b->SetPos((sf::Vector2f(0, 3600) + offset));
+				auto set = b->GetSettings();
+				set.layer = tilesl;
+				b->UpdateSettings(set);
 				m_engine->AddBlock(b, tilesl);
 
 			}
@@ -287,6 +290,9 @@ void Game::INITMAP()
 				sf::Vector2f offset(castlewall2->getSize().x*i + 16, (32));
 				Block* b = new Block("castlewall2.png", "resources/blocks/", Iwmo::BlockType::solid);
 				b->SetPos((sf::Vector2f(0, 3600) + offset));
+				auto set = b->GetSettings();
+				set.layer = tilesl;
+				b->UpdateSettings(set);
 				m_engine->AddBlock(b, tilesl);
 			}
 		}
@@ -404,14 +410,14 @@ void GameHandler::OnEvent(Event eventt)
 		}
 		if (event.type == Event::KeyPressed)
 		{
-			if (event.key.code == Keyboard::M)
+			if (event.key.code == HotkeyMake)
 			{
 				m_engine->make = !m_engine->make;
 			}
 		}
 		if (event.type == Event::KeyPressed)
 		{
-			if (event.key.code == Keyboard::T)
+			if (event.key.code == HotkeyMinimap)
 			{
 				m_engine->ShowMinimap = !m_engine->ShowMinimap;
 			}

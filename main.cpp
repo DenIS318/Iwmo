@@ -38,11 +38,14 @@ sf::TcpSocket socket;
 sf::SocketSelector selector;
 bool connected = false;
 bool serverrunning = false;
+bool KID = false;
 inline void enablebox()
 {
 	ip = "";
 	iptext.setString(ip);
 	ipbox.setState(Enabled);
+	ipbox.setOutlineThickness(2);
+	ipbox.setOutlineColor(Color::Black);
 	iptext.setFillColor(Color::Black);
 
 }
@@ -63,6 +66,7 @@ void startgame(Engine* engine, RenderWindow* window)
 }
 inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
 {
+
 	if (!connected)
 	{
 		connected = true;
@@ -76,7 +80,7 @@ inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engi
 			return;
 		}
 		ready = true;
-
+		engine->ClientIsMaker = !kid;
 		return;
 
 	}
@@ -161,7 +165,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							
 						}
 						
-						if (Keyboard::isKeyPressed(Keyboard::LShift) )
+						if (Keyboard::isKeyPressed(HotkeyFastBuild) )
 						{
 							if (Mouse::isButtonPressed(sf::Mouse::Button::Left))
 							{
@@ -277,6 +281,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						if (ipbox.getState() != myState::Enabled)
 						{
 							enablebox();
+							KID = true;
 						}
 
 					}
@@ -286,6 +291,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						if (ipbox.getState() != myState::Enabled)
 						{
 							enablebox();
+							KID = false;
 						}
 
 
@@ -315,7 +321,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 								inet_addr(temp);
 								stoi(temp);
 
-								thread thr = thread(&beginconnect, true, temp, window, engine);
+								thread thr = thread(&beginconnect, KID, temp, window, engine);
 
 								thr.detach();
 								while (!ready) {             // wait until main() sets ready...
@@ -354,7 +360,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				if (engine->ClientIsMaker)
 				{
 					
-					if (event.key.code == Keyboard::Delete)
+					if (event.key.code == HotkeyDelete)
 					{
 						if (engine->blockprototype != NULL)
 						{
@@ -367,13 +373,13 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							engine->textprototype = NULL;
 						}
 					}
-					if (event.key.code == Keyboard::Tab)
+					if (event.key.code == HotkeyImGui)
 					{
 						ImGui::SetWindowCollapsed("Maker", !engine->ImguiCollappsed);
 					}
-					else if (event.key.code == Keyboard::F)
+					else if (event.key.code == HotkeyFlip)
 					{
-						if (engine->blockprototype != NULL)
+						if (engine->blockprototype != NULL && !engine->ImGuifocus)
 						{
 							engine->FlipBlock(engine->blockprototype);
 						}
@@ -513,19 +519,19 @@ int main()
 				if (engine.FreeCamera && engine.ClientIsMaker && window->hasFocus())
 				{
 					Vector2f offset;
-					if (Keyboard::isKeyPressed(Keyboard::W))
+					if (Keyboard::isKeyPressed(HotkeyScrollUp))
 					{
 						offset = offset + Vector2f(0, -engine.Scrollingratio.y);
 					}
-					if (Keyboard::isKeyPressed(Keyboard::A))
+					if (Keyboard::isKeyPressed(HotkeyScrollLeft))
 					{
 						offset = offset + Vector2f(-engine.Scrollingratio.x, 0);
 					}
-					if (Keyboard::isKeyPressed(Keyboard::S))
+					if (Keyboard::isKeyPressed(HotkeyScrollDown))
 					{
 						offset = offset + Vector2f(0, engine.Scrollingratio.y);
 					}
-					if (Keyboard::isKeyPressed(Keyboard::D))
+					if (Keyboard::isKeyPressed(HotkeyScrollRight))
 					{
 						offset = offset + Vector2f(engine.Scrollingratio.x, 0);
 					}

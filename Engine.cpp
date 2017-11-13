@@ -3,7 +3,12 @@ const string m_spath = "resources/sounds/";
 float fps;
 bool CameraSetted = false;
 View* CamPointer;
-
+class kid;
+kid* m_ClientKid = NULL;
+boost::any Engine::ClientKid()
+{
+	return boost::any(m_ClientKid);
+}
 //
 void Engine::AddSoundBuffer(string name)
 {
@@ -147,13 +152,14 @@ void Engine::AddText(Text* text)
 }
 void Engine::AddLayer()
 {
-	vector<Drawable*> tempvector;
+	vector<Drawable*> tempvector(0);
 	Engine::layerr.push_back(tempvector);
-	vector<iwmoEntity*> tempvectorentity;
+	vector<iwmoEntity*> tempvectorentity(0);
 	Engine::layerrentity.push_back(tempvectorentity);
 	IwmoLayer templayer;
+	templayer.objects.resize(0);
 	Engine::MapBlocks.push_back(templayer);
-	vector<iwmoEffect*> tempvectoreffects;
+	vector<iwmoEffect*> tempvectoreffects(0);
 	Engine::effectlayers.push_back(tempvectoreffects);
 	intlayer.push_back(to_string(MapBlocks.size()));
 	sortstr(&intlayer);
@@ -352,7 +358,7 @@ void Engine::UpdateMouseRect()
 {
 	auto mousepos = Mouse::getPosition(window);
 	auto newpos = window.mapPixelToCoords(mousepos);
-	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+	if (!sf::Keyboard::isKeyPressed(HotkeyNoGrid))
 	{
 		int x = newpos.x;
 		int y = newpos.y;
@@ -429,9 +435,8 @@ void Engine::DrawImguiTilesets()
 	{
 		if (ImGui::TreeNode("Tilesets"))
 		{
-			
+
 			ShowFilters = !ImGui::IsWindowCollapsed();
-			ImGui::BeginChild("make", Vector2f(230, 100), false);
 			if (ImGui::Checkbox("Make", &make))
 			{
 				if (make)
@@ -449,7 +454,8 @@ void Engine::DrawImguiTilesets()
 					//block selected
 					//let allow to create his prototype
 					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
-					
+					UpdatePrototype();
+
 				}
 			}
 			ImGui::Checkbox("Show mouse bounds", &showbounds);
@@ -461,7 +467,7 @@ void Engine::DrawImguiTilesets()
 				}
 				UpdateMouseRect();
 			}
-			if(ImGui::InputInt("Grid size Y", &GridSize.y))
+			if (ImGui::InputInt("Grid size Y", &GridSize.y))
 			{
 				if (GridSize.y < 1)
 				{
@@ -469,33 +475,32 @@ void Engine::DrawImguiTilesets()
 				}
 				UpdateMouseRect();
 			}
-			ImGui::EndChild();
-			ImGui::BeginChild("BlockList", Vector2f(350, 125), false);
-				if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
+			if (ImGui::ListBox("Select block", &listbox_item_current, listboxvector))
+			{
+				if (make)
 				{
-					if (make)
+					if (blockprototype != NULL)
 					{
+						delete blockprototype;
 						if (blockprototype != NULL)
 						{
-							delete blockprototype;
-							if (blockprototype != NULL)
-							{
-								blockprototype = NULL;
-							}
+							blockprototype = NULL;
 						}
-						BlockType type = blocklistptr->at(listbox_item_current).blocktype;
-						//block selected
-						//let allow to create his prototype
-						blockSettings = BlockSettings();
-						blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
 					}
-
+					blockSettings = BlockSettings();
+					blockSettings.layer = selectedlayer;
+					BlockType type = blocklistptr->at(listbox_item_current).blocktype;
+					//block selected
+					//let allow to create his prototype
+					blockprototype = new Block(blocklistptr->at(listbox_item_current).blockname, blocklistptr->at(listbox_item_current).folder, type);
+					UpdatePrototype();
 				}
-			
-		ImGui::EndChild();
-		ImGui::TreePop();
+
+			}
+
+			ImGui::TreePop();
 		}
-		if(!make)
+		if (!make)
 		{
 			bool finded;
 			for (int i = 0; i < MapBlocks.size(); i++)
@@ -504,11 +509,13 @@ void Engine::DrawImguiTilesets()
 				if (std::find(v.begin(), v.end(), blockprototype) != v.end()) {
 					//contains
 					blockSettings = BlockSettings();
+					delete blockprototype;
 					blockprototype = NULL;
 					finded = true;
+					UpdatePrototype();
 					break;
 				}
-				
+
 			}
 			if (!finded)
 			{
@@ -519,10 +526,11 @@ void Engine::DrawImguiTilesets()
 				{
 					blockprototype = NULL;
 				}
+				UpdatePrototype();
 			}
-			
-			
-			
+
+
+
 		}
 		///Layers editor
 		//ImGui::BeginChild("Layers editor", Vector2f(350, 200), false);
@@ -549,7 +557,7 @@ void Engine::DrawImguiTilesets()
 					{
 						prev = selectedlayer;
 					}*/
-					
+
 					RemoveBlockLayer(selectedlayer);
 					//begins with 1,not 0, so will -2 instead -1
 					if (selectedlayer != 0)
@@ -565,7 +573,7 @@ void Engine::DrawImguiTilesets()
 		//ImGui::EndChild();
 		///TEXT EDITOR
 		//ImGui::BeginChild("Text editor", Vector2f(350, 200), false);
-		
+
 		if (ImGui::TreeNode("Text"))
 		{
 			ImGui::PushFont(defaultfont);
@@ -597,7 +605,7 @@ void Engine::DrawImguiTilesets()
 				{
 					delete textprototype;
 				}
-				
+				UpdatePrototype();
 				String txt(textbuffer); // note String(SFML STRING), not an std string
 				textprototype = new Text();
 				textprototype->setString(txt);
@@ -613,7 +621,7 @@ void Engine::DrawImguiTilesets()
 				textprototype->setFillColor(color);
 				textprototype->setScale(textscale);
 			}
-			
+
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNode("Camera"))
@@ -656,12 +664,12 @@ void Engine::DrawImguiTilesets()
 					for (auto it2 = firstval.begin(); it2 != firstval.end(); ++it2)
 					{
 						auto val = *it2._Ptr;
-						
+
 						val->ScreenCamera = !FreeCamera;
-						
+
 					}
 				}
-				
+
 			}
 			if (FreeCamera)
 			{
@@ -675,16 +683,59 @@ void Engine::DrawImguiTilesets()
 				{
 					Scrollingratio.y = 1;
 				}
-				
+
 			}
 			ImGui::TreePop();
 		}
-		//ImGui::EndChild();
+		if (ImGui::TreeNode("Hotkeys"))
+		{
+			Color color(255, 127, 80, 255);
+			for (int i = 0; i < Hotkeys.size(); i++)
+			{
+				auto key = *Hotkeys[i];
+				auto tooltip = HotkeysName.at(i).c_str();
+				ImGui::Text(tooltip);
+				ImGui::SameLine();
+				ImGui::TextColored(color, getKeyName(key));
+			}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Misc"))
+		{
+			if (ImGui::Button("Clear selected screen", Vector2f(80, 20)))
+			{
+				auto vec = GetBlocksAtRectNoFix(bounds);
+				if (!vec.empty())
+				{
+					for (auto it = vec.begin(); it != vec.end(); it++)
+					{
+						auto val = *it._Ptr;
+						RemoveBlock(val,val->GetSettings().layer);
+					}
+				}
+			}
+			
+			if (ImGui::Button("Clear map", Vector2f(80, 20)))
+			{
+				for (auto layerit = MapBlocks.begin(); layerit != MapBlocks.end(); ++layerit)
+				{
+					auto layer = *layerit._Ptr;
+					for (auto it = layer.objects.begin(); it != layer.objects.end(); ++it)
+					{
+						auto b = *it._Ptr;
+						RemoveBlock(b, b->GetSettings().layer);
+					}
+				}
+			
+			}
+			ImGui::SameLine();
+			ImGui::TextColored(ImVec4(Color::Red), "Delete ALL blocks!");
+			ImGui::TreePop();
+		}
 		///property editor
 		if (blockprototype != NULL)
 		{
 			blockSettings.layer = selectedlayer;
-			ImGui::BeginChild("propeditor", Vector2f(600, 300), false);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 			ImGui::Columns(2);
 			ImGui::Separator();
@@ -717,27 +768,27 @@ void Engine::DrawImguiTilesets()
 						}
 						if (i == 1)
 						{
-							ImGui::Checkbox("Determines, will block kill kid", &blockSettings.Killable);
+							ImGui::Checkbox("##1", &blockSettings.Killable);
 						}
 						if (i == 2)
 						{
-							ImGui::Checkbox("Determines, will block reset on R press", &blockSettings.Resetable);
+							ImGui::Checkbox("##2", &blockSettings.Resetable);
 						}
 						if (i == 3)
 						{
-							ImGui::InputFloat("Scale by X factor", &blockSettings.ScaleX, 0.1f);
+							ImGui::InputFloat("##3", &blockSettings.ScaleX, 0.1f);
 						}
 						if (i == 4)
 						{
-							ImGui::InputFloat("Scale by Y factor", &blockSettings.ScaleY, 0.1f);
+							ImGui::InputFloat("##4", &blockSettings.ScaleY, 0.1f);
 						}
 						if (i == 5)
 						{
-							ImGui::Checkbox("Disable collision, killable etc...", &blockSettings.fake);
+							ImGui::Checkbox("##5", &blockSettings.fake);
 						}
 						if (i == 6)
 						{
-							ImGui::Checkbox("Allow kid to jump through", &blockSettings.jumpthru);
+							ImGui::Checkbox("##6", &blockSettings.jumpthru);
 						}
 						if (i == 7)
 						{
@@ -757,7 +808,6 @@ void Engine::DrawImguiTilesets()
 			ImGui::Columns(1);
 			ImGui::Separator();
 			ImGui::PopStyleVar();
-			ImGui::EndChild();
 		}
 		
 	}
@@ -805,6 +855,45 @@ vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect,int layer)
 		if (rect.getGlobalBounds().intersects(val->GetGlobalRect())&& val != blockprototype)
 		{
 			vec.push_back(val);
+		}
+	}
+	return vec;
+}
+//at layer
+vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect, int layer)
+{
+	auto size = rect.getSize();
+	auto pos = rect.getPosition();
+	rect.setSize(size);
+	rect.setPosition(pos);
+	vector<Block*> vec;
+	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (rect.getGlobalBounds().contains(val->sprite.getPosition()) && val != blockprototype)
+		{
+			vec.push_back(val);
+		}
+	}
+	return vec;
+}
+//at all layers
+vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect)
+{
+	auto size = rect.getSize();
+	auto pos = rect.getPosition();
+	rect.setSize(size);
+	rect.setPosition(pos);
+	vector<Block*> vec;
+	for (int layer = 0; layer < MapBlocks.size(); layer++)
+	{
+		for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (rect.getGlobalBounds().contains(val->sprite.getPosition()) && val != blockprototype)
+			{
+				vec.push_back(val);
+			}
 		}
 	}
 	return vec;
@@ -954,6 +1043,12 @@ void Engine::Render()
 	{
 		UpdateMouseRect();	
 	}
+	
+	if (CamPointer != NULL)
+	{
+		window.setView(*CamPointer);
+		DrawMap(m__time,false);
+	}
 	if (ClientIsMaker && ShowMinimap && gamestarted)
 	{
 		minimap.setSize(MinimapSize);
@@ -964,7 +1059,6 @@ void Engine::Render()
 	if (CamPointer != NULL)
 	{
 		window.setView(*CamPointer);
-		DrawMap(m__time,false);
 	}
 	for (unsigned int myi = 0; myi < Engine::layerr.size(); myi++)
 	{
@@ -974,7 +1068,7 @@ void Engine::Render()
 		}
 	}
 	UpdatePrototype();
-	if (ShowScreenBounds && gamestarted)
+	if (ClientIsMaker && ShowScreenBounds && gamestarted)
 	{
 		window.draw(bounds);
 	}
@@ -994,7 +1088,7 @@ void Engine::Render()
 			ImguiMaker();
 		}
 	}
-	if (showbounds)
+	if (ClientIsMaker && showbounds)
 	{
 		window.draw(mouseboundsshow);
 		
