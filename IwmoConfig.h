@@ -4,6 +4,7 @@
 #include "IwmoMath.h"
 #include <stdio.h>
 #include "iwmoTypes.h"
+#include <boost/filesystem.hpp>
 //CONFIG
 namespace Iwmo {
 	//defines layers
@@ -45,9 +46,31 @@ namespace Iwmo {
 	auto static HotkeyImGui = sf::Keyboard::Tab;
 	auto static HotkeyFlip = sf::Keyboard::F;
 	auto static HotkeyDelete = sf::Keyboard::Delete;
+	auto static HotkeyListener = sf::Keyboard::L;
 	extern vector <Keyboard::Key*> Hotkeys;
 	extern vector<string> HotkeysName;
 	extern Math IWMOMATH;
+	static vector<map<string, string>> get_file_list(const std::string& path)
+	{
+		vector<map<string, string>> filevector = vector<map<string, string>>(0);
+		filevector.reserve(0);
+		if (!path.empty())
+		{
+			namespace fs = boost::filesystem;
+
+			fs::path apk_path(path);
+			fs::recursive_directory_iterator end;
+
+			for (fs::recursive_directory_iterator i(apk_path); i != end; ++i)
+			{
+				map<string, string> m_file;
+				const fs::path cp = (*i);
+				m_file.insert(std::pair<string, string>(cp.string(), cp.filename().string()));
+				filevector.push_back(m_file);
+			}
+		}
+		return filevector;
+	}
 	static const char *getKeyName(const sf::Keyboard::Key key) {
 		switch (key) {
 		default:

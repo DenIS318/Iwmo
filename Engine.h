@@ -174,10 +174,6 @@ public:
 	bool showbounds = true;
 	/*at one layer*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect,int layer);
-	/*at one layer*/
-	vector<Block*> GetBlocksAtRectNoFix(RectangleShape rect, int layer);
-	/*at all layers(slower)*/
-	vector<Block*> GetBlocksAtRectNoFix(RectangleShape rect);
 	/*at all layers(slower)*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect);
 	void UpdateMouseRect();
@@ -188,9 +184,27 @@ public:
 	bool ShowMinimap=true;
 	Vector2f MinimapSize = Vector2f(Width * 3, Height * 3);
 	Vector2f MinimapViewportSize = Vector2f(0.25, 0.25);
+	void UpdateMusicList();
+	void setListenerPosition(Vector3f pos);
 private:
+	int selectedMusicIndex;
+	Sprite ListenerSprite;
+	bool ShowListener;
+	struct MusicPrototype {
+		string name;
+		int attention;
+		bool loop;
+	};
+	bool error;
+	string errorfile;
+	void PickMusic();
+	MusicPrototype* musicPrototype = NULL;
+	void clearMusiclist();
+	vector<string> MusicList;
+	//time and its a minimap draw or not
 	void DrawMap(float time,bool Minimap);
 	void FilterVector(string filter);
+	Vector2f boundsCenter();
 	vector<string> FilteredElements;
 	int FilteredCurrent;
 	int listboxFiltersCurrent;
@@ -221,4 +235,5 @@ private:
 	RenderWindow window;
 	Shader shader;
 	bool ImguiOpen = true;
+	Texture tex;
 };

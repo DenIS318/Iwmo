@@ -52,29 +52,6 @@ Texture* Game::GetBlockTextureByName(string name)
 	cout << "Block texture '" << name << "'" << " not found!" << endl;
 	return new Texture;
 }
-vector<map<string, string>> get_file_list(const std::string& path)
-{
-	vector<map<string, string>> filevector = vector<map<string, string>>(0);
-	filevector.reserve(0);
-	if (!path.empty())
-	{
-		namespace fs = boost::filesystem;
-
-		fs::path apk_path(path);
-		fs::recursive_directory_iterator end;
-
-		for (fs::recursive_directory_iterator i(apk_path); i != end; ++i)
-		{
-			map<string, string> m_file;
-			const fs::path cp = (*i);
-			/*stringstream ss;
-			ss << cp.filename()/* << "." << cp.extension();*/
-			m_file.insert(std::pair<string, string>(cp.string(),cp.filename().string()));
-			filevector.push_back(m_file);
-		}
-	}
-	return filevector;
-}
 void Game::InitIwmoBlocks(string filter)
 {
 	BlockType bltype = BlockType::unknownblock;
@@ -205,21 +182,20 @@ void Game::StartGame(Engine* engine, CSource* source)
 	engine->minimap = minimap;
 	auto nullval = m_engine->ClientKid();
 	nullval = &mykid;
-	m_engine->gamestarted = true;
-	if (!castleent.openFromFile("resources/music/castleentrance.ogg"))
+	if (!castleent.openFromFile("resources/Music/castleentrance.ogg"))
 	{
 		cout << "castle entrance not loaded!" << endl;
 	}
-	m_engine->AddMusic(&castleent);
-	castleent.setLoop(true);
-	m_engine->PlayMusic(&castleent);
-	if (debug)
+	else
 	{
-
+		castleent.setAttenuation(0);
+		m_engine->AddMusic(&castleent);
+		castleent.setLoop(true);
+		m_engine->PlayMusic(&castleent);
 	}
+	m_engine->UpdateMusicList();
 	m_engine->ShowTilesets = true;
-	cout << "Game started!" << endl;
-	
+	m_engine->gamestarted = true;
 }
 
 Game::Game()

@@ -164,9 +164,9 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							}
 							
 						}
+						if(HotkeyFastBuild)
+						{ 
 						
-						if (Keyboard::isKeyPressed(HotkeyFastBuild) )
-						{
 							if (Mouse::isButtonPressed(sf::Mouse::Button::Left))
 							{
 								if (engine->blockprototype != NULL)
@@ -191,6 +191,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 												auto val = *it._Ptr;
 
 												engine->RemoveBlock(val, engine->selectedlayer);
+
 											}
 										}
 									}
@@ -262,6 +263,15 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 										{
 											auto val = *it._Ptr;
 											engine->RemoveText(val);
+										}
+									}
+									auto blvec2 = engine->GetBlocksAtRect(engine->mouseboundsshow,engine->selectedlayer);
+									if (!blvec2.empty())
+									{
+										for (auto it = blvec2.begin(); it != blvec2.end(); ++it)
+										{
+											auto val = *it._Ptr;
+											engine->RemoveBlock(val);
 										}
 									}
 								}
@@ -373,6 +383,12 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 							engine->textprototype = NULL;
 						}
 					}
+					if (event.key.code == HotkeyListener)
+					{
+						auto mousepos = sf::Mouse::getPosition(*engine->GetWindow());
+						Vector2f pos = engine->GetWindow()->mapPixelToCoords(mousepos);
+						engine->setListenerPosition(Vector3f(pos.x, pos.y, 0));
+					}
 					if (event.key.code == HotkeyImGui)
 					{
 						ImGui::SetWindowCollapsed("Maker", !engine->ImguiCollappsed);
@@ -442,7 +458,8 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 }
 float angleBetween(const Vector2f &v1, const Vector2f &v2)
 {
-	return  atan2(v2.y, v2.x) - atan2(v1.y, v1.x);
+	float radians = atan2(v1.y - v2.y, v1.x - v2.x);
+	return radians * 180 / IWMOPHIE; // in degress
 }
 //MAIN
 int main()
@@ -571,30 +588,22 @@ int main()
 				sf::Mouse::setPosition(sf::Vector2i(mX, mY), *w);
 			}
 		}
-		if (engine.FreeCamera && gamestarted && engine.ClientIsMaker)
+		if (engine.FreeCamera && gamestarted && engine.ClientIsMaker && engine.GetWindow()->hasFocus())
 		{
 			Vector2i cursorpos = Mouse::getPosition(*engine.GetWindow());
 			auto newpos = engine.GetWindow()->mapPixelToCoords(Vector2i(cursorpos));
 			auto cam = engine.GetCam();
 			Vector2f offset(20, 20);
 			Vector2f insidesize = cam->getSize() - offset;
-
 			FloatRect inside(cam->getCenter() - Vector2f(Width / 2, Height / 2) + Vector2f(offset.x / 2, offset.y / 2), insidesize);
 			if (!inside.contains(newpos))
 			{
 				
 				Vector2f insideOrigin(inside.left + inside.width / 2, inside.top + inside.height / 2);
-				/*float angleRadians = atan2(insideOrigin.y - cursorpos.y, insideOrigin.x - cursorpos.x);
-				auto angle = angleRadians * 180 / IWMOPHIE;*/
-				auto angle = angleBetween(insideOrigin, Vector2f(cursorpos));
-				/*
-				auto x = cos(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
-				auto y = sin(sprite()->getRotation()*IWMOPHIE / 180) * bulletspeedratio;
-				*/
-				cout << angle << endl;
-				auto x = cos(angle) * engine.Scrollingratio.x;
-				auto y = sin(angle) * engine.Scrollingratio.y;
-				cam->move(Vector2f(x, y));
+				auto angle = angleBetween(insideOrigin, window->mapPixelToCoords(Vector2i(cursorpos)));
+				auto x = cos(angle * IWMOPHIE / 180) * engine.Scrollingratio.x;
+				auto y = sin(angle * IWMOPHIE / 180) * engine.Scrollingratio.y;
+				cam->move(Vector2f(-x, -y)); // -x and -y, otherwise opposite angle will be
 			}
 		}
 		continuepool(window, &engine);

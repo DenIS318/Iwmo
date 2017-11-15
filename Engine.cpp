@@ -109,15 +109,27 @@ Engine::Engine()
 }
 void Engine::AddMusic(Music* music)
 {
+	music->setRelativeToListener(true);
 	allmusic.push_back(music);
+}
+void Engine::setListenerPosition(Vector3f pos)
+{
+	sf::Listener::setPosition(pos);
+	ListenerSprite.setPosition(pos.x,pos.y);
+	//TODO SEND PACKET
 }
 void Engine::RemoveMusic(Music* music)
 {
-	delete music;
+	music->stop();
 	allmusic.erase(std::remove(allmusic.begin(), allmusic.end(), music), allmusic.end());
+	delete music;
 }
 void Engine::PlayMusic(Music* music)
 {
+	if (CurrentMusic != NULL && CurrentMusic != music)
+	{
+		RemoveMusic(CurrentMusic);
+	}
 	CurrentMusic = music;
 	music->play();
 }
@@ -127,6 +139,10 @@ Engine::~Engine()
 bool compareLen(const std::string& a, const std::string& b)
 {
 	return (a.length() < b.length());
+}
+void sortmusic(vector<string>* vec)
+{
+	std::sort(vec->begin(), vec->end(), compareLen);
 }
 void sortstr(vector<string>* vec)
 {
@@ -421,13 +437,73 @@ void Engine::FilterVector(string filter)
 {
 	FilteredElements = vector<string>(0);
 	auto it = std::copy_if(listboxvector.begin(), listboxvector.end(), std::back_inserter(FilteredElements), is_valid(filter));
-	//TODO FILTER
-	ShowFilters = true;
 
 }
 View* Engine::GetCam()
 {
 	return CamPointer;
+}
+void Engine::clearMusiclist()
+{
+	/*for (auto it = allmusic.begin(); it != allmusic.end(); ++it)
+	{
+		auto val = it._Ptr;
+		delete val;
+	}*/
+	allmusic.clear();
+	MusicList.clear();
+}
+void Engine::UpdateMusicList()
+{
+	using namespace boost::filesystem;
+	path p = "resources/Music/";
+	std::vector<std::map<string, string>> filevector(0);
+	MusicList.clear();
+	if (exists(p))    // does path p actually exist?
+	{
+
+		filevector = get_file_list(p.string());
+			for (unsigned int i = 0; i < filevector.size(); i++)
+			{
+
+				for (auto it = filevector[i].begin(); it != filevector[i].end(); ++it)
+				{
+					string name = it->second;
+					MusicList.push_back(name);
+				}
+			}
+		sortmusic(&MusicList);
+	}
+	else
+	{
+		error = true;
+		errorfile = "resources/Music";
+	}
+}
+void Engine::PickMusic()
+{
+	if (musicPrototype != NULL)
+	{
+		Music* music = new Music();
+		if (music->openFromFile("resources/Music/" + musicPrototype->name))
+		{
+			music->setAttenuation(musicPrototype->attention);
+			music->setLoop(musicPrototype->loop);
+			AddMusic(music);
+			PlayMusic(music);
+		}
+		else
+		{
+			error = true;
+			errorfile = musicPrototype->name;
+			delete music;
+		}
+	}
+}
+Vector2f Engine::boundsCenter()
+{
+	auto center = bounds.getPosition() + Vector2f(bounds.getSize().x / 2, bounds.getSize().y / 2);
+	return center;
 }
 void Engine::DrawImguiTilesets()
 {
@@ -687,6 +763,103 @@ void Engine::DrawImguiTilesets()
 			}
 			ImGui::TreePop();
 		}
+		if (ImGui::TreeNode("Music"))
+		{
+			ImGui::Text("Place all your music to 'Music' folder (resources/Music/)");
+			if (ImGui::Button("Update music list", Vector2f(150, 20)))
+			{
+				UpdateMusicList();
+			}
+			if (ImGui::ListBox("Music list", &selectedMusicIndex, MusicList))
+			{
+				musicPrototype = new MusicPrototype();
+				musicPrototype->name = MusicList[selectedMusicIndex];
+				if (ImGui::IsMouseDoubleClicked(0))
+				{
+					PickMusic();
+				}
+
+			}
+			if (error)
+			{
+				auto message = "Error! '" + errorfile + "' not opened";
+				if (errorfile == "resources/Music")
+				{
+					message = "Error! resources/Music not exists, or cannot be opened";
+				}
+				ImGui::TextColored(Color::Red, message.c_str());
+			}
+			if (ImGui::Button("Play/pause", Vector2f(100, 20)))
+			{
+				if (CurrentMusic != NULL)
+				{
+					if (CurrentMusic->getStatus() == Music::Status::Paused)
+					{
+						CurrentMusic->play();
+					}
+					else if (CurrentMusic->getStatus() == Music::Status::Playing)
+					{
+						CurrentMusic->pause();
+					}
+				}				
+			}
+			if (ImGui::Button("Stop", Vector2f(40, 20)))
+			{
+				CurrentMusic->stop();
+			}
+			
+			if (musicPrototype != NULL)
+			{
+				if (ImGui::Button("Pick music"))
+				{
+					error = false;
+					errorfile = "";
+					PickMusic();
+				}
+				if (ImGui::InputInt("Attention", &musicPrototype->attention))
+				{
+					ImGui::OpenPopup("Att");
+				}
+				if (ImGui::BeginPopup("Att"))
+				{
+					ImGui::Text("Set the attenuation factor of the sound.\
+				The attenuation is a multiplicative factor which makes the sound more or less loud according to its distance from the listener.\
+				An attenuation of 0 will produce a non - attenuated sound, i.e.its volume will always be the same whether it is heard from near or from far.\
+				On the other hand, an attenuation value such as 100 will make the sound fade out very quickly as it gets further from the listener.");
+					ImGui::EndPopup();
+				}
+
+				if (musicPrototype->attention < 0)
+				{
+					musicPrototype->attention = 0;
+				}
+				if (musicPrototype->attention > 100)
+				{
+					musicPrototype->attention = 100;
+				}
+				ImGui::Checkbox("Loop", &musicPrototype->loop);
+				
+			}
+			if (ImGui::TreeNode("Listener"))
+			{
+				ImGui::TextColored(Color::Yellow, "Listener are global for all makers");
+				ImGui::Checkbox("Show listener", &ShowListener);
+				if (ImGui::Button("Teleport listener to this screen", Vector2f(220, 20)))
+				{
+					setListenerPosition(Vector3f(boundsCenter().x,boundsCenter().y, 0));
+				}
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+		else
+		{
+			if (error)
+			{
+				error = false;
+				errorfile = "";
+			}
+		}
 		if (ImGui::TreeNode("Hotkeys"))
 		{
 			Color color(255, 127, 80, 255);
@@ -702,9 +875,9 @@ void Engine::DrawImguiTilesets()
 		}
 		if (ImGui::TreeNode("Misc"))
 		{
-			if (ImGui::Button("Clear selected screen", Vector2f(80, 20)))
+			if (ImGui::Button("Clear selected screen", Vector2f(160, 20)))
 			{
-				auto vec = GetBlocksAtRectNoFix(bounds);
+				auto vec = GetBlocksAtRect(bounds);
 				if (!vec.empty())
 				{
 					for (auto it = vec.begin(); it != vec.end(); it++)
@@ -838,29 +1011,7 @@ void Engine::AddBullet(Bullet* bul)
 	bulletlist.push_back(bul);
 }
 //at layer
-vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect,int layer)
-{
-	auto newsize = rect.getSize();
-	//its need for fix intersects 9 blocks at one rect
-	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
-	auto valdivided = Vector2f(val.x / 2, val.y / 2);
-	newsize = newsize - val;
-	auto newpos = rect.getPosition();
-	rect.setSize(newsize);
-	rect.setPosition(newpos + valdivided);
-	vector<Block*> vec;
-	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
-	{
-		auto val = *it._Ptr;
-		if (rect.getGlobalBounds().intersects(val->GetGlobalRect())&& val != blockprototype)
-		{
-			vec.push_back(val);
-		}
-	}
-	return vec;
-}
-//at layer
-vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect, int layer)
+vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect, int layer)
 {
 	auto size = rect.getSize();
 	auto pos = rect.getPosition();
@@ -878,7 +1029,7 @@ vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect, int layer)
 	return vec;
 }
 //at all layers
-vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect)
+vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
 {
 	auto size = rect.getSize();
 	auto pos = rect.getPosition();
@@ -899,45 +1050,17 @@ vector<Block*> Engine::GetBlocksAtRectNoFix(RectangleShape rect)
 	return vec;
 }
 //at all layers
-vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
-{
-	auto newsize = rect.getSize();
-	//its need for fix intersects 9 blocks at one rect
-	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
-	auto valdivided = Vector2f(val.x / 2, val.y / 2);
-	newsize = newsize - val;
-	auto newpos = rect.getPosition();
-	rect.setSize(newsize);
-	rect.setPosition(newpos + valdivided);
-	vector<Block*> vec;
-	for (int layer = 0; layer < MapBlocks.size(); layer++)
-	{
-		for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
-		{
-			auto val = *it._Ptr;
-			if (rect.getGlobalBounds().intersects(val->GetGlobalRect()) && val != blockprototype)
-			{
-				vec.push_back(val);
-			}
-		}
-	}
-	return vec;
-}
 vector<Text*> Engine::GetTextAtRect(RectangleShape rect)
 {
 	auto newsize = rect.getSize();
-	//its need for fix intersects 9 blocks at one rect
-	auto val = Vector2f(newsize.x / 10, newsize.y / 10);
-	auto valdivided = Vector2f(val.x / 2, val.y / 2);
-	newsize = newsize - val;
 	auto newpos = rect.getPosition();
 	rect.setSize(newsize);
-	rect.setPosition(newpos + valdivided);
+	rect.setPosition(newpos);
 	vector<Text*> vec;
 		for (auto it = textlist.begin(); it != textlist.end(); ++it)
 		{
 			auto val = *it._Ptr;
-			if (rect.getGlobalBounds().intersects(val->getGlobalBounds()) && val != textprototype)
+			if (rect.getGlobalBounds().contains(val->getPosition()) && val != textprototype)
 			{
 				vec.push_back(val);
 			}
@@ -1025,6 +1148,10 @@ void Engine::DrawMap(float m__time,bool Minimap)
 				}
 			}
 		}
+	}
+	if (ShowListener)
+	{
+		window.draw(ListenerSprite);
 	}
 }
 void Engine::SetCamFromGame(View* ptr)
@@ -1192,4 +1319,13 @@ void Engine::init(int Width, int Height, string title, short fm)
 	bounds.setOutlineThickness(-1);
 	bounds.setSize(Vector2f(Width,Height));
 	bounds.setFillColor(Color::Transparent);
+	if (tex.loadFromFile("resources/listener.png"))
+	{
+		ListenerSprite.setTexture(tex);
+		ListenerSprite.setOrigin(tex.getSize().x / 2, tex.getSize().y / 2);
+	}
+	else
+	{
+		cout << "Listener image not loaded!" << endl;
+	}
 }
