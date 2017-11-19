@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <imgui.h>
 #include <imgui-SFML.h>
-#include<cstdlib>
+#include <cstdlib>
 #include <stdio.h>
 #include "IwmoLayer.h"
 #include <functional>
@@ -24,6 +24,8 @@
 #include <fstream>
 #include <SFML/OpenGL.hpp>
 #include <boost/any.hpp>
+#include <boost/preprocessor.hpp>
+///END ANTIHACK
 #ifdef _MSC_VER 
 //not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
 #define strncasecmp _strnicmp
@@ -41,11 +43,11 @@ public:
 	Engine();
 	void AddBlock(Block* b, int layernumber);
 	void ResetBlock(Block* b);
-	boost::any ClientKid();
+	kid* ClientKid();
 	void ResetBlocks();
-	void AddMusic(Music* music);
+	void AddMusic(Music* music,string name,bool absolute = false);
 	void RemoveMusic(Music* music);
-	void PlayMusic(Music* music);
+	void PlayMusic(Music* music,bool stopPrev = true);
 	vector<Sprite*> maptiles;
 	///PROTOTYPES
 	/*
@@ -129,6 +131,7 @@ public:
 	void RemoveEffect(iwmoEffect* effect);
 	void RemoveEffect(iwmoEffect* effect, unsigned short layernum);
 	void AddEffect(iwmoEffect* effect,unsigned short layernum);
+	string FindMusicPtr(Music* music);
 	vector<IwmoLayer> MapBlocks;
 	Math m_math = Iwmo::IWMOMATH;
 	bool LoadSound(string name,string buffername);
@@ -136,7 +139,7 @@ public:
 	map<string, sf::SoundBuffer>* buflist();
 	vector<vector<iwmoEffect*>>* getEffectLayers();
 	vector<Sound*> allsounds;
-	vector<Music*> allmusic;
+	map<string, Music*>* allmusic = new map<string, Music*>;
 	bool ShowTilesets = false;
 	void SetCamFromGame(View* ptr);
 	void UpdateBlockList(vector<IwmoBlock>*);
@@ -186,19 +189,31 @@ public:
 	Vector2f MinimapViewportSize = Vector2f(0.25, 0.25);
 	void UpdateMusicList();
 	void setListenerPosition(Vector3f pos);
-private:
-	int selectedMusicIndex;
-	Sprite ListenerSprite;
-	bool ShowListener;
+	void SetSuperMaker(bool b);
 	struct MusicPrototype {
 		string name;
 		int attention;
+		float MinDistance;
 		bool loop;
 	};
+	map<string, Sprite*> MusicSprites;
+private:
+	
+	bool showMusicsSpr = true;
+	Texture MusicTexture;
+	int selectedMusicIndex;
+	bool superMaker = false;
+	Sprite ListenerSprite;
+	bool ShowListener;
 	bool error;
+	int nowplayingIndex;
+	vector<string> NowPlaying;
+	MusicPrototype MusicToPrototype(Music* music);
 	string errorfile;
-	void PickMusic();
+	void PickMusic(bool StopPrevious, bool absolute = true);
 	MusicPrototype* musicPrototype = NULL;
+	//Sprite currentMusicSprite;
+	//Texture CurrentMusicTexture;
 	void clearMusiclist();
 	vector<string> MusicList;
 	//time and its a minimap draw or not
@@ -236,4 +251,5 @@ private:
 	Shader shader;
 	bool ImguiOpen = true;
 	Texture tex;
+	bool StopPrev = true;
 };

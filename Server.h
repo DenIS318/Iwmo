@@ -5,11 +5,11 @@
 #include <vector>
 #include <string>
 #include "Player.h"
-
+#include "Engine.h"
 class Server
 {
 public:
-	Server();
+	Server(Engine* engine);
 	void run();
 
 private:
@@ -31,6 +31,6 @@ private:
 	char m_tmp[1400];
 
 	sf::Clock m_clock;
-
+	Engine* m_engine;
 
 };

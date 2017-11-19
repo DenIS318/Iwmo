@@ -2,8 +2,9 @@
 
 using namespace std;
 #define server "[SERVER]: "
-Server::Server()
+Server::Server(Engine* engine)
 {
+	m_engine = engine;
 	m_maxPlayerNumber = 1000;
 	m_currentID = 0;
 	m_playerNumber = 0;
@@ -41,6 +42,11 @@ void Server::run()
 						unsigned short port = temp->getRemotePort();
 						//delete &temp;
 						cout << server << "Client " <<  ip << ":" << port << " with id " << m_currentID << " connected!" << endl;
+						if (ip.getLocalAddress() == sf::IpAddress::getLocalAddress())
+						{
+							cout << server << "Client " << m_currentID << " recieved SuperMaker rights" << endl;
+							m_engine->SetSuperMaker(true);
+						}
 						if (m_playerList.back().getSocket()->send(outPacket) != sf::Socket::Done) //Send client id
 							std::cout << server << "error sending player index" << std::endl;
 						m_currentID++;

@@ -189,7 +189,7 @@ void Game::StartGame(Engine* engine, CSource* source)
 	else
 	{
 		castleent.setAttenuation(0);
-		m_engine->AddMusic(&castleent);
+		m_engine->AddMusic(&castleent, "castleentrance.ogg");
 		castleent.setLoop(true);
 		m_engine->PlayMusic(&castleent);
 	}

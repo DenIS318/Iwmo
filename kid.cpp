@@ -417,12 +417,11 @@ void kid::Restart()
 		sound->setPlayingOffset(sf::seconds(0));
 		
 	}
-	for (auto it = m_engine->allmusic.begin(); it != m_engine->allmusic.end(); ++it)
+	for (auto it = m_engine->allmusic->begin(); it != m_engine->allmusic->end(); ++it)
 	{
-		auto sound = *it._Ptr;
+		auto sound = it._Ptr->_Myval.second;
 		sound->setVolume(100);
 		sound->setPlayingOffset(sf::seconds(0));
-
 	}
 
 	volCounter = 100;
@@ -598,9 +597,9 @@ void kid::tick(float time)
 
 
 			}
-			for (auto it = m_engine->allmusic.begin(); it != m_engine->allmusic.end(); ++it)
+			for (auto it = m_engine->allmusic->begin(); it != m_engine->allmusic->end(); ++it)
 			{
-				auto sound = *it._Ptr;
+				auto sound = it._Ptr->_Myval.second;
 				if (volCounter >= 0)
 				{
 					sound->setVolume(volCounter);

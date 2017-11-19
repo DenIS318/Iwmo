@@ -5,9 +5,17 @@ bool CameraSetted = false;
 View* CamPointer;
 class kid;
 kid* m_ClientKid = NULL;
-boost::any Engine::ClientKid()
+void StopNoRemove(Music* music)
 {
-	return boost::any(m_ClientKid);
+	if (music != NULL)
+	{
+		music->pause();
+		music->setPlayingOffset(sf::seconds(0));
+	}
+}
+kid* Engine::ClientKid()
+{
+	return m_ClientKid;
 }
 //
 void Engine::AddSoundBuffer(string name)
@@ -107,10 +115,34 @@ Engine::Engine()
 {
 	
 }
-void Engine::AddMusic(Music* music)
+//absolute position, ie heard everythere
+void Engine::AddMusic(Music* music,string name,bool absolute)
 {
-	music->setRelativeToListener(true);
-	allmusic.push_back(music);
+	music->setRelativeToListener(absolute);
+	if (!absolute)
+	{
+		music->setPosition(boundsCenter().x, boundsCenter().y, 0);
+	}
+	string bonus = "";
+	while (allmusic->count(name + bonus) > 0)
+	{
+		if (bonus == "")
+		{
+			bonus = "1";
+		}
+		else
+		{
+			bonus = to_string(stoi(bonus) + 1);
+		}
+	}
+	string comboname = name + bonus;
+	Sprite* spr = new Sprite();
+	spr->setTexture(MusicTexture);
+	spr->setOrigin(MusicTexture.getSize().x / 2, MusicTexture.getSize().y / 2);
+	spr->setPosition(music->getPosition().x,music->getPosition().y);
+	MusicSprites.insert(pair<string, Sprite*>(comboname, spr));
+	allmusic->insert(pair<string, Music*>(comboname,music));
+	NowPlaying.push_back(name+bonus);
 }
 void Engine::setListenerPosition(Vector3f pos)
 {
@@ -118,17 +150,46 @@ void Engine::setListenerPosition(Vector3f pos)
 	ListenerSprite.setPosition(pos.x,pos.y);
 	//TODO SEND PACKET
 }
+void Engine::SetSuperMaker(bool b)
+{
+	superMaker = b;
+}
+string Engine::FindMusicPtr(Music* music)
+{
+	for (auto it = allmusic->begin(); it != allmusic->end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (val._Myval.second == music)
+		{
+			return val._Myval.first;
+		}
+	}
+	return "";
+}
 void Engine::RemoveMusic(Music* music)
 {
-	music->stop();
-	allmusic.erase(std::remove(allmusic.begin(), allmusic.end(), music), allmusic.end());
-	delete music;
-}
-void Engine::PlayMusic(Music* music)
-{
-	if (CurrentMusic != NULL && CurrentMusic != music)
+	music->stop(); 
+	auto musicname = FindMusicPtr(music);
+	auto it = allmusic->find(musicname);
+	auto itSpr = MusicSprites.find(musicname);
+	NowPlaying.erase(remove(NowPlaying.begin(), NowPlaying.end(), musicname), NowPlaying.end());
+	delete MusicSprites[musicname];
+	MusicSprites.erase(itSpr);
+	allmusic->erase(it);
+	music->~Music();
+	if (CurrentMusic = music)
 	{
-		RemoveMusic(CurrentMusic);
+		CurrentMusic = NULL;
+	}
+}
+void Engine::PlayMusic(Music* music,bool StopPrev)
+{
+	if (StopPrev)
+	{
+		if (CurrentMusic != NULL)
+		{
+			StopNoRemove(CurrentMusic);
+		}
 	}
 	CurrentMusic = music;
 	music->play();
@@ -445,13 +506,26 @@ View* Engine::GetCam()
 }
 void Engine::clearMusiclist()
 {
-	/*for (auto it = allmusic.begin(); it != allmusic.end(); ++it)
+	for (auto it = allmusic->begin(); it != allmusic->end(); ++it)
 	{
-		auto val = it._Ptr;
-		delete val;
-	}*/
-	allmusic.clear();
-	MusicList.clear();
+		auto val = *it._Ptr;
+		val._Myval.second->~Music();
+		//val->~Music();
+	}
+	allmusic->clear();
+	NowPlaying.clear();
+	CurrentMusic = NULL;
+	//not need
+	//MusicList.clear();
+}
+Engine::MusicPrototype Engine::MusicToPrototype(Music* music)
+{
+	MusicPrototype prototype;
+	prototype.attention = music->getAttenuation();
+	prototype.loop = music->getLoop();
+	prototype.MinDistance = music->getMinDistance();
+	prototype.name = FindMusicPtr(music);
+	return prototype;
 }
 void Engine::UpdateMusicList()
 {
@@ -480,24 +554,37 @@ void Engine::UpdateMusicList()
 		errorfile = "resources/Music";
 	}
 }
-void Engine::PickMusic()
+void Engine::PickMusic(bool StopPrevious,bool absolute)
 {
 	if (musicPrototype != NULL)
 	{
-		Music* music = new Music();
-		if (music->openFromFile("resources/Music/" + musicPrototype->name))
+		Music* PickedMusic = new Music();
+		if (PickedMusic->openFromFile("resources/Music/" + musicPrototype->name))
 		{
-			music->setAttenuation(musicPrototype->attention);
-			music->setLoop(musicPrototype->loop);
-			AddMusic(music);
-			PlayMusic(music);
+			PickedMusic->setAttenuation(musicPrototype->attention);
+			PickedMusic->setLoop(musicPrototype->loop);
+			
+			AddMusic(PickedMusic,musicPrototype->name);
+			PlayMusic(PickedMusic,StopPrevious);
 		}
 		else
 		{
 			error = true;
 			errorfile = musicPrototype->name;
-			delete music;
+			PickedMusic->~Music();
 		}
+	}
+}
+static void ShowHelpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(450.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
 	}
 }
 Vector2f Engine::boundsCenter()
@@ -766,6 +853,7 @@ void Engine::DrawImguiTilesets()
 		if (ImGui::TreeNode("Music"))
 		{
 			ImGui::Text("Place all your music to 'Music' folder (resources/Music/)");
+			ShowHelpMarker("If you will have many music (above 256) in game, you can obtain many troubles, keep it in mind");
 			if (ImGui::Button("Update music list", Vector2f(150, 20)))
 			{
 				UpdateMusicList();
@@ -774,10 +862,6 @@ void Engine::DrawImguiTilesets()
 			{
 				musicPrototype = new MusicPrototype();
 				musicPrototype->name = MusicList[selectedMusicIndex];
-				if (ImGui::IsMouseDoubleClicked(0))
-				{
-					PickMusic();
-				}
 
 			}
 			if (error)
@@ -785,9 +869,17 @@ void Engine::DrawImguiTilesets()
 				auto message = "Error! '" + errorfile + "' not opened";
 				if (errorfile == "resources/Music")
 				{
-					message = "Error! resources/Music not exists, or cannot be opened";
+					message = "Error! resources/Music not exists, or game has not permission to open it";
 				}
 				ImGui::TextColored(Color::Red, message.c_str());
+			}
+			ImGui::Separator();
+			if (ImGui::ListBox("Now playing", &nowplayingIndex, NowPlaying))
+			{
+				CurrentMusic = allmusic->at(NowPlaying[nowplayingIndex]);
+				*musicPrototype = MusicToPrototype(CurrentMusic);
+				//currentMusicSprite.setPosition(CurrentMusic->getPosition().x, CurrentMusic->getPosition().y);
+
 			}
 			if (ImGui::Button("Play/pause", Vector2f(100, 20)))
 			{
@@ -805,50 +897,75 @@ void Engine::DrawImguiTilesets()
 			}
 			if (ImGui::Button("Stop", Vector2f(40, 20)))
 			{
-				CurrentMusic->stop();
+				StopNoRemove(CurrentMusic);
 			}
-			
+			if (CurrentMusic != NULL)
+			{
+				if (ImGui::Button("Remove current music"))
+				{
+					RemoveMusic(CurrentMusic);
+				}
+			}
 			if (musicPrototype != NULL)
 			{
-				if (ImGui::Button("Pick music"))
+				ImGui::Checkbox("Stop previous music", &StopPrev);
+				if (ImGui::Button("Pick music and play"))
 				{
 					error = false;
 					errorfile = "";
-					PickMusic();
+					PickMusic(StopPrev);
 				}
-				if (ImGui::InputInt("Attention", &musicPrototype->attention))
+				ImGui::SameLine();
+				ShowHelpMarker("Music position will be setted to selected screen, you can teleport current playing music to your mouse by pressing N");
+				if (ImGui::InputInt("Attenuation", &musicPrototype->attention,1,100))
 				{
-					ImGui::OpenPopup("Att");
+					if (musicPrototype->attention < 0)
+					{
+						musicPrototype->attention = 0;
+					}
+					if (musicPrototype->attention > 100)
+					{
+						musicPrototype->attention = 100;
+					}
 				}
-				if (ImGui::BeginPopup("Att"))
+				ImGui::SameLine();
+				ShowHelpMarker("Set the attenuation factor of the sound. The attenuation is a multiplicative factor which makes the sound more or less loud according to its distance from the listener. An attenuation of 0 will produce a non - attenuated sound, i.e. its volume will always be the same whether it is heard from near or from far. On the other hand, an attenuation value such as 100 will make the sound fade out very quickly as it gets further from the listener.");
+				if (ImGui::InputFloat("Minimal distance", &musicPrototype->MinDistance,1,10,1))
 				{
-					ImGui::Text("Set the attenuation factor of the sound.\
-				The attenuation is a multiplicative factor which makes the sound more or less loud according to its distance from the listener.\
-				An attenuation of 0 will produce a non - attenuated sound, i.e.its volume will always be the same whether it is heard from near or from far.\
-				On the other hand, an attenuation value such as 100 will make the sound fade out very quickly as it gets further from the listener.");
-					ImGui::EndPopup();
+					if (musicPrototype->MinDistance < 0)
+					{
+						musicPrototype->MinDistance = 0;
+					}
+					if (musicPrototype->MinDistance > FLT_MAX)
+					{
+						musicPrototype->MinDistance = FLT_MAX;
+					}
 				}
-
-				if (musicPrototype->attention < 0)
-				{
-					musicPrototype->attention = 0;
-				}
-				if (musicPrototype->attention > 100)
-				{
-					musicPrototype->attention = 100;
-				}
+				ImGui::SameLine();
+				ShowHelpMarker("The 'minimum distance' of a sound is the maximum distance at which it is heard at its maximum volume.Further than the minimum distance, it will start to fade out according to its attenuation factor.A value of 0 ('inside the head of the listener') is an invalid value and is forbidden.");
 				ImGui::Checkbox("Loop", &musicPrototype->loop);
 				
 			}
-			if (ImGui::TreeNode("Listener"))
+			ImGui::Checkbox("Show music location",&showMusicsSpr);
+			if (superMaker)
 			{
-				ImGui::TextColored(Color::Yellow, "Listener are global for all makers");
-				ImGui::Checkbox("Show listener", &ShowListener);
-				if (ImGui::Button("Teleport listener to this screen", Vector2f(220, 20)))
+				if (ImGui::TreeNode("Listener"))
 				{
-					setListenerPosition(Vector3f(boundsCenter().x,boundsCenter().y, 0));
+					ImGui::TextColored(Color::Yellow, "Listener are global for all makers");
+					ImGui::Checkbox("Show listener", &ShowListener);
+					if (ImGui::Button("Teleport listener to this screen", Vector2f(220, 20)))
+					{
+						setListenerPosition(Vector3f(boundsCenter().x, boundsCenter().y, 0));
+					}
+					ImGui::TreePop();
 				}
-				ImGui::TreePop();
+			}
+			if (superMaker)
+			{
+				if (ImGui::Button("Clear ALL music"))
+				{
+					clearMusiclist();
+				}
 			}
 			ImGui::TreePop();
 		}
@@ -887,22 +1004,24 @@ void Engine::DrawImguiTilesets()
 					}
 				}
 			}
-			
-			if (ImGui::Button("Clear map", Vector2f(80, 20)))
+			if (superMaker)
 			{
-				for (auto layerit = MapBlocks.begin(); layerit != MapBlocks.end(); ++layerit)
+				if (ImGui::Button("Clear map", Vector2f(80, 20)))
 				{
-					auto layer = *layerit._Ptr;
-					for (auto it = layer.objects.begin(); it != layer.objects.end(); ++it)
+					for (auto layerit = MapBlocks.begin(); layerit != MapBlocks.end(); ++layerit)
 					{
-						auto b = *it._Ptr;
-						RemoveBlock(b, b->GetSettings().layer);
+						auto layer = *layerit._Ptr;
+						for (auto it = layer.objects.begin(); it != layer.objects.end(); ++it)
+						{
+							auto b = *it._Ptr;
+							RemoveBlock(b, b->GetSettings().layer);
+						}
 					}
+
 				}
-			
+				ImGui::SameLine();
+				ImGui::TextColored(ImVec4(Color::Red), "Delete ALL blocks!");
 			}
-			ImGui::SameLine();
-			ImGui::TextColored(ImVec4(Color::Red), "Delete ALL blocks!");
 			ImGui::TreePop();
 		}
 		///property editor
@@ -1149,6 +1268,22 @@ void Engine::DrawMap(float m__time,bool Minimap)
 			}
 		}
 	}
+	if (showMusicsSpr)
+	{
+		for (auto it = MusicSprites.begin(); it != MusicSprites.end(); ++it)
+		{
+			auto val = it._Ptr->_Myval;
+			auto curmusicname = FindMusicPtr(CurrentMusic);
+			if (val.first == curmusicname)
+			{
+				window.draw(*val.second);
+			}
+			else
+			{
+				window.draw(*val.second, &shader);
+			}
+		}
+	}
 	if (ShowListener)
 	{
 		window.draw(ListenerSprite);
@@ -1163,7 +1298,7 @@ void Engine::Render()
 {
 	float m__time = clock.getElapsedTime().asMicroseconds();
 	m__time = m__time / 500; 
-	if (m__time > 40) { m__time = 40; }
+	if (m__time > framerate) { m__time = framerate; }
 	window.clear();
 	ImGui::SFML::Update(window, clock.restart());
 	if (gamestarted)
@@ -1328,4 +1463,5 @@ void Engine::init(int Width, int Height, string title, short fm)
 	{
 		cout << "Listener image not loaded!" << endl;
 	}
+	MusicTexture.loadFromFile("resources/music.png");
 }

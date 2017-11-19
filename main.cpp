@@ -50,9 +50,9 @@ inline void enablebox()
 
 }
 
-inline void beginbind(IpAddress address, RenderWindow* window)
+inline void beginbind(IpAddress address, RenderWindow* window,Engine* engine)
 {
-	Server serv;
+	Server serv(engine);
 	serv.run();
 
 }
@@ -312,7 +312,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						if (!serverstarted)
 						{
 							serverstarted = true;
-							thread thr(&beginbind, IpAddress::getLocalAddress(), window);
+							thread thr(&beginbind, IpAddress::getLocalAddress(), window,engine);
 							thr.detach();
 						}
 						else {
@@ -388,6 +388,13 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						auto mousepos = sf::Mouse::getPosition(*engine->GetWindow());
 						Vector2f pos = engine->GetWindow()->mapPixelToCoords(mousepos);
 						engine->setListenerPosition(Vector3f(pos.x, pos.y, 0));
+					}
+					if (event.key.code == HotkeyTeleportMusic)
+					{
+						auto mousepos = sf::Mouse::getPosition(*engine->GetWindow());
+						Vector2f pos = engine->GetWindow()->mapPixelToCoords(mousepos);
+						engine->CurrentMusic->setPosition(Vector3f(pos.x, pos.y, 0));
+						engine->MusicSprites.at(engine->FindMusicPtr(engine->CurrentMusic))->setPosition(pos);
 					}
 					if (event.key.code == HotkeyImGui)
 					{
@@ -475,7 +482,6 @@ int main()
 	Sprite bgmain;
 	bgmain.setTextureRect(sf::IntRect(0, 0, Width, Height));
 	bgmain.setTexture(text);
-
 	//creating
 	kidbuttext.loadFromFile(res + but + "kid.png");
 	makerbuttext.loadFromFile(res + but + "maker.png");
