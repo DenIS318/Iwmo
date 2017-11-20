@@ -25,7 +25,7 @@ void Server::run()
 			{
 				
 				std::unique_ptr<sf::TcpSocket> tempSocket = std::make_unique<sf::TcpSocket>();
-
+				
 				if (m_listener.accept(*tempSocket) == sf::Socket::Done)
 				{
 					if (m_playerNumber < m_maxPlayerNumber) //if server is not full

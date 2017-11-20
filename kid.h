@@ -49,8 +49,9 @@ public:
 	bool AllowControl = true;
 	//for imgui focus in maker
 	bool AllowControl2 = true;
-	//will camera changes on screens change?
+	Block* GetBlockUnder(BlockType blocktype);
 private:
+	Block* JumpThruedBlock = NULL;
 	FloatRect kidrect;
 	View* m_camera;
 	vector<Block*> tmpvc;
@@ -64,6 +65,8 @@ private:
 	void CheckState();
 	bool m_p = false;
 	bool m_ps = false;
+	//COLLIDED WITH JUMP THRUED BLOCK
+	bool CWJTB = false;
 	bool JumpThruPassed = false;
 	bool JumpThruJumped;
 	Texture* m_deathsheet;

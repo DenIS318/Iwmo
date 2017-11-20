@@ -1077,10 +1077,14 @@ void Engine::DrawImguiTilesets()
 						if (i == 5)
 						{
 							ImGui::Checkbox("##5", &blockSettings.fake);
+							ImGui::SameLine();
+							ShowHelpMarker("Disable behaviors, like collision, jumpthru, etc...");
 						}
 						if (i == 6)
 						{
 							ImGui::Checkbox("##6", &blockSettings.jumpthru);
+							ImGui::SameLine();
+							ShowHelpMarker("Block type must be solid. Press down arrow to jump-through block.");
 						}
 						if (i == 7)
 						{
@@ -1132,10 +1136,6 @@ void Engine::AddBullet(Bullet* bul)
 //at layer
 vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect, int layer)
 {
-	auto size = rect.getSize();
-	auto pos = rect.getPosition();
-	rect.setSize(size);
-	rect.setPosition(pos);
 	vector<Block*> vec;
 	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
 	{
@@ -1150,10 +1150,6 @@ vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect, int layer)
 //at all layers
 vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
 {
-	auto size = rect.getSize();
-	auto pos = rect.getPosition();
-	rect.setSize(size);
-	rect.setPosition(pos);
 	vector<Block*> vec;
 	for (int layer = 0; layer < MapBlocks.size(); layer++)
 	{
@@ -1168,6 +1164,58 @@ vector<Block*> Engine::GetBlocksAtRect(RectangleShape rect)
 	}
 	return vec;
 }
+///
+
+//at layer
+vector<Block*> Engine::GetBlocksAtRect(FloatRect rect, int layer)
+{
+	vector<Block*> vec;
+	for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		if (rect.contains(val->sprite.getPosition()) && val != blockprototype)
+		{
+			vec.push_back(val);
+		}
+	}
+	return vec;
+}
+//at all layers
+vector<Block*> Engine::GetBlocksAtRect(FloatRect rect)
+{
+	vector<Block*> vec;
+	for (int layer = 0; layer < MapBlocks.size(); layer++)
+	{
+		for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (rect.contains(val->sprite.getPosition()) && val != blockprototype)
+			{
+				vec.push_back(val);
+			}
+		}
+	}
+	return vec;
+}
+//at all layers
+vector<Block*> Engine::GetBlocksIntersectedAtRect(FloatRect rect)
+{
+	vector<Block*> vec;
+	for (int layer = 0; layer < MapBlocks.size(); layer++)
+	{
+		for (auto it = MapBlocks[layer].objects.begin(); it != MapBlocks[layer].objects.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (rect.intersects(val->sprite.getGlobalBounds()) && val != blockprototype)
+			{
+				vec.push_back(val);
+			}
+		}
+	}
+	return vec;
+}
+
+///
 //at all layers
 vector<Text*> Engine::GetTextAtRect(RectangleShape rect)
 {

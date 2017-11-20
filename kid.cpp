@@ -20,19 +20,21 @@ void kid::AddWalls()
 				auto bl2 = *col._Ptr;
 				if (dir != None)
 				{
-					if (bl2->blocktype == solid || bl2->blocktype == slidable)
+					if (!bl2->fake)
 					{
-						//fix wall collision
-						auto newpos = kidentity->GetPos();
-						int x = newpos.x;
-						int y = newpos.y;
-						auto wid = kidentity->anim.getSprite()->getLocalBounds().width;
-						auto hei = kidentity->anim.getSprite()->getLocalBounds().height;
-						newpos.x = (x / wid) * wid;
-						newpos.y = (y / hei) * hei;
-						FloatRect rect(newpos.x - (wid / 2), newpos.y - hei, wid, hei);
-						if (bl2->GetGlobalRect().intersects(rect))
+						if (bl2->blocktype == solid || bl2->blocktype == slidable)
 						{
+							//fix wall collision
+							auto newpos = kidentity->GetPos();
+							int x = newpos.x;
+							int y = newpos.y;
+							auto wid = kidentity->anim.getSprite()->getLocalBounds().width;
+							auto hei = kidentity->anim.getSprite()->getLocalBounds().height;
+							newpos.x = (x / wid) * wid;
+							newpos.y = (y / hei) * hei;
+							FloatRect rect(newpos.x - (wid / 2), newpos.y - hei, wid, hei);
+							if (bl2->GetGlobalRect().intersects(rect))
+							{
 								if (bl2->blocktype == solid)
 								{
 									if (JumpThruPassed || JumpThruJumped)
@@ -43,28 +45,30 @@ void kid::AddWalls()
 											tmpvc.push_back(bl2);
 
 										}
+
 									}
 									else
 									{
 										tmpvc.push_back(bl2);
 									}
 								}
-							else
-							{
-								bool b = false;
-								if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && bl2->flipped)
+								else
 								{
-									b = true;
-								}
-								else if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !bl2->flipped)
-								{
-									b = true;
-								}
-								if (b)
-								{
-									jumpcount = 1;
-									state = slide;
-									m_ps = true;
+									bool b = false;
+									if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && bl2->flipped)
+									{
+										b = true;
+									}
+									else if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !bl2->flipped)
+									{
+										b = true;
+									}
+									if (b)
+									{
+										jumpcount = 1;
+										state = slide;
+										m_ps = true;
+									}
 								}
 							}
 						}
@@ -85,6 +89,7 @@ void kid::Col()
 		}
 		m_p = false;
 		m_ps = false;
+		CWJTB = false;
 		Sprite* kidspr = &anim.animList[anim.currentAnim].sprite;
 		auto curf = anim.animList[anim.currentAnim].currentFrame;
 		vector< IwmoLayer >::iterator row;
@@ -103,6 +108,10 @@ void kid::Col()
 
 							if (m_engine->m_math.sat_test(kidrect, bl2->sprite.getGlobalBounds(), &mtv))
 							{
+								if (bl2 == JumpThruedBlock)
+								{
+									CWJTB = true;
+								}
 								if (bl2->killable)
 								{
 									death();
@@ -117,6 +126,18 @@ void kid::Col()
 										{
 											kidentity->setPos(kidentity->GetPos() + mtv);
 										}
+										else if (bl2 != JumpThruedBlock && state == fall)
+										{
+											grounded = true;
+											state = idle;
+											JumpThruPassed = false;
+											JumpThruJumped = false;
+											JumpThruedBlock = NULL;
+
+											kidentity->setPos(kidentity->GetPos() + mtv);
+											
+										}
+										
 									}
 									else
 									{
@@ -153,6 +174,17 @@ void kid::Col()
 												grounded = false;
 												vel.y = 0;
 											}
+											else if (bl2 != JumpThruedBlock && state == fall)
+											{
+												grounded = true;
+												state = idle;
+												JumpThruPassed = false;
+												JumpThruJumped = false;
+												JumpThruedBlock = NULL;
+												
+												kidentity->setPos(kidentity->GetPos() + mtv);
+												
+											}
 										
 									}
 								}
@@ -161,37 +193,44 @@ void kid::Col()
 							else
 								if (m_engine->m_math.onblock(bl2, kidrect))
 								{
+									if (bl2 == JumpThruedBlock)
+									{
+										CWJTB = true;
+									}
 									if(bl2->blocktype == Iwmo::BlockType::solid)
 									{
-									m_p = true;
-									m_ps = false;
-									if (JumpThruPassed || JumpThruJumped)
-									{
-										if (!bl2->jumpthru)
+										m_p = true;
+										m_ps = false;
+										if (JumpThruPassed || JumpThruJumped)
 										{
-											grounded = true;
-											vel.y = 0;
-											lshiftcounter = 0;
-											jumpcount = 0;
-											if (state != walk && state != idle)
-											{
-												state = idle;
-											}
-										}
-										else
-										{
-											if (JumpThruJumped)
+											if (!bl2->jumpthru)
 											{
 												grounded = true;
-												state = idle;
-												JumpThruPassed = false;
-												JumpThruJumped = false;
-												kidentity->setPos(kidentity->GetPos() + mtv);
+												vel.y = 0;
+												lshiftcounter = 0;
+												jumpcount = 0;
+												if (state != walk && state != idle)
+												{
+													state = idle;
+												}
 											}
+											else
+											{
+												if (state==fall && bl2 != JumpThruedBlock)
+												{
+												
+													grounded = true;
+													state = idle;
+													JumpThruPassed = false;
+													JumpThruJumped = false;
+													JumpThruedBlock = NULL;
+													kidentity->setPos(kidentity->GetPos() + mtv);
+													
+												}
 										}
 
 
-									}
+										}
 									else
 									{
 										grounded = true;
@@ -214,8 +253,10 @@ void kid::Col()
 		if (!m_p)
 		{
 			grounded = false;
-			if (state == fall) {
+			if (state == fall && !CWJTB) {
 				JumpThruPassed = false;
+				JumpThruedBlock = NULL;
+				
 				//JumpThruJumped = false;
 			}
 			if (state == slide && !m_ps)
@@ -346,6 +387,7 @@ void kid::Col()
 			{
 				JumpThruPassed = false;
 				JumpThruJumped = false;
+				JumpThruedBlock = NULL;
 				if (kidentity->state != walk && kidentity->state != idle) {
 					kidentity->state = idle;
 
@@ -811,6 +853,28 @@ void kid::shoot()
 		}
 	
 }
+Block* kid::GetBlockUnder(BlockType type)
+{
+	auto newrect = FloatRect(kidrect.left, kidrect.top+1.5, kidrect.width/4, kidrect.height + 1.5);
+	/*RectangleShape* r = new RectangleShape(Vector2f(kidrect.width, kidrect.height));
+	r->setPosition(newrect.left, newrect.top);
+	r->setOutlineColor(Color::Black);
+	r->setOutlineThickness(2);
+	m_engine->AddSprite(r, 5);*/
+	auto blvec = m_engine->GetBlocksIntersectedAtRect(newrect);
+	if (!blvec.empty())
+	{
+		for (auto it = blvec.begin(); it != blvec.end(); ++it)
+		{
+			auto val = *it._Ptr;
+			if (val->blocktype == type)
+			{
+				return val;
+			}
+		}
+	}
+	return NULL;
+}
 void kid::ProcessKeyboard(Event event)
 {
 	if (AllowControl && AllowControl2)
@@ -840,9 +904,13 @@ void kid::ProcessKeyboard(Event event)
 				}
 				if (event.key.code == HotkeyJumpThru)
 				{
-					JumpThruPassed = true;
-					grounded = false;
-					state = fall;
+					if (grounded)
+					{
+						JumpThruPassed = true;
+						JumpThruedBlock = GetBlockUnder(solid);
+						grounded = false;
+						state = fall;
+					}
 				}
 				if (event.key.code == HotkeyTeleport)
 				{

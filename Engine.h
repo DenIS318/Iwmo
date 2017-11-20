@@ -179,6 +179,11 @@ public:
 	vector<Block*> GetBlocksAtRect(RectangleShape rect,int layer);
 	/*at all layers(slower)*/
 	vector<Block*> GetBlocksAtRect(RectangleShape rect);
+	/*at one layer*/
+	vector<Block*> GetBlocksAtRect(FloatRect rect, int layer);
+	/*at all layers(slower)*/
+	vector<Block*> GetBlocksAtRect(FloatRect rect);
+	vector<Block*> GetBlocksIntersectedAtRect(FloatRect rect);
 	void UpdateMouseRect();
 	void BlockListSelectBlock(Block* b);
 	vector<string> listboxvectorFilters;
