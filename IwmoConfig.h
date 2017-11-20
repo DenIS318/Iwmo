@@ -48,6 +48,8 @@ namespace Iwmo {
 	auto static HotkeyDelete = sf::Keyboard::Delete;
 	auto static HotkeyListener = sf::Keyboard::L;
 	auto static HotkeyTeleportMusic = sf::Keyboard::N;
+	extern string NameStringHelp;
+	extern string IpStringHelp;
 	extern vector <Keyboard::Key*> Hotkeys;
 	extern vector<string> HotkeysName;
 	extern Math IWMOMATH;

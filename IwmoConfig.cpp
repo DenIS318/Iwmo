@@ -14,6 +14,8 @@ namespace Iwmo {
 	bool debug = true;
 	unsigned short port = 25565;
 	int GRAVITY = 10;
+	string NameStringHelp = "Enter your name";
+	string IpStringHelp = "Enter ip to connect";
 	Math IWMOMATH;
 	vector <Keyboard::Key*> Hotkeys = {
 		&HotkeyMake,&HotkeyMinimap,&HotkeyTeleport,&HotkeyDeath,&HotkeyRestart,&HotkeyShoot,&HotkeyJump,&HotkeyJumpThru,

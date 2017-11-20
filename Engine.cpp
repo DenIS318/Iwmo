@@ -69,9 +69,13 @@ bool Engine::LoadSound(string name,string buffername)
 }
 void Engine::RemoveAll()
 {
+	for (unsigned int i = 0; i < boxvector.size(); i++)
+	{
+		removeTextBox(Engine::boxvector[i]);
+	}
 	for (unsigned int i = 0; i < textlist.size(); i++)
 	{
-		delete textlist[i];
+		RemoveText(Engine::textlist[i]);
 	}
 	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
 	{
@@ -96,13 +100,14 @@ void Engine::RemoveAll()
 	}
 	for (unsigned int i = 0; i < Engine::bulletlist.size(); i++)
 	{
-		delete bulletlist.at(i);
+		delete Engine::bulletlist.at(i);
 	}
 	effectlayers.clear();
 	MapBlocks.clear();
 	intlayer.clear();
 	bulletlist.clear();
 	textlist.clear();
+	boxvector.clear();
 	Engine::layerrentity.clear();
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
@@ -226,6 +231,15 @@ void Engine::RemoveText(Text* text)
 void Engine::AddText(Text* text)
 {
 	textlist.push_back(text);
+}
+void Engine::addTextBox(mytextbox* textbox)
+{
+	boxvector.push_back(textbox);
+}
+void Engine::removeTextBox(mytextbox* textbox)
+{
+	boxvector.erase(std::remove(boxvector.begin(), boxvector.end(), textbox), boxvector.end());
+	delete textbox;
 }
 void Engine::AddLayer()
 {
@@ -1262,6 +1276,7 @@ void Engine::DrawMap(float m__time,bool Minimap)
 	}
 	for (int i = 0; i < textlist.size(); i++)
 	{
+		if(textlist.at(i)->getString().toAnsiString() != NameStringHelp && textlist.at(i)->getString().toAnsiString() != IpStringHelp)
 		window.draw(*textlist.at(i));
 	}
 	for (unsigned int myi = 0; myi < Engine::bulletlist.size(); myi++)
@@ -1345,19 +1360,19 @@ void Engine::SetCamFromGame(View* ptr)
 void Engine::Render()
 {
 	float m__time = clock.getElapsedTime().asMicroseconds();
-	m__time = m__time / 500; 
+	m__time = m__time / 500;
 	if (m__time > framerate) { m__time = framerate; }
 	window.clear();
 	ImGui::SFML::Update(window, clock.restart());
 	if (gamestarted)
 	{
-		UpdateMouseRect();	
+		UpdateMouseRect();
 	}
-	
+
 	if (CamPointer != NULL)
 	{
 		window.setView(*CamPointer);
-		DrawMap(m__time,false);
+		DrawMap(m__time, false);
 	}
 	if (ClientIsMaker && ShowMinimap && gamestarted)
 	{
@@ -1377,6 +1392,7 @@ void Engine::Render()
 			window.draw(*(Engine::layerr.at(myi).at(myi1)));
 		}
 	}
+
 	UpdatePrototype();
 	if (ClientIsMaker && ShowScreenBounds && gamestarted)
 	{
@@ -1402,6 +1418,23 @@ void Engine::Render()
 	{
 		window.draw(mouseboundsshow);
 		
+	}
+	for (auto it = boxvector.begin(); it != boxvector.end(); ++it)
+	{
+		auto val = *it._Ptr;
+		val->update();
+		if ( val->visible())
+		{
+			window.draw(*val);
+			window.draw(val->text);
+		}
+	}
+	for (unsigned int i = 0; i < textlist.size(); i++)
+	{
+		if (textlist.at(i)->getString().toAnsiString() == NameStringHelp || textlist.at(i)->getString().toAnsiString() == IpStringHelp)
+		{
+			window.draw(*textlist.at(i));
+		}
 	}
 	debugger.DebugDraw(&window);
 	///
@@ -1438,20 +1471,6 @@ Block* Engine::GetBlockAtPoint(Vector2f point, int layer)
 		}
 	}
 	return NULL;
-}
-GLuint loadTexture(unsigned char *pixels, int w, int h, int components)
-{
-	GLuint textureID;
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexImage2D(GL_TEXTURE_2D, 0, components, w, h, 0, (components == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	return textureID;
 }
 void Engine::init(int Width, int Height, string title, short fm)
 {

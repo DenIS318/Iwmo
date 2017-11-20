@@ -20,10 +20,13 @@ sf::IntRect makerrect(600 - 105, 381, 105, 40);
 sf::IntRect startrect(280 + 70, 500, 88, 40);
 sf::IntRect boxrect(startrect.left - 60, startrect.top - 50, 200, 20);
 sf::IntRect serverrect(650, 500, 104, 40);
-mytextbox ipbox(sf::Vector2f(200, 20));
-static string ip;
+mytextbox* ipbox = new mytextbox;
+mytextbox* namebox = new mytextbox;
+string myname;
+string ip;
+Text* iptext = new Text();
+Text* nametext = new Text();
 bool ready = false;
-sf::Text iptext;
 static Game* game;
 bool gamestarted = false;
 #define mainlayer 0
@@ -31,7 +34,6 @@ bool gamestarted = false;
 #define textlayer 2
 #define isclient iskid
 #define socket sockett
-bool allow = false;
 bool serverstarted = false;
 bool isclient = true;
 sf::TcpSocket socket;
@@ -42,11 +44,15 @@ bool KID = false;
 inline void enablebox()
 {
 	ip = "";
-	iptext.setString(ip);
-	ipbox.setState(Enabled);
-	ipbox.setOutlineThickness(2);
-	ipbox.setOutlineColor(Color::Black);
-	iptext.setFillColor(Color::Black);
+	myname = "";
+	ipbox->setVisible(true);
+	namebox->setVisible(true);
+	ipbox->AllowAutoEnable = true;
+	namebox->AllowAutoEnable = true;
+	ipbox->showText(true);
+	namebox->showText(true);
+	nametext->setString(NameStringHelp);
+	iptext->setString(IpStringHelp);
 
 }
 
@@ -62,6 +68,10 @@ void startgame(Engine* engine, RenderWindow* window)
 	game = new Game(engine, window, source);
 	gamestarted = true;
 	engine->listboxvectorFilters = game->Filters;
+	//engine->removeTextBox(&ipbox);
+	//engine->removeTextBox(&namebox);
+	//engine->RemoveText(nametext);
+	//engine->RemoveText(iptext);
 
 }
 inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
@@ -211,6 +221,10 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			makerrect = IntRect(makerbut.getGlobalBounds());
 			serverrect = IntRect(server.getGlobalBounds());
 			startrect = IntRect(start.getGlobalBounds());
+			namebox->setPosition(startrect.left - 60, startrect.top - 270);
+			nametext->setPosition(namebox->getPosition() + Vector2f(0, -35));
+			ipbox->setPosition(namebox->getPosition().x, namebox->getPosition().y + 80);
+			iptext->setPosition(ipbox->getPosition() + Vector2f(0, -35));
 			break;
 		case sf::Event::MouseButtonPressed:
 			if (engine->ClientIsMaker)
@@ -288,7 +302,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 					sf::Vector2i position = Vector2i(window->mapPixelToCoords(sf::Mouse::getPosition(*window)));
 					if (kidrect.contains(position))
 					{
-						if (ipbox.getState() != myState::Enabled)
+						if (ipbox->getState() != myState::Enabled)
 						{
 							enablebox();
 							KID = true;
@@ -298,7 +312,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 					else if (makerrect.contains(position))
 					{
 
-						if (ipbox.getState() != myState::Enabled)
+						if (ipbox->getState() != myState::Enabled)
 						{
 							enablebox();
 							KID = false;
@@ -321,7 +335,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 					}
 					else if (startrect.contains(position))
 					{
-						if (ipbox.getState() == Enabled)
+						if (ip.size() > 0)
 						{
 							try {
 								char temp[20];
@@ -350,22 +364,6 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			}
 			break;
 		case sf::Event::KeyPressed:
-			
-			if (!gamestarted)
-			{
-				if (event.key.code == sf::Keyboard::BackSpace)
-				{
-					if (sizeof(ip) > 0 && ip != "")
-					{
-
-						ip.pop_back();
-						iptext.setString(ip);
-
-					}
-
-				}
-			}
-			else
 			{
 				if (engine->ClientIsMaker)
 				{
@@ -410,23 +408,6 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 				}
 			}
 			break;
-		case Event::TextEntered:
-			if (!gamestarted)
-			{
-				if (ipbox.getState() == Enabled)
-				{
-					if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
-					{
-						ip.push_back((char)event.text.unicode);
-						iptext.setString(ip);
-						if (debug)
-						{
-
-						}
-					}
-				}
-			}
-			break;
 		case Event::MouseWheelScrolled:
 			if (gamestarted)
 			{
@@ -460,6 +441,11 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 	{
 		__raise (*source).OnEvent(event);
 		ImGui::SFML::ProcessEvent(event);
+		if (namebox != NULL)
+		{
+			namebox->GetEvent(event);
+			ipbox->GetEvent(event);
+		}
 		checkevent(event, window, engine);
 	}
 }
@@ -473,6 +459,17 @@ int main()
 {
 	static Engine engine;
 	engine.init(Width, Height, WindowName, framerate);
+	*ipbox = mytextbox(Vector2f(200, 20), &ip, &engine.font, engine.GetWindow());
+	*namebox = mytextbox(Vector2f(200, 20), &myname, &engine.font, engine.GetWindow());
+	ipbox->filter = mytextbox::textboxFilters::ip;
+	ipbox->setVisible(false);
+	namebox->setVisible(false);
+	ipbox->showText(false);
+	ipbox->AllowAutoEnable = false;
+	ipbox->setState(myState::Disabled);
+	namebox->showText(false);
+	namebox->AllowAutoEnable = false;
+	namebox->setState(myState::Disabled);
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
 	engine.AddLayer();
@@ -480,7 +477,6 @@ int main()
 	engine.AddLayer();
 	text.loadFromFile("resources/bg.jpg");
 	Sprite bgmain;
-	bgmain.setTextureRect(sf::IntRect(0, 0, Width, Height));
 	bgmain.setTexture(text);
 	//creating
 	kidbuttext.loadFromFile(res + but + "kid.png");
@@ -500,35 +496,35 @@ int main()
 	//
 	start.setPosition(startrect.left, startrect.top);
 	//
-	ipbox.setPosition(startrect.left - 60, startrect.top - 50);
+	nametext->setFont(engine.font);
+	nametext->setCharacterSize(22);
+	namebox->setPosition(startrect.left - 60, startrect.top - 270);
+	nametext->setPosition(namebox->getPosition() + Vector2f(0, -35));
+	nametext->setColor(Color::Red);
+	engine.AddText(nametext);
+	//
+	iptext->setFont(engine.font);
+	iptext->setCharacterSize(22);
+	ipbox->setPosition(namebox->getPosition().x, namebox->getPosition().y + 80);
+	iptext->setPosition(ipbox->getPosition() + Vector2f(0, -35));
+	iptext->setColor(Color::Red);
 	//
 	kidrect = (IntRect)kidbut.getGlobalBounds();
 	serverrect = (IntRect)server.getGlobalBounds();
 	makerrect = (IntRect)makerbut.getGlobalBounds();
 	startrect = (IntRect)start.getGlobalBounds();
 	//
-	iptext.setCharacterSize(12);
-	iptext.setFont(engine.font);
-	iptext.setFillColor(Color::Black);
-	iptext.setPosition(ipbox.getPosition().x + 5, ipbox.getPosition().y + 2);
-	//
-	if (debug)
-	{
-		//printf("Address of pSource is %p\n", (void *)source);
-	}
-	if (!allow)
-	{
-		iptext.setFillColor(sf::Color::Transparent);
-		ipbox.setState(myState::Disabled);
-	}
 	//adding
-	
+	//
 	engine.AddSprite(&bgmain, 0);
 	engine.AddSprite(&kidbut, 0);
 	engine.AddSprite(&makerbut, 0);
 	engine.AddSprite(&start, 0);
-	engine.AddSprite(&ipbox, 0);
-	engine.AddSprite(&iptext, 1);
+	engine.addTextBox(ipbox);
+	engine.addTextBox(namebox);
+	engine.AddText(iptext);
+	engine.AddText(nametext);
+//	engine.AddSprite(&iptext, 1);
 	engine.AddSprite(&server, 0);
 	//
 	while (window->isOpen())

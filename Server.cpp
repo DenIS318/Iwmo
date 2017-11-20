@@ -30,7 +30,7 @@ void Server::run()
 				{
 					if (m_playerNumber < m_maxPlayerNumber) //if server is not full
 					{
-						m_playerList.emplace_back(Player(&tempSocket, sf::Vector2f(0, 0), m_currentID));
+						m_playerList.emplace_back(Player(&tempSocket, m_currentID));
 						m_selector.add(*m_playerList.back().getSocket());
 						m_playerNumber++;
 

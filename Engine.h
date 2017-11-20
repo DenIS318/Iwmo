@@ -25,6 +25,7 @@
 #include <SFML/OpenGL.hpp>
 #include <boost/any.hpp>
 #include <boost/preprocessor.hpp>
+#include "mytextbox.h"
 ///END ANTIHACK
 #ifdef _MSC_VER 
 //not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
@@ -34,7 +35,7 @@
 #define IMGUI_ARRAYSIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 using namespace sf;
 using namespace std;
-using namespace Iwmo;
+//using namespace Iwmo;
 class Engine
 {
 
@@ -127,6 +128,8 @@ public:
 	Returns all entities
 	*/
 	vector<vector<iwmoEntity*>>& GetEntities();
+	void addTextBox(mytextbox* box);
+	void removeTextBox(mytextbox* textbox);
 	View* GetCam();
 	void RemoveEffect(iwmoEffect* effect);
 	void RemoveEffect(iwmoEffect* effect, unsigned short layernum);
@@ -203,7 +206,7 @@ public:
 	};
 	map<string, Sprite*> MusicSprites;
 private:
-	
+	vector<mytextbox*> boxvector;
 	bool showMusicsSpr = true;
 	Texture MusicTexture;
 	int selectedMusicIndex;

@@ -36,8 +36,8 @@ void Network::send(Player* p)
 	sf::Packet temp;
 	temp << 3;
 	temp << p->getID();
-	temp << p->getDirection().x;
-	temp << p->getDirection().y;
+	//temp << p->getDirection().x;
+	//temp << p->getDirection().y;
 
 	if (connection.send(temp) != sf::Socket::Done)
 	{
@@ -54,8 +54,8 @@ void Network::sendPosition(Player* p)
 		sf::Packet temp;
 		temp << 4;
 		temp << p->getID();
-		temp << p->getPosition().x;
-		temp << p->getPosition().y;
+		//temp << p->getPosition().x;
+		//temp << p->getPosition().y;
 
 		if (connection.send(temp) != sf::Socket::Done)
 		{
