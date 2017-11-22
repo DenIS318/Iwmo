@@ -1,7 +1,6 @@
 #include "mytextbox.h"
 using namespace myState;
 
-myState::State statenow = myState::Enabled;
 mytextbox::mytextbox(Vector2f size,string* ptr,Font* fptr,RenderWindow* wind)
 {
 	window = wind;
@@ -23,8 +22,15 @@ void mytextbox::update()
 	text.setPosition(getPosition().x + 5, getPosition().y + 2);
 	if (AllowAutoEnable)
 	{
-		auto cords = window->mapPixelToCoords(Vector2i(sf::Mouse::getPosition(*window)));
-		if (this->getGlobalBounds().contains(cords))
+		auto cords = Vector2f(sf::Mouse::getPosition(*window));
+		//auto cords = window->mapPixelToCoords(Vector2i(sf::Mouse::getPosition(*window)));
+		/*RectangleShape r(Vector2f(getGlobalBounds().width,getGlobalBounds().height));
+		r.setPosition(getGlobalBounds().left,getGlobalBounds().top);
+		r.setOutlineColor(Color::Green);
+		r.setOutlineThickness(2);
+		window->draw(r);
+		cout << getGlobalBounds().contains(cords) << endl;*/
+		if (getGlobalBounds().contains(cords))
 		{
 			setState(Enabled);
 		}
@@ -78,33 +84,29 @@ void mytextbox::GetEvent(Event event)
 	{
 		switch (event.type)
 		{
-		case Event::KeyPressed:
-		{
-			if (event.key.code == sf::Keyboard::BackSpace)
-			{
-				if (sizeof(text.getString()) > 0 && text.getString() != "")
-				{
-						stringptr->pop_back();
-				}
-
-			}
-		}
-		break;
 		case Event::TextEntered:
-				if (filter == ip)
+			if (filter == ip)
+			{
+				if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
 				{
-					if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
+					stringptr->push_back((char)event.text.unicode);
+				}
+			}
+			else if (filter == none)
+			{
+				//backspace
+				if (event.text.unicode != 8)
+				{
+					stringptr->push_back((char)event.text.unicode);
+				}
+				else
+				{
+					if (sizeof(text.getString()) > 0 && text.getString() != "")
 					{
-						stringptr->push_back((char)event.text.unicode);
+						stringptr->pop_back();
 					}
 				}
-				else if (filter == none)
-				{
-					if (event.text.unicode != 8)
-					{
-						stringptr->push_back((char)event.text.unicode);
-					}
-				}
+			}
 			break;
 		}
 	}

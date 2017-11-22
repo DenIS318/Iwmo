@@ -4,10 +4,12 @@
 //#include "Enemy.h"
 #include <iostream>
 #include <memory>
+#include "Engine.h"
+
 class Network
 {
 public:
-	Network(sf::IpAddress& ip, unsigned short port);
+	Network(sf::IpAddress& ip, Engine* engine,CSource* source,unsigned short port);
 	void disconnect(Player* p);
 
 	void send(Player* p);
@@ -22,7 +24,8 @@ public:
 private:
 	sf::TcpSocket connection;
 	bool m_connected;
-
+	Engine* m_engine;
+	CSource* m_source;
 	std::string m_textMessage;
 	int packetCounter = 0;
 	sf::Clock packetClock;

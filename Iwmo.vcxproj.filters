@@ -26,6 +26,7 @@
     <ClCompile Include="..\..\..\..\Desktop\1\Imgui\imgui-SFML.cpp" />
     <ClCompile Include="IwmoLayer.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="TexturePreloader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IwmoConfig.h" />
@@ -52,6 +53,7 @@
     <ClInclude Include="IwmoLayer.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="TexturePreloader.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="zlibstat.lib" />

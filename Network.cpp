@@ -1,8 +1,10 @@
 #include "Network.h"
 #define getID getId
 #define getDirection getPosition
-Network::Network(sf::IpAddress& ip, unsigned short port) : m_connected(false)
+Network::Network(sf::IpAddress& ip,Engine* eng,CSource* source, unsigned short port) : m_connected(false)
 {
+	m_engine = eng;
+	m_source = source;
 	if (connection.connect(ip, port, sf::seconds(5)) != sf::Socket::Done)
 	{
 		std::cout << "Error connecting to server" << std::endl;
@@ -121,14 +123,25 @@ void Network::receive( Player* p)
 
 		if (type == 0) // you connected to server, get your ID
 		{
-			if (p->getID() == -1)
+
+			kid mykid;
+			mykid.setPos(Iwmo::KidSpawn);
+			mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, this->m_source, kidDeathSheet, m_engine->GetCam());
+			if (m_engine->gamestarted)
 			{
-				p->setId(id);
-				std::cout << "I connected to server, my ID: " << p->getID() << std::endl;
-				this->sendMyName(p);
-				sf::sleep(sf::milliseconds(50));
-				this->getPlayerList(p);
+				m_engine->Addentity(&mykid, 0);
 			}
+			auto nullval = m_engine->ClientKid();
+			if (nullval == NULL)
+			{
+				//if clientkid is empty , we set it for new kid, mhm... looks like a koctil
+				nullval = &mykid;
+			}
+			p->setId(id);
+			std::cout << "I connected to server, my ID: " << p->getID() << std::endl;
+			this->sendMyName(p);
+			sf::sleep(sf::milliseconds(50));
+			this->getPlayerList(p);
 			m_connected = true;
 		}
 		else if (type == 1) // disconnected
@@ -223,7 +236,8 @@ void Network::receive( Player* p)
 				receivePacket >> tempName;
 				playersName.push_back(tempName);
 				playersId.push_back(tempId);
-
+				players
+					//TODO
 			}
 
 
@@ -251,6 +265,33 @@ void Network::receive( Player* p)
 			playersName.clear();
 			playersId.clear();
 
+		}
+		else if (type == 10)
+		{
+			//supermaker
+			bool b;
+			int newsupermakerid;
+			receivePacket >> newsupermakerid;
+			receivePacket >> b;
+			if (p->getId() == newsupermakerid)
+			{
+				p->setPrefix("[SuperMaker]");
+				p->SetSuperMaker = b;
+				
+				//m_engine->SetSuperMaker(b);
+			}
+		}
+		else if (type == 11)
+		{
+			//maker
+			bool b;
+			int newmakerid;
+			receivePacket >> newmakerid;
+			receivePacket >> b;
+			if (p->getId() == newmakerid)
+			{
+				p->SetMaker = b;
+			}
 		}
 
 

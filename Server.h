@@ -6,14 +6,15 @@
 #include <string>
 #include "Player.h"
 #include "Engine.h"
+using namespace Iwmo;
 class Server
 {
 public:
-	Server(Engine* engine);
+	Server(Engine* engine, CSource* source);
 	void run();
 
 private:
-
+	void Server::SetSuperMaker(bool b, int id);
 	void sendPacket(sf::Packet& packet, unsigned int skip = -1);
 	bool m_isRunning;
 
@@ -32,5 +33,6 @@ private:
 
 	sf::Clock m_clock;
 	Engine* m_engine;
+	CSource* m_ls;
 
 };

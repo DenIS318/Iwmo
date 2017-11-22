@@ -28,7 +28,7 @@ public:
 	void setPos(Vector2f);
 	void m_move(int x, int y);
 	void initEntit(std::string fileName, Texture* t,CSource* source);
-	~iwmoEntity();
+	virtual ~iwmoEntity();
 	void draw(RenderWindow*);
 	float GetX();
 	float GetY();

@@ -326,19 +326,30 @@ void Engine::AddEffect(iwmoEffect* effect, unsigned short layernum)
 {
 	Engine::effectlayers.at(layernum).push_back(effect);
 }
+bool Engine::EffectIsOK(iwmoEffect* effect)
+{
+	return effect->anim.currentAnim!="";
+}
 void Engine::RemoveEffect(iwmoEffect* ef, unsigned short layernum)
 {
-	effectlayers[layernum].erase(std::remove(effectlayers[layernum].begin(), effectlayers[layernum].end(), ef), effectlayers[layernum].end());
-	delete ef;
+	if (EffectIsOK(ef))
+	{
+		effectlayers[layernum].erase(std::remove(effectlayers[layernum].begin(), effectlayers[layernum].end(), ef), effectlayers[layernum].end());
+		delete ef;
+		ef = NULL;
+	}
 }
 void Engine::RemoveEffect(iwmoEffect* ef)
 {
-	for (unsigned int i = 0; i < effectlayers.size(); i++)
+	if (EffectIsOK(ef))
 	{
-		effectlayers[i].erase(std::remove(effectlayers[i].begin(), effectlayers[i].end(), ef), effectlayers[i].end());
+		for (unsigned int i = 0; i < effectlayers.size(); i++)
+		{
+			effectlayers[i].erase(std::remove(effectlayers[i].begin(), effectlayers[i].end(), ef), effectlayers[i].end());
+		}
+		delete ef;
+		ef = NULL;
 	}
-	delete ef;
-	ef = NULL;
 }
 void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {
@@ -1314,18 +1325,22 @@ void Engine::DrawMap(float m__time,bool Minimap)
 			if (effectlayers.at(myi)[myi1] != NULL)
 			{
 				auto val = effectlayers.at(myi)[myi1];
-				auto check = (iwmoEntity*)val;
-				if (check != NULL)
+				if (EffectIsOK(val))
 				{
-					if (!Minimap)
+					auto check = (iwmoEntity*)val;
+					if (check != NULL)
 					{
-						val->updatetime(m__time);
-						val->tick(m__time);
-					}
-					if (val->visible)
-					{
-						
-						val->draw(&window);
+						if (!Minimap)
+						{
+							val->updatetime(m__time);
+							val->tick(m__time);
+						}
+						if (val->visible)
+						{
+
+							val->draw(&window);
+						}
+
 					}
 				}
 			}

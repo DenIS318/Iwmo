@@ -5,13 +5,11 @@
 #include "Network.h"
 #include <imgui.h>
 #include <imgui-SFML.h>
+#include "TexturePreloader.h"
 #include "Game.h"
 using namespace std;
 using namespace myState;
 CSource* source = new CSource;
-
-/*const unsigned short maxPlayerNumber = 20;
-unsigned short playerNumber = 0;*/
 Texture kidbuttext, makerbuttext, startt, serverr;
 Sprite kidbut, makerbut, start, server;
 std::unique_ptr<Network> network;
@@ -20,8 +18,8 @@ sf::IntRect makerrect(600 - 105, 381, 105, 40);
 sf::IntRect startrect(280 + 70, 500, 88, 40);
 sf::IntRect boxrect(startrect.left - 60, startrect.top - 50, 200, 20);
 sf::IntRect serverrect(650, 500, 104, 40);
-mytextbox* ipbox = new mytextbox;
-mytextbox* namebox = new mytextbox;
+mytextbox* ipbox = NULL;
+mytextbox* namebox = NULL;
 string myname;
 string ip;
 Text* iptext = new Text();
@@ -32,12 +30,10 @@ bool gamestarted = false;
 #define mainlayer 0
 #define bgmainlayer 1
 #define textlayer 2
-#define isclient iskid
-#define socket sockett
 bool serverstarted = false;
-bool isclient = true;
-sf::TcpSocket socket;
-sf::SocketSelector selector;
+//bool isclient = true;
+//sf::TcpSocket socket;
+//sf::SocketSelector selector;
 bool connected = false;
 bool serverrunning = false;
 bool KID = false;
@@ -56,9 +52,9 @@ inline void enablebox()
 
 }
 
-inline void beginbind(IpAddress address, RenderWindow* window,Engine* engine)
+inline void beginbind(Engine* engine)
 {
-	Server serv(engine);
+	Server serv(engine,source);
 	serv.run();
 
 }
@@ -74,15 +70,14 @@ void startgame(Engine* engine, RenderWindow* window)
 	//engine->RemoveText(iptext);
 
 }
-inline void beginconnect(bool kid, IpAddress address, RenderWindow* window, Engine* engine)
+inline void beginconnect(bool kid, IpAddress address,  Engine* engine)
 {
 
 	if (!connected)
 	{
 		connected = true;
-		iskid = kid;
 		try {
-			network = std::make_unique<Network>(address, (unsigned short)port);
+			network = std::make_unique<Network>(address,engine, (unsigned short)port);
 		}
 		catch (exception e)
 		{
@@ -326,7 +321,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						if (!serverstarted)
 						{
 							serverstarted = true;
-							thread thr(&beginbind, IpAddress::getLocalAddress(), window,engine);
+							thread thr(&beginbind, engine);
 							thr.detach();
 						}
 						else {
@@ -345,7 +340,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 								inet_addr(temp);
 								stoi(temp);
 
-								thread thr = thread(&beginconnect, KID, temp, window, engine);
+								thread thr = thread(&beginconnect, KID, temp, engine);
 
 								thr.detach();
 								while (!ready) {             // wait until main() sets ready...
@@ -365,9 +360,11 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 			break;
 		case sf::Event::KeyPressed:
 			{
+			if (gamestarted)
+			{
 				if (engine->ClientIsMaker)
 				{
-					
+
 					if (event.key.code == HotkeyDelete)
 					{
 						if (engine->blockprototype != NULL)
@@ -406,6 +403,7 @@ inline void checkevent(Event event, RenderWindow* window, Engine* engine)
 						}
 					}
 				}
+			}
 			}
 			break;
 		case Event::MouseWheelScrolled:
@@ -457,19 +455,18 @@ float angleBetween(const Vector2f &v1, const Vector2f &v2)
 //MAIN
 int main()
 {
+	TexturePreloader::Preload();
 	static Engine engine;
 	engine.init(Width, Height, WindowName, framerate);
-	*ipbox = mytextbox(Vector2f(200, 20), &ip, &engine.font, engine.GetWindow());
-	*namebox = mytextbox(Vector2f(200, 20), &myname, &engine.font, engine.GetWindow());
+	ipbox = new mytextbox(Vector2f(200, 20), &ip, &engine.font, engine.GetWindow());
+	namebox = new mytextbox(Vector2f(200, 20), &myname, &engine.font, engine.GetWindow());
 	ipbox->filter = mytextbox::textboxFilters::ip;
 	ipbox->setVisible(false);
 	namebox->setVisible(false);
 	ipbox->showText(false);
 	ipbox->AllowAutoEnable = false;
-	ipbox->setState(myState::Disabled);
 	namebox->showText(false);
 	namebox->AllowAutoEnable = false;
-	namebox->setState(myState::Disabled);
 	Texture text;
 	RenderWindow* window = engine.GetWindow();
 	engine.AddLayer();

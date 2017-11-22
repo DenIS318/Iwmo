@@ -10,8 +10,8 @@ namespace myState
 {
 	enum State
 	{
-		Enabled,
-		Disabled
+		Disabled,
+		Enabled
 	};
 }
 class mytextbox : public sf::RectangleShape
@@ -53,4 +53,5 @@ private:
 	Font* font;
 	RenderWindow* window;
 	string* stringptr = NULL;
+	myState::State statenow = myState::Disabled;
 };

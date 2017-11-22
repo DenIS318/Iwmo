@@ -172,16 +172,17 @@ void Game::StartGame(Engine* engine, CSource* source)
 	instanceEH = dynamic_cast<Game*>(eventhandler);
 	instanceEH->m_hookEvent(m_ls);
 	__raise source->OnEvent(sf::Event());
-	static kid mykid;
+	//moved to network
+	/*kid mykid;
 	auto lss = this->m_ls;
 	mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss, kidDeathSheet, &camera);
 	m_engine->Addentity(&mykid, 0);
-	mykid.setPos(Iwmo::KidSpawn);
+	mykid.setPos(Iwmo::KidSpawn);*/
 	sf::View standard = camera;
 	auto minimap = View(camera);
 	engine->minimap = minimap;
-	auto nullval = m_engine->ClientKid();
-	nullval = &mykid;
+	//auto nullval = m_engine->ClientKid();
+	//nullval = &mykid;
 	if (!castleent.openFromFile("resources/Music/castleentrance.ogg"))
 	{
 		cout << "castle entrance not loaded!" << endl;
@@ -209,14 +210,7 @@ Game* Game::getGame()
 }
 void Game::LoadSheets()
 {
-	if (!kidSheet->loadFromFile("resources/kid.png"))
-	{
-		cout << "Kid spritesheet not loaded!" << endl;
-	}
-	if (!kidDeathSheet->loadFromFile("resources/effects/poof.png"))
-	{
-		cout << "Poof spritesheet not loaded!" << endl;
-	}
+	//replaced with texturepreloader
 }
 //TODO
 void Game::INITMAP()

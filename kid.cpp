@@ -126,7 +126,7 @@ void kid::Col()
 										{
 											kidentity->setPos(kidentity->GetPos() + mtv);
 										}
-										else if (bl2 != JumpThruedBlock && state == fall)
+										else if (bl2 != JumpThruedBlock && state == fall && mtv.y < -0.2)
 										{
 											grounded = true;
 											state = idle;
@@ -141,6 +141,12 @@ void kid::Col()
 									}
 									else
 									{
+										grounded = true;
+										state = idle;
+										JumpThruPassed = false;
+										JumpThruJumped = false;
+										JumpThruedBlock = NULL;
+
 										kidentity->setPos(kidentity->GetPos() + mtv);
 									}
 									if (mtv.y <= bl2->sprite.getTexture()->getSize().y / (-2) && mtv.x == 0)
@@ -174,7 +180,7 @@ void kid::Col()
 												grounded = false;
 												vel.y = 0;
 											}
-											else if (bl2 != JumpThruedBlock && state == fall)
+											else if (bl2 != JumpThruedBlock && state == fall && mtv.y < -0.2)
 											{
 												grounded = true;
 												state = idle;
@@ -855,7 +861,7 @@ void kid::shoot()
 }
 Block* kid::GetBlockUnder(BlockType type)
 {
-	auto newrect = FloatRect(kidrect.left, kidrect.top+1.5, kidrect.width/4, kidrect.height + 1.5);
+	auto newrect = FloatRect(kidrect.left + (kidrect.width / 2 ) - 1, kidrect.top + kidrect.height, 2, 1.0);
 	/*RectangleShape* r = new RectangleShape(Vector2f(kidrect.width, kidrect.height));
 	r->setPosition(newrect.left, newrect.top);
 	r->setOutlineColor(Color::Black);

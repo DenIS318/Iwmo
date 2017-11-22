@@ -2,19 +2,40 @@
 
 using namespace std;
 #define server "[SERVER]: "
-Server::Server(Engine* engine)
+Server::Server(Engine* engine,CSource* source)
 {
 	m_engine = engine;
 	m_maxPlayerNumber = 1000;
 	m_currentID = 0;
 	m_playerNumber = 0;
-
+	m_ls = source;
 	m_isRunning = true;
 	m_listener.listen(25565);
 	m_selector.add(m_listener);
 	std::cout << "Server is started. Waiting for connections..." << std::endl;
 }
 
+void Server::SetSuperMaker(bool b,int id)
+{
+	//m_engine->SetSuperMaker(b);
+	string s;
+	if (b) {
+		s = "recieved";
+	}	
+	else
+	{
+		s = "lost";
+	}
+	cout << server << "Client " << m_playerList[id].getName() << " "+s+" SuperMaker rights" << endl;
+	Packet sPacket;
+	//setsupermaker type
+	sPacket << 10;
+	//new super maker id
+	sPacket << id;
+	//boolean
+	sPacket << b;
+	sendPacket(sPacket);
+}
 void Server::run()
 {
 	while (m_isRunning)
@@ -30,7 +51,19 @@ void Server::run()
 				{
 					if (m_playerNumber < m_maxPlayerNumber) //if server is not full
 					{
-						m_playerList.emplace_back(Player(&tempSocket, m_currentID));
+						
+						/*
+						on connecting user, creating this kid for yourself , or no...
+						*/
+						kid* newkid = new kid();
+						auto lss = this->m_ls;
+						newkid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss, kidDeathSheet, &camera);
+						if (m_engine->gamestarted)
+						{
+							//for not creating kids in lobby
+							m_engine->Addentity(&newkid, 0);
+						}
+						m_playerList.emplace_back(Player(&tempSocket,newkid,m_engine,true, m_currentID));
 						m_selector.add(*m_playerList.back().getSocket());
 						m_playerNumber++;
 
@@ -44,8 +77,7 @@ void Server::run()
 						cout << server << "Client " <<  ip << ":" << port << " with id " << m_currentID << " connected!" << endl;
 						if (ip.getLocalAddress() == sf::IpAddress::getLocalAddress())
 						{
-							cout << server << "Client " << m_currentID << " recieved SuperMaker rights" << endl;
-							m_engine->SetSuperMaker(true);
+							SetSuperMaker(true,m_playerList.size());
 						}
 						if (m_playerList.back().getSocket()->send(outPacket) != sf::Socket::Done) //Send client id
 							std::cout << server << "error sending player index" << std::endl;
@@ -100,7 +132,7 @@ void Server::run()
 									}
 								}
 
-								
+
 								m_selector.remove(*m_playerList[i].getSocket());
 								m_playerList.erase(m_playerList.begin() + i);
 								m_playerNumber--;
@@ -162,6 +194,8 @@ void Server::run()
 
 								sendPacket(namePacket);
 							}
+							//num 10 not here. see setsupermaker above
+							
 
 						}
 

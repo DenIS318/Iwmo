@@ -9,6 +9,7 @@ iwmoEffect::iwmoEffect()
 
 iwmoEffect::~iwmoEffect()
 {
+	
 }
 void iwmoEffect::play(string animname)
 {

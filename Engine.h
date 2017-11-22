@@ -26,6 +26,8 @@
 #include <boost/any.hpp>
 #include <boost/preprocessor.hpp>
 #include "mytextbox.h"
+#include "TexturePreloader.h"
+using namespace Textures;
 ///END ANTIHACK
 #ifdef _MSC_VER 
 //not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
@@ -140,6 +142,7 @@ public:
 	bool LoadSound(string name,string buffername);
 	void AddSoundBuffer(string name);
 	map<string, sf::SoundBuffer>* buflist();
+	bool EffectIsOK(iwmoEffect* effect);
 	vector<vector<iwmoEffect*>>* getEffectLayers();
 	vector<Sound*> allsounds;
 	map<string, Music*>* allmusic = new map<string, Music*>;

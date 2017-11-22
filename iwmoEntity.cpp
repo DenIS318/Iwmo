@@ -72,6 +72,7 @@ void iwmoEntity::m_move(int xm, int ym)
 }
 iwmoEntity::~iwmoEntity()
 {
+	
 }
 float iwmoEntity::GetX()
 {
