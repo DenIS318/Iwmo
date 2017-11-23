@@ -108,7 +108,18 @@ void Network::getPlayerList(Player* p)
 		std::cout << "Error sending getPlayerList to server" << std::endl;
 	}
 }
+void Network::sendMaker(Player* p,bool maker)
+{
+	sf::Packet temp;
+	temp << 12;
+	temp << p->getID();
+	temp << maker;
 
+	if (connection.send(temp) != sf::Socket::Done)
+	{
+		std::cout << "Error sending maker to server" << std::endl;
+	}
+}
 
 
 void Network::receive( Player* p)
@@ -123,24 +134,11 @@ void Network::receive( Player* p)
 
 		if (type == 0) // you connected to server, get your ID
 		{
-
-			kid mykid;
-			mykid.setPos(Iwmo::KidSpawn);
-			mykid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, this->m_source, kidDeathSheet, m_engine->GetCam());
-			if (m_engine->gamestarted)
-			{
-				m_engine->Addentity(&mykid, 0);
-			}
-			auto nullval = m_engine->ClientKid();
-			if (nullval == NULL)
-			{
-				//if clientkid is empty , we set it for new kid, mhm... looks like a koctil
-				nullval = &mykid;
-			}
 			p->setId(id);
 			std::cout << "I connected to server, my ID: " << p->getID() << std::endl;
 			this->sendMyName(p);
-			sf::sleep(sf::milliseconds(50));
+			sendMaker(p, m_engine->ClientIsMaker);
+			//sf::sleep(sf::milliseconds(50));
 			this->getPlayerList(p);
 			m_connected = true;
 		}
@@ -224,7 +222,7 @@ void Network::receive( Player* p)
 			int playerNumber;
 			std::vector<std::string> playersName;
 			std::vector<int> playersId;
-
+			vector<bool> plMaker;
 			receivePacket >> playerNumber;
 			std::cout << "Num of players on server: " << playerNumber << std::endl;
 
@@ -232,51 +230,61 @@ void Network::receive( Player* p)
 			{
 				std::string tempName;
 				int tempId;
+				bool tempBool;
+				UINT tempSocketPtr;
 				receivePacket >> tempId;
 				receivePacket >> tempName;
+				receivePacket >> tempBool;
 				playersName.push_back(tempName);
 				playersId.push_back(tempId);
-				players
-					//TODO
+				plMaker.push_back(tempBool);
+				//we update players later... but now need to create it
 			}
 
 
 			for (unsigned int i = 0; i < playersId.size(); ++i) //loop through id-s we got
 			{
 				bool haveThatEnemy = false;
-				/*for (unsigned int v = 0; v < enemies.size(); v++) //check if we already have enemy with that id
+				for (unsigned int v = 0; v < playerKidlist.size(); v++) //check if we already have enemy with that id
 				{
-					if (enemies[v]->getID() == playersId[i])
+					if (playerKidlist[v]->playerid == playersId[i])
 					{
 						haveThatEnemy = true;
 					}
 
 				}
+				
 				if (playersId[i] != p->getID() && !haveThatEnemy) //if it is not our id and if we dont have that enemy, create a new enemy with that id
 				{
-					enemies.push_back(std::make_unique<Enemy>(playersId[i], sf::Vector2f(100, 100), playersName[i]));
+					auto newkid = make_unique<kid>();
+					newkid->createKid("resources/kid.xml", kidSheet, KidSpawn, m_engine, this->m_source, kidDeathSheet, m_engine->GetCam());
+					m_engine->Addentity(newkid._Myptr(), 0);
+					newkid->playerid = playersId[i];
+					//Player(std::unique_ptr<sf::TcpSocket>* socket, kid* KID, Engine* engine, bool maker, int id);
+					//std::make_unique<Player> newplayer();
+					//TODO
+					playerKidlist.push_back(move(newkid));
 					m_textMessage = "New player connected: " + playersName[i];
-					std::cout << "Created a new enemy with id: " << playersId[i] << std::endl;
+					std::cout << "Created a new player kid with player id: " << playersId[i] << std::endl;
 
 				}
-				*/
+				
 			}
 
 			playersName.clear();
 			playersId.clear();
+			plMaker.clear();
 
 		}
 		else if (type == 10)
 		{
 			//supermaker
 			bool b;
-			int newsupermakerid;
-			receivePacket >> newsupermakerid;
 			receivePacket >> b;
-			if (p->getId() == newsupermakerid)
+			if (p->getId() == id)
 			{
 				p->setPrefix("[SuperMaker]");
-				p->SetSuperMaker = b;
+				p->SetSuperMaker(b);
 				
 				//m_engine->SetSuperMaker(b);
 			}
@@ -285,12 +293,10 @@ void Network::receive( Player* p)
 		{
 			//maker
 			bool b;
-			int newmakerid;
-			receivePacket >> newmakerid;
 			receivePacket >> b;
-			if (p->getId() == newmakerid)
+			if (p->getId() == id)
 			{
-				p->SetMaker = b;
+				p->SetMaker(b);
 			}
 		}
 

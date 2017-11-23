@@ -13,10 +13,17 @@ namespace Iwmo {
 	std::string but = "button_";
 	bool debug = true;
 	unsigned short port = 25565;
+	string MyName = "Noname";
 	int GRAVITY = 10;
 	string NameStringHelp = "Enter your name";
 	string IpStringHelp = "Enter ip to connect";
 	Math IWMOMATH;
+	Player* myplayer;
+	TcpSocket* mysocket;
+	namespace Textures {
+		sf::Texture* kidDeathSheet;
+		sf::Texture* kidSheet;
+	}
 	vector <Keyboard::Key*> Hotkeys = {
 		&HotkeyMake,&HotkeyMinimap,&HotkeyTeleport,&HotkeyDeath,&HotkeyRestart,&HotkeyShoot,&HotkeyJump,&HotkeyJumpThru,
 		&HotkeyNoGrid,&HotkeyMoveLeft,&HotkeyMoveRight,&HotkeyScrollUp,&HotkeyScrollLeft,&HotkeyScrollDown,&HotkeyScrollRight,

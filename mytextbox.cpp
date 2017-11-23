@@ -85,6 +85,14 @@ void mytextbox::GetEvent(Event event)
 		switch (event.type)
 		{
 		case Event::TextEntered:
+			if (event.text.unicode == 8)
+			{
+				if (text.getString() != "")
+				{
+					stringptr->pop_back();
+				}
+				return;
+			}
 			if (filter == ip)
 			{
 				if (event.text.unicode >= 46 && event.text.unicode <= 57 && event.text.unicode != 47)
@@ -94,18 +102,7 @@ void mytextbox::GetEvent(Event event)
 			}
 			else if (filter == none)
 			{
-				//backspace
-				if (event.text.unicode != 8)
-				{
-					stringptr->push_back((char)event.text.unicode);
-				}
-				else
-				{
-					if (sizeof(text.getString()) > 0 && text.getString() != "")
-					{
-						stringptr->pop_back();
-					}
-				}
+				stringptr->push_back((char)event.text.unicode);
 			}
 			break;
 		}

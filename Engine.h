@@ -122,7 +122,7 @@ public:
 	/*
 	Removes all sprites and permament destroyes its.
 	*/
-	void RemoveAll();
+	void RemoveAll(bool KeepEntities = false);
 	//DESTRUCT
 	~Engine();
 	bool gamestarted = false;

@@ -36,6 +36,7 @@ public:
 	AnimationManager anim;
 	virtual void MGetEvent(Event);
 	virtual void control();
+	virtual void UpdateState();
 	AnimationManager* GetTextureAnimation();
 	iwmoEntity* MGetBase();
 	float SpeedX = 50.0;
@@ -49,6 +50,7 @@ public:
 	bool visible = true;
 	//For kid
 	bool ScreenCamera = true;
+	bool yourkid = false;
 	virtual void shoot(Texture* bullettexture, Vector2i pos);
 private:
 	float x = 0;

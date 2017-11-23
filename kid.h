@@ -28,7 +28,7 @@ public:
 	Sound doublejumps;
 	Sound deaths;
 	Sound fires;
-	
+	void UpdateState();
 	void MGetEvent(Event event);
 	sf::Vector2f vel;
 	int JumpPower = -260;
@@ -50,6 +50,8 @@ public:
 	//for imgui focus in maker
 	bool AllowControl2 = true;
 	Block* GetBlockUnder(BlockType blocktype);
+	int playerid = 0;
+	void _setcam(View* camera);
 private:
 	Block* JumpThruedBlock = NULL;
 	FloatRect kidrect;

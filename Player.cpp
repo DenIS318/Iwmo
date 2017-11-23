@@ -1,14 +1,33 @@
 #include "Player.h"
+Player::Player()
+{
 
+}
+kid* Player::GetKid()
+{
+	return playerkid;
+}
 Player::Player(std::unique_ptr<sf::TcpSocket>* socket,kid* KID,Engine* engine,bool Maker, int id)
 {
 	m_engine = engine;
-	m_name = "Noname";
 	m_id = id;
 	m_socket = std::move(*socket);
 	m_timeout = sf::seconds(0);
 	playerkid = KID;
 	maker = Maker;
+}
+/*Player::Player(kid* KID, Engine* engine, bool Maker, int id)
+{
+	m_engine = engine;
+	m_name = "Noname";
+	m_id = id;
+	m_timeout = sf::seconds(0);
+	playerkid = KID;
+	maker = Maker;
+}*/
+bool Player::GetMaker()
+{
+	return maker;
 }
 void Player::SetMaker(bool b)
 {
@@ -40,6 +59,10 @@ string Player::getPrefix()
 int Player::getId()
 {
 	return m_id;
+}
+void Player::SetKid(kid* _kid)
+{
+	playerkid = _kid;
 }
 void Player::setId(int id)
 {

@@ -119,9 +119,9 @@ public:
 
 		TiXmlDocument animFile(fileName.c_str());
 
-		if (animFile.LoadFile())
+		if (!animFile.LoadFile())
 		{
-
+			cout << "failed to load " << fileName.c_str() << endl;
 		}
 
 		TiXmlElement *head;

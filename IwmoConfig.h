@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
 #include <SFML\Graphics.hpp>
+#include <SFML\Network.hpp>
 #include "IwmoMath.h"
 #include <stdio.h>
 #include "iwmoTypes.h"
 #include <boost/filesystem.hpp>
+extern class Player;
 //CONFIG
 namespace Iwmo {
 	//defines layers
@@ -49,10 +51,17 @@ namespace Iwmo {
 	auto static HotkeyListener = sf::Keyboard::L;
 	auto static HotkeyTeleportMusic = sf::Keyboard::N;
 	extern string NameStringHelp;
+	extern string MyName;
 	extern string IpStringHelp;
 	extern vector <Keyboard::Key*> Hotkeys;
 	extern vector<string> HotkeysName;
 	extern Math IWMOMATH;
+	extern Player* myplayer;
+	extern TcpSocket* mysocket;
+	namespace Textures {
+		extern sf::Texture* kidDeathSheet;
+		extern sf::Texture* kidSheet;
+	}
 	static vector<map<string, string>> get_file_list(const std::string& path)
 	{
 		vector<map<string, string>> filevector = vector<map<string, string>>(0);

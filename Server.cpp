@@ -53,16 +53,17 @@ void Server::run()
 					{
 						
 						/*
-						on connecting user, creating this kid for yourself , or no...
+						on connecting user, creating this player
 						*/
 						kid* newkid = new kid();
 						auto lss = this->m_ls;
-						newkid.createKid("resources/kid.xml", kidSheet, sf::Vector2f(100, 100), m_engine, lss, kidDeathSheet, &camera);
+						newkid->createKid("resources/kid.xml", kidSheet, KidSpawn, m_engine, lss, kidDeathSheet, m_engine->GetCam());
 						if (m_engine->gamestarted)
 						{
 							//for not creating kids in lobby
-							m_engine->Addentity(&newkid, 0);
+							m_engine->Addentity(newkid, 0);
 						}
+						newkid->playerid = m_currentID;
 						m_playerList.emplace_back(Player(&tempSocket,newkid,m_engine,true, m_currentID));
 						m_selector.add(*m_playerList.back().getSocket());
 						m_playerNumber++;
@@ -75,12 +76,13 @@ void Server::run()
 						unsigned short port = temp->getRemotePort();
 						//delete &temp;
 						cout << server << "Client " <<  ip << ":" << port << " with id " << m_currentID << " connected!" << endl;
-						if (ip.getLocalAddress() == sf::IpAddress::getLocalAddress())
-						{
-							SetSuperMaker(true,m_playerList.size());
-						}
 						if (m_playerList.back().getSocket()->send(outPacket) != sf::Socket::Done) //Send client id
 							std::cout << server << "error sending player index" << std::endl;
+						if (ip.getLocalAddress() == sf::IpAddress::getLocalAddress())
+						{
+							m_playerList[m_currentID].setName("Server");
+							SetSuperMaker(true, m_currentID);
+						}
 						m_currentID++;
 					}
 					else //if server is full
@@ -128,11 +130,12 @@ void Server::run()
 									{
 
 										std::cout << server << std::endl << "Client disconnected!" << std::endl;
-										std::cout << server << "	ID: " << itr.getId() << " Name: " << itr.getName() << std::endl;
+										std::cout << server << "ID: " << itr.getId() << " Name: " << itr.getName() << std::endl;
 									}
 								}
 
 
+								m_engine->Removeentity(m_playerList[i].GetKid(),0);
 								m_selector.remove(*m_playerList[i].getSocket());
 								m_playerList.erase(m_playerList.begin() + i);
 								m_playerNumber--;
@@ -174,8 +177,8 @@ void Server::run()
 									std::string nameHolder;
 									received >> nameHolder;
 									m_playerList[i].setName(nameHolder);
-									std::cout << server << std::endl << std::endl << "New client added." << std::endl;
-									std::cout << server << "	ID: " << id << " Name: " << nameHolder << std::endl;
+									std::cout << server << "New client added." << std::endl;
+									std::cout << server << "ID: " << id << " Name: " << nameHolder << std::endl;
 									std::cout << server << "Number of players: " << m_playerNumber << std::endl;
 								}
 							}
@@ -190,11 +193,25 @@ void Server::run()
 								{
 									namePacket << m_playerList[j].getId();
 									namePacket << m_playerList[j].getName();
+									namePacket << m_playerList[j].GetMaker();
 								}
 
 								sendPacket(namePacket);
 							}
 							//num 10 not here. see setsupermaker above
+							else if (num == 11)
+							{
+								//maker
+								bool makerr;
+								received >> makerr;
+								m_playerList[id].SetMaker(makerr);
+								sf::Packet makerPacket;
+								makerPacket << 7;
+								makerPacket << id;
+								makerPacket << makerr;
+								sendPacket(makerPacket);
+							}
+							
 							
 
 						}

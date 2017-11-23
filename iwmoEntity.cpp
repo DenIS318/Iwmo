@@ -10,6 +10,10 @@ void iwmoEntity::control()
 {
 	
 }
+void iwmoEntity::UpdateState()
+{
+
+}
 void iwmoEntity::deleteentity()
 {
 	delete this;

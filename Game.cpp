@@ -154,14 +154,7 @@ void Game::LS()
 {
 	/*m_engine->AddSoundBuffer("castleentrance");
 	m_engine->LoadSound("castleentrance.ogg", "castleentrance");*/
-	m_engine->AddSoundBuffer("kidjump");
-	m_engine->LoadSound("jump1.ogg", "kidjump");
-	m_engine->AddSoundBuffer("kiddoublejump");
-	m_engine->LoadSound("jump2.ogg", "kiddoublejump");
-	m_engine->AddSoundBuffer("kiddeath");
-	m_engine->LoadSound("death.ogg", "kiddeath");
-	m_engine->AddSoundBuffer("kidfire");
-	m_engine->LoadSound("bullet.flac", "kidfire");
+	//moved to main
 }
 void Game::StartGame(Engine* engine, CSource* source)
 {
@@ -273,7 +266,7 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 {
 	window = wind;
 	m_engine = engine;
-	m_engine->RemoveAll();
+	m_engine->RemoveAll(true);
 	//
 	/*
 	Inits layers
@@ -299,6 +292,7 @@ Game::Game(Engine* engine, RenderWindow* wind,CSource* source)
 	camera.setCenter(CAM_CENTER);
 	camera.setSize(CAM_SIZE);
 	engine->SetCamFromGame(&camera);
+	myplayer->GetKid()->_setcam(&camera);
 	engine->GetWindow()->setKeyRepeatEnabled(false);
 	INITMAP();
 	

@@ -70,22 +70,35 @@ void startgame(Engine* engine, RenderWindow* window)
 	//engine->RemoveText(iptext);
 
 }
-inline void beginconnect(bool kid, IpAddress address,  Engine* engine)
+inline void beginconnect(bool _kid, IpAddress address,  Engine* engine)
 {
 
 	if (!connected)
 	{
 		connected = true;
+		engine->ClientIsMaker = !_kid;
+		MyName = myname;
 		try {
-			network = std::make_unique<Network>(address,engine, (unsigned short)port);
+			static auto newplayer = new Player();
+			kid* mykid = new kid();
+			mykid->yourkid = true;
+			mykid->createKid("resources/kid.xml", kidSheet, KidSpawn, engine, source, kidDeathSheet, engine->GetCam());
+			engine->Addentity(mykid, 0);
+			auto nullval = engine->ClientKid();
+			nullval = mykid;
+			newplayer->SetKid(mykid);
+			newplayer->setName(MyName);
+			myplayer = newplayer;
+			network = std::make_unique<Network>(address,engine,source, (unsigned short)port);
 		}
 		catch (exception e)
 		{
 			cout << e.what() << endl;
+			connected = false;
 			return;
 		}
+		
 		ready = true;
-		engine->ClientIsMaker = !kid;
 		return;
 
 	}
@@ -446,18 +459,32 @@ inline void continuepool(RenderWindow* window, Engine* engine)
 		}
 		checkevent(event, window, engine);
 	}
+	
 }
 float angleBetween(const Vector2f &v1, const Vector2f &v2)
 {
 	float radians = atan2(v1.y - v2.y, v1.x - v2.x);
 	return radians * 180 / IWMOPHIE; // in degress
 }
+void soundpreload(Engine* m_engine)
+{
+	m_engine->AddSoundBuffer("kidjump");
+	m_engine->LoadSound("jump1.ogg", "kidjump");
+	m_engine->AddSoundBuffer("kiddoublejump");
+	m_engine->LoadSound("jump2.ogg", "kiddoublejump");
+	m_engine->AddSoundBuffer("kiddeath");
+	m_engine->LoadSound("death.ogg", "kiddeath");
+	m_engine->AddSoundBuffer("kidfire");
+	m_engine->LoadSound("bullet.flac", "kidfire");
+}
 //MAIN
 int main()
 {
-	TexturePreloader::Preload();
+	TexturePreloader preloader;
+	preloader.Preload();
 	static Engine engine;
 	engine.init(Width, Height, WindowName, framerate);
+	soundpreload(&engine);
 	ipbox = new mytextbox(Vector2f(200, 20), &ip, &engine.font, engine.GetWindow());
 	namebox = new mytextbox(Vector2f(200, 20), &myname, &engine.font, engine.GetWindow());
 	ipbox->filter = mytextbox::textboxFilters::ip;
@@ -528,6 +555,10 @@ int main()
 	{
 		if (gamestarted)
 		{
+			if (network != NULL)
+			{
+				network->receive(myplayer);
+			}
 			auto cam = engine.GetCam();
 			if (cam != NULL)
 			{
@@ -607,6 +638,10 @@ int main()
 		}
 		continuepool(window, &engine);
 		engine.Render();
+	}
+	if (network != NULL && myplayer != NULL)
+	{
+		network->disconnect(myplayer);
 	}
 	ImGui::SFML::Shutdown();
 	return EXIT_SUCCESS;

@@ -17,6 +17,7 @@ void TexturePreloader::Preload()
 	{
 		cout << "Poof spritesheet not loaded!" << endl;
 	}
+
 }
 
 TexturePreloader::~TexturePreloader()

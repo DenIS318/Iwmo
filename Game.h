@@ -12,6 +12,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/any.hpp>
+#include "Player.h"
 using namespace boost::filesystem;
 using namespace std;
 using namespace sf;

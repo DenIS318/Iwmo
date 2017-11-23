@@ -589,9 +589,13 @@ void kid::CheckBulletCols(Bullet* bullet,int i)
 		}
 	}
 }
+void kid::_setcam(View* _camera)
+{
+	m_camera = _camera;
+}
 void kid::tick(float time)
 {
-	if (ScreenCamera)
+	if (ScreenCamera && m_camera != NULL)
 	{
 		int x = GetX();
 		int y = GetY();
@@ -683,126 +687,133 @@ void kid::deleteentity()
 }
 void kid::control()
 {
-	if (m_engine->ImGuifocus)
+	if (yourkid)
 	{
-		AllowControl2 = false;
-	}
-	else
-	{
-		AllowControl2 = true;
-	}
-	if (AllowControl&& AllowControl2)
-	{
-		if (Alive)
+		if (m_engine->ImGuifocus)
 		{
-			if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
+			AllowControl2 = false;
+		}
+		else
+		{
+			AllowControl2 = true;
+		}
+		if (AllowControl&& AllowControl2)
+		{
+			if (Alive)
 			{
-				if (!anim.isFlip())
+				if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
 				{
-					anim.flip(true);
+					if (!anim.isFlip())
+					{
+						anim.flip(true);
+					}
 				}
-			}
-			if (sf::Keyboard::isKeyPressed(HotkeyMoveRight))
-			{
-				if (anim.isFlip())
+				if (sf::Keyboard::isKeyPressed(HotkeyMoveRight))
 				{
-					anim.flip(false);
+					if (anim.isFlip())
+					{
+						anim.flip(false);
+					}
 				}
 			}
 		}
-	}
 
-	Col();
-	if (AllowControl && AllowControl2)
-	{
-		if (m_engine->GetWindow()->hasFocus())
+		Col();
+		if (AllowControl && AllowControl2)
 		{
-
-			if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && !sf::Keyboard::isKeyPressed(HotkeyMoveRight))
+			if (m_engine->GetWindow()->hasFocus())
 			{
 
-				if (state != slide)
+				if (sf::Keyboard::isKeyPressed(HotkeyMoveLeft) && !sf::Keyboard::isKeyPressed(HotkeyMoveRight))
 				{
-					dir = WalkLeft;
-				}
-				else if (state == slide && anim.isFlip())
-				{
-					dir = WalkLeft;
-				}
 
-
-
-
-			}
-			if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
-			{
-				if (state != slide)
-				{
-					dir = WalkRight;
-				}
-				else if (state == slide && !anim.isFlip())
-				{
-					dir = WalkRight;
-				}
-
-
-
-			}
-			if (!sf::Keyboard::isKeyPressed(HotkeyJump))
-			{
-				if (!grounded)
-				{
-					//мизерное замедление вверху чтоб не грохался сразу
-					if (vel.y < 0)
+					if (state != slide)
 					{
-						if (lshiftcounter < 2)
+						dir = WalkLeft;
+					}
+					else if (state == slide && anim.isFlip())
+					{
+						dir = WalkLeft;
+					}
+
+
+
+
+				}
+				if (sf::Keyboard::isKeyPressed(HotkeyMoveRight) && !sf::Keyboard::isKeyPressed(HotkeyMoveLeft))
+				{
+					if (state != slide)
+					{
+						dir = WalkRight;
+					}
+					else if (state == slide && !anim.isFlip())
+					{
+						dir = WalkRight;
+					}
+
+
+
+				}
+				if (!sf::Keyboard::isKeyPressed(HotkeyJump))
+				{
+					if (!grounded)
+					{
+						//мизерное замедление вверху чтоб не грохался сразу
+						if (vel.y < 0)
 						{
-							int val = (-GRAVITY *(-vel.y * 0.005));
-							vel.y += val;
-							kidentity->m_move(0, vel.y);
-							kidentity->state = jump;
-							lshiftcounter++;
-						}
-						else
-						{
-							if (vel.y > JumpPower*0.4)
+							if (lshiftcounter < 2)
 							{
-								//- потомучто там и так на +гравити постоянно, нам нужно немного поднять кида вверх
-								vel.y += (-GRAVITY / 1.75);
-								//cout << vel.y << endl;
-								//мы не двигаем кида здесь!
+								int val = (-GRAVITY *(-vel.y * 0.005));
+								vel.y += val;
+								kidentity->m_move(0, vel.y);
+								kidentity->state = jump;
+								lshiftcounter++;
 							}
 							else
 							{
-								int val2 = ((JumpPower * 0.05)*(vel.y*0.01) * 7);
-								vel.y += val2;
-								if (vel.y < 0)
+								if (vel.y > JumpPower*0.4)
 								{
-									kidentity->m_move(0, vel.y);
+									//- потомучто там и так на +гравити постоянно, нам нужно немного поднять кида вверх
+									vel.y += (-GRAVITY / 1.75);
+									//cout << vel.y << endl;
+									//мы не двигаем кида здесь!
 								}
-							}
+								else
+								{
+									int val2 = ((JumpPower * 0.05)*(vel.y*0.01) * 7);
+									vel.y += val2;
+									if (vel.y < 0)
+									{
+										kidentity->m_move(0, vel.y);
+									}
+								}
 
+							}
 						}
-					}
-					else
-					{
-						if (state != slide)
+						else
 						{
-							state = fall;
+							if (state != slide)
+							{
+								state = fall;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-		CheckState();
+		//CheckState();
 	
 	
+}
+void kid::UpdateState()
+{
+	CheckState();
 }
 void kid::shoot()
 {
 	
-	
+
 		if (currentbullets < maxbullets)
 		{
 			currentbullets++;
@@ -837,7 +848,7 @@ void kid::shoot()
 					flipped = !flipped;
 					goto jmp2;
 				}
-			
+
 			}
 			if (state == jump)
 			{
@@ -857,6 +868,7 @@ void kid::shoot()
 			e.whichBullet = bul;
 			__raise m_souc->OnCustomEvent(&e);
 		}
+	
 	
 }
 Block* kid::GetBlockUnder(BlockType type)
@@ -932,7 +944,10 @@ void kid::MGetEvent(Event event)
 }
 void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, Engine* engine,CSource* eventsource,Texture*  kidDeathSheet,View* camera)
 {
-	m_camera = camera;
+	if (camera != NULL)
+	{
+		m_camera = camera;
+	}
 	m_texture = kidTexture;
 	m_deathsheet = kidDeathSheet;
 	kidentity->initEntit(filen, kidTexture,eventsource);
@@ -954,5 +969,11 @@ void kid::createKid(string filen, Texture* kidTexture, sf::Vector2f position, En
 	m_engine->allsounds.push_back(&deaths);
 	m_engine->allsounds.push_back(&jumps);
 	m_engine->allsounds.push_back(&doublejumps);
+	jumps.setAttenuation(40);
+	jumps.setMinDistance(300);
+	fires.setAttenuation(50);
+	fires.setMinDistance(200);
+	doublejumps.setAttenuation(50);
+	doublejumps.setMinDistance(200);
 	m_deathsheet = TextureManager::loadTexture("poof2.png", "resources/effects/poof2.png");
 }

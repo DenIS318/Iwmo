@@ -67,7 +67,7 @@ bool Engine::LoadSound(string name,string buffername)
 	}
 	return true;
 }
-void Engine::RemoveAll()
+void Engine::RemoveAll(bool keep)
 {
 	for (unsigned int i = 0; i < boxvector.size(); i++)
 	{
@@ -77,12 +77,17 @@ void Engine::RemoveAll()
 	{
 		RemoveText(Engine::textlist[i]);
 	}
-	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+	if (!keep)
 	{
-		for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
+		for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
 		{
-			delete Engine::layerrentity.at(i).at(i1);
+			for (unsigned int i1 = 0; i1 < Engine::layerrentity.at(i).size(); i1++)
+			{
+				delete Engine::layerrentity.at(i).at(i1);
+			}
 		}
+		layerrentity.clear();
+		Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 	}
 	for (unsigned int i = 0; i < Engine::effectlayers.size(); i++)
 	{
@@ -108,10 +113,8 @@ void Engine::RemoveAll()
 	bulletlist.clear();
 	textlist.clear();
 	boxvector.clear();
-	Engine::layerrentity.clear();
 	Engine::layerr.clear();
 	Engine::layerr = vector<vector<Drawable*>>(maxlayersize);
-	Engine::layerrentity = vector<vector<iwmoEntity*>>(maxlayersize);
 	Engine::effectlayers = vector<vector<iwmoEffect*>>(maxlayersize);
 	MapBlocks = vector<IwmoLayer>(maxlayersize);
 	
@@ -1307,8 +1310,12 @@ void Engine::DrawMap(float m__time,bool Minimap)
 				{
 					Engine::layerrentity.at(i).at(i1)->updatetime(m__time);
 					Engine::layerrentity.at(i).at(i1)->anim.tick(m__time);
-					Engine::layerrentity.at(i).at(i1)->tick(m__time);
-					Engine::layerrentity.at(i).at(i1)->control();
+					if(Engine::layerrentity.at(i).at(i1)->yourkid)
+					{
+						Engine::layerrentity.at(i).at(i1)->tick(m__time);
+						Engine::layerrentity.at(i).at(i1)->control();
+					}
+					Engine::layerrentity.at(i).at(i1)->UpdateState();
 				}
 				if (Engine::layerrentity.at(i).at(i1)->visible)
 				{
