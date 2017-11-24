@@ -334,6 +334,15 @@ void GameHandler::OnCustomEvent(CustomEvent* event)
 	{
 	case Types::EntityMoveEvent:
 		break;
+	case Types::KidChangePositionEvent:
+		mynetwork->sendPosition(myplayer);
+		break;
+	case Types::KidCheckStateEvent:
+		mynetwork->sendState(myplayer);
+		break;
+	case Types::PlayerFlipEvent:
+		mynetwork->sendFlip(myplayer);
+		break;
 	case Types::DestroyEffectEvent:
 		{
 		DestroyEffectEvent* e = reinterpret_cast<DestroyEffectEvent*>(event);

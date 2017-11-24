@@ -11,7 +11,8 @@ class Network
 public:
 	Network(sf::IpAddress& ip, Engine* engine,CSource* source,unsigned short port);
 	void disconnect(Player* p);
-
+	void sendState(Player* p);
+	void sendFlip(Player* p);
 	void send(Player* p);
 	void sendPosition(Player* p);
 	void receive(Player* p); //Add more later

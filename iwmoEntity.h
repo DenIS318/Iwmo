@@ -24,8 +24,10 @@ using namespace Iwmo;
 class iwmoEntity
 {
 public:
+	bool instanceofKid();
 	iwmoEntity();
-	void setPos(Vector2f);
+	void flip(bool flip);
+	void setPos(Vector2f,bool sendPacket = true);
 	void m_move(int x, int y);
 	void initEntit(std::string fileName, Texture* t,CSource* source);
 	virtual ~iwmoEntity();

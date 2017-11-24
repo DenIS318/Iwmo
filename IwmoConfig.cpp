@@ -20,6 +20,7 @@ namespace Iwmo {
 	Math IWMOMATH;
 	Player* myplayer;
 	TcpSocket* mysocket;
+	Network* mynetwork;
 	namespace Textures {
 		sf::Texture* kidDeathSheet;
 		sf::Texture* kidSheet;

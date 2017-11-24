@@ -22,7 +22,7 @@ void Network::disconnect(Player* p) //Disconnect the player from the server
 	sf::Packet temp;
 	temp << 1;
 	temp << p->getID();
-
+	temp << p->getName();
 	if (connection.send(temp) != sf::Socket::Done)
 	{
 		std::cout << "Error sending disconnect command to server" << std::endl;
@@ -56,9 +56,23 @@ void Network::sendPosition(Player* p)
 		sf::Packet temp;
 		temp << 4;
 		temp << p->getID();
-		//temp << p->getPosition().x;
-		//temp << p->getPosition().y;
+		temp << p->GetKid()->GetPos().x;
+		temp << p->GetKid()->GetPos().y;
+		if (connection.send(temp) != sf::Socket::Done)
+		{
+			std::cout << "Error sending data to server" << std::endl;
+		}
+	}
 
+}
+void Network::sendState(Player* p)
+{
+	if (m_connected)
+	{
+		sf::Packet temp;
+		temp << 13;
+		temp << p->getID();
+		temp << static_cast<int>(p->GetKid()->state);
 		if (connection.send(temp) != sf::Socket::Done)
 		{
 			std::cout << "Error sending data to server" << std::endl;
@@ -108,6 +122,20 @@ void Network::getPlayerList(Player* p)
 		std::cout << "Error sending getPlayerList to server" << std::endl;
 	}
 }
+void Network::sendFlip(Player* p)
+{
+	if (m_connected)
+	{
+		sf::Packet temp;
+		temp << 14;
+		temp << p->getID();
+		temp << p->GetKid()->anim.isFlip();
+		if (connection.send(temp) != sf::Socket::Done)
+		{
+			std::cout << "Error sending data to server" << std::endl;
+		}
+	}
+}
 void Network::sendMaker(Player* p,bool maker)
 {
 	sf::Packet temp;
@@ -122,11 +150,18 @@ void Network::sendMaker(Player* p,bool maker)
 }
 
 
-void Network::receive( Player* p)
+void Network::receive(Player* p)
 {
 
 	sf::Packet receivePacket;
 	int type, id;
+	/*while (connection.receive(receivePacket) != sf::Socket::Done)
+	{
+		if (connection.receive(receivePacket) == sf::Socket::Error || connection.receive(receivePacket) == sf::Socket::Disconnected)
+		{
+			break;
+		}
+	}*/
 	if (connection.receive(receivePacket) == sf::Socket::Done)
 	{
 		receivePacket >> type;
@@ -141,23 +176,29 @@ void Network::receive( Player* p)
 			//sf::sleep(sf::milliseconds(50));
 			this->getPlayerList(p);
 			m_connected = true;
+			return;
 		}
 		else if (type == 1) // disconnected
 		{
-			m_textMessage = "Player " + p->getName() + " disconnected.";
-			/*for (unsigned int i = 0; i < enemies.size(); i++)
+			for (unsigned int i = 0; i < playerKidlist.size(); i++)
 			{
-				if (enemies[i]->getID() == id)
+				if (playerKidlist[i]->playerid == id)
 				{
-					m_textMessage = "Player " + enemies[i]->getName() + " disconnected.";
-					std::cout << "Enemy: " << enemies[i]->getID() << " deleted " << std::endl;
-					enemies.erase(enemies.begin() + i);
+					string NAME;
+					receivePacket >> NAME;
+					m_textMessage = "Player " + NAME + " disconnected.";
+					std::cout << "Kid with id: " << playerKidlist[i]->playerid << " deleted " << std::endl;
+					m_engine->RemoveentityKeepPtr(playerKidlist[i].get(), 0);
+					playerKidlist.erase(playerKidlist.begin() + i);
+					
 				}
-			}*/
+			}
+			return;
 		}
 		else if (type == 2)
 		{
 			std::cout << "Server is full" << std::endl;
+			return;
 		}
 
 		else if (type == 3) // get move direction of enemys
@@ -175,23 +216,24 @@ void Network::receive( Player* p)
 				}
 
 			}*/
+			return;
 		}
 		else if (type == 4) //Set player position to the recived position
 		{
-
-			/*for (unsigned int i = 0; i < enemies.size(); i++)
+			
+			for (unsigned int i = 0; i < playerKidlist.size(); i++)
 			{
-				if (enemies[i]->getID() == id)
+				if (playerKidlist[i]->playerid == id)
 				{
 					sf::Vector2f pos;
 					receivePacket >> pos.x;
 					receivePacket >> pos.y;
-
-					enemies[i]->setPosition(pos);
+					playerKidlist[i]->setPos(pos,false);
 					break;
 				}
 
-			}*/
+			}
+			return;
 		}
 		else if (type == 5) // chat message received
 		{
@@ -212,6 +254,7 @@ void Network::receive( Player* p)
 				std::string newString = testMessage.substr(0, testMessage.length() - 1);
 				m_textMessage = senderName + ":" + newString;
 			}
+			return;
 
 
 		}
@@ -223,6 +266,9 @@ void Network::receive( Player* p)
 			std::vector<std::string> playersName;
 			std::vector<int> playersId;
 			vector<bool> plMaker;
+			vector<bool> plFlip;
+			vector<Vector2f> plPos;
+			vector<EntityState> plState;
 			receivePacket >> playerNumber;
 			std::cout << "Num of players on server: " << playerNumber << std::endl;
 
@@ -232,9 +278,19 @@ void Network::receive( Player* p)
 				int tempId;
 				bool tempBool;
 				UINT tempSocketPtr;
+				Vector2f pos;
+				int Stateid;
+				bool tempFlip;
 				receivePacket >> tempId;
 				receivePacket >> tempName;
 				receivePacket >> tempBool;
+				receivePacket >> pos.x;
+				receivePacket >> pos.y;
+				receivePacket >> Stateid;
+				receivePacket >> tempBool;
+				plPos.push_back(pos);
+				plFlip.push_back(tempFlip);
+				plState.push_back(static_cast<EntityState>(Stateid));
 				playersName.push_back(tempName);
 				playersId.push_back(tempId);
 				plMaker.push_back(tempBool);
@@ -263,18 +319,28 @@ void Network::receive( Player* p)
 					//Player(std::unique_ptr<sf::TcpSocket>* socket, kid* KID, Engine* engine, bool maker, int id);
 					//std::make_unique<Player> newplayer();
 					//TODO
+					newkid->setPos(plPos[i], false);
+					newkid->state = plState[i];
+					newkid->anim.flip(plFlip[i]);
+					newkid->yourkid = false;
 					playerKidlist.push_back(move(newkid));
 					m_textMessage = "New player connected: " + playersName[i];
 					std::cout << "Created a new player kid with player id: " << playersId[i] << std::endl;
+					cout << "His position: ";
+					coutVector2(plPos[i]);
+					cout << "His state: " << plState[i] << endl;
+					cout << "Size of package: " << receivePacket.getDataSize() << " bytes." << endl;
 
 				}
 				
 			}
-
+			plFlip.clear();
 			playersName.clear();
 			playersId.clear();
 			plMaker.clear();
-
+			plPos.clear();
+			plState.clear();
+			return;
 		}
 		else if (type == 10)
 		{
@@ -288,6 +354,7 @@ void Network::receive( Player* p)
 				
 				//m_engine->SetSuperMaker(b);
 			}
+			return;
 		}
 		else if (type == 11)
 		{
@@ -298,8 +365,48 @@ void Network::receive( Player* p)
 			{
 				p->SetMaker(b);
 			}
+			return;
 		}
+		else if (type == 13) //Set player state
+		{
 
+			for (unsigned int i = 0; i < playerKidlist.size(); i++)
+			{
+				if (playerKidlist[i]->playerid == id)
+				{
+					int StateId;
+					EntityState state;
+					receivePacket >> StateId;
+					state = static_cast<EntityState>(StateId);
+					playerKidlist[i]->state = state;
+					break;
+				}
+
+			}
+			return;
+		}
+		else if (type == 14) //Set player flip
+		{
+
+			for (unsigned int i = 0; i < playerKidlist.size(); i++)
+			{
+				if (playerKidlist[i]->playerid == id)
+				{
+					bool flip;
+					receivePacket >> flip;
+					playerKidlist[i]->anim.flip(flip);
+					break;
+				}
+
+			}
+			return;
+		}
+		else if (type == 15) //server closed
+		{
+			cout << "Server closed." << endl;
+			disconnect(myplayer);
+			return;
+		}
 
 	}
 

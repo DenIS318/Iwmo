@@ -96,6 +96,14 @@ public:
 	*/
 	void Removeentity(iwmoEntity*);
 	/*
+	Removes iwmoEntity by layer permament and keeping ptr.
+	*/
+	void RemoveentityKeepPtr(iwmoEntity*, unsigned short);
+	/*
+	Removes iwmoEntity permament and clearing RAM and keeping ptr.
+	*/
+	void RemoveentityKeepPtr(iwmoEntity*);
+	/*
 	Adding sprite pointer to layer and render.
 	*/
 	void AddSprite(Drawable*, unsigned short);

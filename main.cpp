@@ -24,6 +24,7 @@ string myname;
 string ip;
 Text* iptext = new Text();
 Text* nametext = new Text();
+Server* myserv;
 bool ready = false;
 static Game* game;
 bool gamestarted = false;
@@ -56,18 +57,34 @@ inline void beginbind(Engine* engine)
 {
 	Server serv(engine,source);
 	serv.run();
+	myserv = &serv;
 
 }
-
+inline void Recieve()
+{
+	if (network != NULL)
+	{
+		network->receive(myplayer);
+	}
+	else if (mynetwork != NULL)
+	{
+		mynetwork->receive(myplayer);
+	}
+	this_thread::sleep_for(chrono::microseconds(1));
+	Recieve();
+}
 void startgame(Engine* engine, RenderWindow* window)
 {
-	game = new Game(engine, window, source);
-	gamestarted = true;
-	engine->listboxvectorFilters = game->Filters;
-	//engine->removeTextBox(&ipbox);
-	//engine->removeTextBox(&namebox);
-	//engine->RemoveText(nametext);
-	//engine->RemoveText(iptext);
+	if (!gamestarted)
+	{
+		game = new Game(engine, window, source);
+		gamestarted = true;
+		engine->listboxvectorFilters = game->Filters;;
+		//engine->removeTextBox(&ipbox);
+		//engine->removeTextBox(&namebox);
+		//engine->RemoveText(nametext);
+		//engine->RemoveText(iptext);
+	}
 
 }
 inline void beginconnect(bool _kid, IpAddress address,  Engine* engine)
@@ -90,6 +107,7 @@ inline void beginconnect(bool _kid, IpAddress address,  Engine* engine)
 			newplayer->setName(MyName);
 			myplayer = newplayer;
 			network = std::make_unique<Network>(address,engine,source, (unsigned short)port);
+			mynetwork = network.release();
 		}
 		catch (exception e)
 		{
@@ -551,14 +569,12 @@ int main()
 //	engine.AddSprite(&iptext, 1);
 	engine.AddSprite(&server, 0);
 	//
+	thread Recthr(&Recieve);
+	Recthr.detach();
 	while (window->isOpen())
 	{
 		if (gamestarted)
 		{
-			if (network != NULL)
-			{
-				network->receive(myplayer);
-			}
 			auto cam = engine.GetCam();
 			if (cam != NULL)
 			{
@@ -639,9 +655,20 @@ int main()
 		continuepool(window, &engine);
 		engine.Render();
 	}
-	if (network != NULL && myplayer != NULL)
+	if (myplayer != NULL)
 	{
-		network->disconnect(myplayer);
+		if (network != NULL)
+		{
+			network->disconnect(myplayer);
+		}
+		else if (mynetwork != NULL)
+		{
+			mynetwork->disconnect(myplayer);
+		}
+	}
+	if (myserv != NULL)
+	{
+		myserv->close();
 	}
 	ImGui::SFML::Shutdown();
 	return EXIT_SUCCESS;

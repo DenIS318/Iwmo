@@ -14,7 +14,13 @@ Server::Server(Engine* engine,CSource* source)
 	m_selector.add(m_listener);
 	std::cout << "Server is started. Waiting for connections..." << std::endl;
 }
-
+void Server::close()
+{
+	sf::Packet outPacket;
+	outPacket << 15;
+	outPacket << 0;
+	sendPacket(outPacket);
+}
 void Server::SetSuperMaker(bool b,int id)
 {
 	//m_engine->SetSuperMaker(b);
@@ -58,16 +64,10 @@ void Server::run()
 						kid* newkid = new kid();
 						auto lss = this->m_ls;
 						newkid->createKid("resources/kid.xml", kidSheet, KidSpawn, m_engine, lss, kidDeathSheet, m_engine->GetCam());
-						if (m_engine->gamestarted)
-						{
-							//for not creating kids in lobby
-							m_engine->Addentity(newkid, 0);
-						}
 						newkid->playerid = m_currentID;
 						m_playerList.emplace_back(Player(&tempSocket,newkid,m_engine,true, m_currentID));
 						m_selector.add(*m_playerList.back().getSocket());
 						m_playerNumber++;
-
 						sf::Packet outPacket;
 						outPacket << 0;
 						outPacket << m_currentID;
@@ -102,6 +102,7 @@ void Server::run()
 			}
 			else
 			{
+			
 				//Receive data
 				for (unsigned int i = 0; i < m_playerList.size(); i++)
 				{
@@ -122,23 +123,25 @@ void Server::run()
 							if (num == 1) // player disconnected, send message to all players to delete his character and delete him from servers players list
 							{
 
-								sendPacket(received, i);
+								
 
 								for (auto& itr : m_playerList)
 								{
 									if (itr.getId() == id)
 									{
-
-										std::cout << server << std::endl << "Client disconnected!" << std::endl;
+										received << itr.getName();
+										sendPacket(received, i);
+										std::cout << server << "Client disconnected!" << std::endl;
 										std::cout << server << "ID: " << itr.getId() << " Name: " << itr.getName() << std::endl;
 									}
 								}
-
-
+								auto disPl = &m_playerList[i];
 								m_engine->Removeentity(m_playerList[i].GetKid(),0);
 								m_selector.remove(*m_playerList[i].getSocket());
 								m_playerList.erase(m_playerList.begin() + i);
 								m_playerNumber--;
+								//not needed, unique ptr
+								//delete disPl;
 								std::cout << server << "Number of players: " << m_playerNumber << std::endl;
 								break;
 							}
@@ -155,10 +158,7 @@ void Server::run()
 							}
 							else if (num == 4) //Position
 							{
-								if (id != -1)
-								{
 									sendPacket(received, i);
-								}
 							}
 							else if (num == 5) //Send text message
 							{
@@ -194,6 +194,10 @@ void Server::run()
 									namePacket << m_playerList[j].getId();
 									namePacket << m_playerList[j].getName();
 									namePacket << m_playerList[j].GetMaker();
+									namePacket << m_playerList[j].GetKid()->GetPos().x;
+									namePacket << m_playerList[j].GetKid()->GetPos().y;
+									namePacket << static_cast<int>(m_playerList[j].GetKid()->state);
+									namePacket << m_playerList[j].GetKid()->anim.isFlip();
 								}
 
 								sendPacket(namePacket);
@@ -210,6 +214,14 @@ void Server::run()
 								makerPacket << id;
 								makerPacket << makerr;
 								sendPacket(makerPacket);
+							}
+							else if (num == 13) //State
+							{
+								sendPacket(received, i);
+							}
+							else if (num == 14) //Flip
+							{
+								sendPacket(received, i);
 							}
 							
 							
@@ -234,6 +246,7 @@ void Server::run()
 							m_playerNumber--;
 							break;
 						}
+						
 					} // end of player socket is ready
 				}
 			}

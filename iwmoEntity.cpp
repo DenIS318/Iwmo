@@ -1,10 +1,14 @@
 #include "iwmoEntity.h"
 
-
+class kid;
 
 iwmoEntity::iwmoEntity()
 {
 
+}
+bool iwmoEntity::instanceofKid()
+{
+	return reinterpret_cast<kid*>(this) != NULL;
 }
 void iwmoEntity::control()
 {
@@ -18,11 +22,24 @@ void iwmoEntity::deleteentity()
 {
 	delete this;
 }
-void iwmoEntity::setPos(Vector2f pos)
+void iwmoEntity::setPos(Vector2f pos,bool sendpacket)
 {
 
 	x = int(pos.x);
 	y = int(pos.y);
+	if (sendpacket)
+	{
+		if (yourkid)
+		{
+			if (mynetwork != NULL)
+			{
+				KidChangePositionEvent e;
+				e.eventtype = Types::EventTypes::KidChangePositionEvent;
+				e.whichKid = reinterpret_cast<kid*>(this);
+				__raise m_souc->OnCustomEvent(&e);
+			}
+		}
+	}
 }
 void iwmoEntity::shoot(Texture* bullettexture,Vector2i pos)
 {
@@ -34,6 +51,18 @@ void iwmoEntity::shoot(Texture* bullettexture,Vector2i pos)
 	//TODO
 	e.whichBullet = &b;//пуля локальная! измени это потом!
 	__raise m_souc->OnCustomEvent(&e);
+}
+void iwmoEntity::flip(bool b)
+{
+	anim.flip(b);
+	if (yourkid)
+	{
+		PlayerFlipEvent e;
+		e.eventtype = Types::EventTypes::PlayerFlipEvent;
+		e.whichEntity = this;
+		e.flip = b;
+		__raise m_souc->OnCustomEvent(&e);
+	}
 }
 Vector2f iwmoEntity::GetPos()
 {
@@ -73,6 +102,16 @@ void iwmoEntity::m_move(int xm, int ym)
 	e.eventtype = Types::EventTypes::EntityMoveEvent;
 	e.whichEntity = this;
 	__raise m_souc->OnCustomEvent(&e);
+	if (yourkid)
+	{
+		if (mynetwork != NULL)
+		{
+			KidChangePositionEvent e;
+			e.eventtype = Types::EventTypes::KidChangePositionEvent;
+			e.whichKid = reinterpret_cast<kid*>(this);
+			__raise m_souc->OnCustomEvent(&e);
+		}
+	}
 }
 iwmoEntity::~iwmoEntity()
 {

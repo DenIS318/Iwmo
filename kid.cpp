@@ -475,7 +475,7 @@ void kid::Restart()
 	volCounter = 100;
 	state = unknown;
 	anim.play("idle");
-	anim.flip(false);
+	flip(false);
 	updaterect();
 	jumpcount = 0;
 	Alive = true;
@@ -558,6 +558,16 @@ void kid::CheckState()
 			if (anim.currentAnim != "idle")
 			{
 				anim.play("idle");
+			}
+		}
+		if (yourkid)
+		{
+			if (mynetwork != NULL)
+			{
+				KidCheckStateEvent e;
+				e.eventtype = Types::EventTypes::KidCheckStateEvent;
+				e.whichKid = reinterpret_cast<kid*>(this);
+				__raise m_souc->OnCustomEvent(&e);
 			}
 		}
 		//cout << anim.currentAnim << endl;
@@ -705,14 +715,14 @@ void kid::control()
 				{
 					if (!anim.isFlip())
 					{
-						anim.flip(true);
+						flip(true);
 					}
 				}
 				if (sf::Keyboard::isKeyPressed(HotkeyMoveRight))
 				{
 					if (anim.isFlip())
 					{
-						anim.flip(false);
+						flip(false);
 					}
 				}
 			}

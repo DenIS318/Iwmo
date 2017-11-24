@@ -12,12 +12,11 @@ class Server
 public:
 	Server(Engine* engine, CSource* source);
 	void run();
-
+	void close();
 private:
 	void Server::SetSuperMaker(bool b, int id);
 	void sendPacket(sf::Packet& packet, unsigned int skip = -1);
 	bool m_isRunning;
-
 	sf::IpAddress m_ipAdress;
 	unsigned short m_port;
 

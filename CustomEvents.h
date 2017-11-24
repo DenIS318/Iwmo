@@ -16,7 +16,11 @@ namespace Iwmo
 				EntityMoveEvent,
 				EntityShootEvent,
 				KidShootEvent,
-				DestroyEffectEvent
+				DestroyEffectEvent,
+				KidChangePositionEvent,
+				//Checking kid state and anim changing
+				KidCheckStateEvent,
+				PlayerFlipEvent
 			};
 		}
 		class CustomEvent {
@@ -45,6 +49,22 @@ namespace Iwmo
 		
 			kid* whichKid;
 		};
-		
+		class KidChangePositionEvent : public CustomEvent
+		{
+		public:
+
+			kid* whichKid;
+		};
+		class KidCheckStateEvent : public CustomEvent
+		{
+		public:
+			kid* whichKid;
+		};
+		class PlayerFlipEvent : public CustomEvent
+		{
+		public:
+			iwmoEntity* whichEntity;
+			bool flip;
+		};
 	}
 }

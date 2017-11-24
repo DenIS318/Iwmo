@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "iwmoTypes.h"
 #include <boost/filesystem.hpp>
+extern class Network;
 extern class Player;
 //CONFIG
 namespace Iwmo {
@@ -58,6 +59,7 @@ namespace Iwmo {
 	extern Math IWMOMATH;
 	extern Player* myplayer;
 	extern TcpSocket* mysocket;
+	extern Network* mynetwork;
 	namespace Textures {
 		extern sf::Texture* kidDeathSheet;
 		extern sf::Texture* kidSheet;

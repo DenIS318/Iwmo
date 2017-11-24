@@ -358,11 +358,21 @@ void Engine::Addentity(iwmoEntity* man, unsigned short layernum)
 {
 	Engine::layerrentity.at(layernum).push_back(man);
 }
+void Engine::RemoveentityKeepPtr(iwmoEntity* man, unsigned short layernum)
+{
+	Engine::layerrentity[layernum].erase(std::remove(Engine::layerrentity[layernum].begin(), Engine::layerrentity[layernum].end(), man), Engine::layerrentity[layernum].end());
+}
+void Engine::RemoveentityKeepPtr(iwmoEntity* man)
+{
+	for (unsigned int i = 0; i < Engine::layerrentity.size(); i++)
+	{
+		Engine::layerrentity[i].erase(std::remove(Engine::layerrentity[i].begin(), Engine::layerrentity[i].end(), man), Engine::layerrentity[i].end());
+	}
+}
 void Engine::Removeentity(iwmoEntity* man, unsigned short layernum)
 {
 	Engine::layerrentity[layernum].erase(std::remove(Engine::layerrentity[layernum].begin(), Engine::layerrentity[layernum].end(), man), Engine::layerrentity[layernum].end());
-
-	delete man;
+		delete man;
 }
 void Engine::Removeentity(iwmoEntity* man)
 {
@@ -370,8 +380,7 @@ void Engine::Removeentity(iwmoEntity* man)
 	{
 		Engine::layerrentity[i].erase(std::remove(Engine::layerrentity[i].begin(), Engine::layerrentity[i].end(), man), Engine::layerrentity[i].end());
 	}
-
-	delete man;
+		delete man;
 }
 void Engine::AddBlock(Block* b,int layernumber)
 {
